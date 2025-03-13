@@ -28,30 +28,18 @@ class AuthService
         $user = $this->authRepository->findByEmail($credentials['email']);
 
         if (!$user || !Hash::check($credentials['password'], $user->password)) {
-            throw new \Exception('Invalid credentials.', 401); // Unauthorized
+            throw new \Exception('Invalid credentials.', 401);
         }
-
-        if (!$user->is_active) {
-            throw new \Exception('Your account is not active. Please contact support.', 403); // Forbidden
-        }
-
-        if (is_null($user->email_verified_at)) {
-            throw new \Exception('Please verify your email before logging in.', 400); // Bad Request
-        }
-
-       // Update the last login timestamp
-        $user->last_login = now();
-        $user->save();
 
         // Generate token (for example, using Sanctum)
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return [
             'user' => $user,
+            'role' => $user->roles,
             'token' => $token,
         ];
     }
-
 
     public function logout($user): void
     {
@@ -94,7 +82,4 @@ class AuthService
 
         return true;
     }
-
-
-
 }

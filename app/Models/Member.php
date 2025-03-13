@@ -1,0 +1,67 @@
+<?php
+
+/**
+ * Created by Reliese Model.
+ */
+
+namespace App\Models;
+
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+/**
+ * Class Member
+ * 
+ * @property int $id
+ * @property int|null $user_id
+ * @property string|null $header_image
+ * @property string|null $club_privacy
+ * @property string|null $header_text
+ * @property string|null $footer_text
+ * @property string|null $background_color
+ * @property string|null $font
+ * @property string|null $logo
+ * @property string|null $cover_image
+ * @property string|null $user_consent_cookie
+ * @property string|null $data_collection_preference
+ * @property string|null $content_moderation_reporting
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property string|null $deleted_at
+ *
+ * @package App\Models
+ */
+class Member extends Model
+{
+	use SoftDeletes;
+	protected $table = 'members';
+
+	protected $casts = [
+		'user_id' => 'int',
+		'created_by' => 'int',
+		'updated_by' => 'int',
+		'deleted_by' => 'int'
+	];
+
+	protected $fillable = [
+		'user_id',
+		'header_image',
+		'club_privacy',
+		'header_text',
+		'footer_text',
+		'background_color',
+		'font',
+		'logo',
+		'cover_image',
+		'user_consent_cookie',
+		'data_collection_preference',
+		'content_moderation_reporting',
+		'created_by',
+		'updated_by',
+		'deleted_by'
+	];
+}

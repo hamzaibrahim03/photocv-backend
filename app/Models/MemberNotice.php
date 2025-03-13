@@ -1,0 +1,54 @@
+<?php
+
+/**
+ * Created by Reliese Model.
+ */
+
+namespace App\Models;
+
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
+/**
+ * Class MemberNotice
+ * 
+ * @property int $id
+ * @property int|null $member_id
+ * @property int|null $notice_type_id
+ * @property string|null $title
+ * @property string|null $description
+ * @property string|null $tags
+ * @property string|null $link_page_url
+ * @property string|null $status
+ * @property string|null $notice_image
+ * @property bool|null $is_active
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property string|null $deleted_at
+ *
+ * @package App\Models
+ */
+class MemberNotice extends Model
+{
+	use SoftDeletes;
+	protected $table = 'member_notices';
+
+	protected $casts = [
+		'member_id' => 'int',
+		'notice_type_id' => 'int',
+		'is_active' => 'bool'
+	];
+
+	protected $fillable = [
+		'member_id',
+		'notice_type_id',
+		'title',
+		'description',
+		'tags',
+		'link_page_url',
+		'status',
+		'notice_image',
+		'is_active'
+	];
+}

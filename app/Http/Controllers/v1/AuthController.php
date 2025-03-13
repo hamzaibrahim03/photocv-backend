@@ -6,6 +6,7 @@ use App\Http\Controllers\v1\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use App\Http\Requests\AuthRequest;
+use App\Http\Requests\SignUpRequest;
 use App\Http\Requests\ForgotPasswordRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Services\AuthService;

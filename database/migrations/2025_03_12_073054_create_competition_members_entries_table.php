@@ -1,0 +1,31 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('competition_members_entries', function (Blueprint $table) {
+            $table->bigInteger('id', true);
+            $table->bigInteger('member_comp_id')->nullable();
+            $table->enum('entry_type', ['print', 'digital'])->nullable();
+            $table->string('entry_image', 250)->nullable();
+            $table->timestamps();
+            $table->softDeletes();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('competition_members_entries');
+    }
+};

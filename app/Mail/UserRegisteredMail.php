@@ -17,11 +17,10 @@ class UserRegisteredMail extends Mailable
     /**
      * Create a new message instance.
      */
-    public function __construct(User $user, $password, $verificationUrl)
+    public function __construct(User $user, $password)
     {
         $this->user = $user;
         $this->password = $password;
-        $this->verificationUrl = $verificationUrl;
     }
 
     /**
@@ -46,7 +45,6 @@ class UserRegisteredMail extends Mailable
             with: [
                 'user' => $this->user,
                 'password' => $this->password,
-                'verificationUrl' => $this->verificationUrl,
             ],
         );
     }

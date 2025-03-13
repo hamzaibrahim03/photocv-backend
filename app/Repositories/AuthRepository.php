@@ -2,11 +2,11 @@
 namespace App\Repositories;
 
 use App\Models\User;
+use Spatie\Permission\Models\Role;
 use Illuminate\Database\Eloquent\Collection;
 
 class AuthRepository implements AuthRepositoryInterface
 {
-
 
     public function findByEmail(string $email): ?User
     {
@@ -20,8 +20,6 @@ class AuthRepository implements AuthRepositoryInterface
 
         // Set email_verified_at to null
     }
-
-
 }
 
 ?>

@@ -12,8 +12,6 @@
         <li>Password: {{ $password }}</li>
 
     </ul>
-    <p>For Login You need to verify your email, please click the link below:</p>
-        <a href="{{ $verificationUrl }}">Verify Email</a>
     <p>If you have any questions, feel free to reach out to us.</p>
     <p>Best regards,</p>
     <p>Your Company Team</p>

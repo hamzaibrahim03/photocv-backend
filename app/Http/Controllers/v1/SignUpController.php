@@ -28,24 +28,23 @@ class SignUpController extends Controller
         $this->signUpService = $signUpService;
     }
 
-
     public function store(SignUpRequest $request)
     {
         try
         {
             DB::beginTransaction();
             // Pass the validated data to the service to create the course
-            $parent_user = $this->signUpService->createParent($request->validated());
+            $parent_user = $this->signUpService->registerUser($request->validated());
 
             DB::commit();
 
             // Return a success JSON response with the newly created course data
-            return SignUpResponse::success('Parent User created successfully.', $parent_user, 201);
+            return SignUpResponse::success('User registered successfully.', $parent_user, 201);
         } catch (\Exception $e) {
             // dd($e);
             DB::rollback();
             // Return an error response if something goes wrong
-            return SignUpResponse::error('Failed to create Parent User.', $e->getMessage(), 500);
+            return SignUpResponse::error('Failed to register user.', $e->getMessage(), 500);
         }
     }
 

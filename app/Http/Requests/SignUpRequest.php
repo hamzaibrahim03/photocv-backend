@@ -23,13 +23,11 @@ class SignUpRequest extends FormRequest
      */
     public function rules(): array
     {
-        // dd('1');
         return [
-            //
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-
+            'username' => 'required|string|unique:users,username|max:255',
+            'email'    => 'required|email|unique:users,email',
+            'password' => 'required',
+            'role'     => 'required|string|in:club_admin,member',
         ];
     }
 
@@ -41,11 +39,12 @@ class SignUpRequest extends FormRequest
     public function messages()
     {
         return [
-            'first_name.required' => 'The first name is required.',
-            'last_name.required' => 'The last name is required.',
-            'email.unique' => 'The email will be unique',
-            'email.required' => 'The email is required',
-
+            'username.required' => 'Username is required.',
+            'email.unique'      => 'The email has already been taken.',
+            'username.unique'   => 'The username has already been taken.',
+            'email.required'    => 'The email is required',
+            'role.required'     => 'Role is required',
+            'role.in'           => 'Invalid role provided. Choose either "club_admin" or "member".',
         ];
     }
 }

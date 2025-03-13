@@ -1,81 +1,85 @@
 <?php
 
+/**
+ * Created by Reliese Model.
+ */
+
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
+use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
 
-class User extends Authenticatable
+/**
+ * Class User
+ * 
+ * @property int $id
+ * @property string|null $role
+ * @property string|null $first_name
+ * @property string|null $last_name
+ * @property string|null $tag_line
+ * @property string|null $about
+ * @property string|null $email
+ * @property string|null $password
+ * @property string|null $profile_image
+ * @property string|null $address
+ * @property string|null $ciy
+ * @property string|null $postcode
+ * @property string|null $country
+ * @property string|null $phone
+ * @property string|null $county
+ * @property string|null $bio
+ * @property string|null $status
+ * @property string|null $account_status
+ * @property Carbon|null $approval_date
+ * @property int|null $created_by
+ * @property int|null $updated_by
+ * @property int|null $deleted_by
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property string|null $deleted_at
+ *
+ * @package App\Models
+ */
+class User extends Model
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasApiTokens;
+	use SoftDeletes, HasRoles, HasApiTokens;
+	protected $table = 'users';
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
+	protected $casts = [
+		'approval_date' => 'datetime',
+		'created_by' => 'int',
+		'updated_by' => 'int',
+		'deleted_by' => 'int'
+	];
 
-	protected $fillable = ['first_name', 'last_name', 'email', 'password', 'phone', 'role_id', 'franchise_id', 'email_varified_token'];
+	protected $hidden = [
+		'password'
+	];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-	public function role()
-    {
-        return $this->belongsTo(Role::class);
-    }
-
-    public function franchise()
-    {
-        return $this->belongsTo(Franchise::class);
-    }
-
-    public function enrollments()
-    {
-        return $this->hasMany(Enrollment::class);
-    }
-
-    public function permissions()
-    {
-        return $this->belongsToMany(Permission::class, 'user_permissions');
-    }
-
-    public function courses()
-    {
-        return $this->hasMany(Course::class, 'teacher_id', 'id');
-    }
-
-        /**
-     * Relationship with course purchases (as a parent or purchaser).
-     */
-    public function coursePurchases()
-    {
-        return $this->hasMany(CoursePurchase::class, 'parent_id', 'id');
-    }
-
-
+	protected $fillable = [
+		'username',
+		'first_name',
+		'last_name',
+		'tag_line',
+		'about',
+		'email',
+		'password',
+		'profile_image',
+		'address',
+		'ciy',
+		'postcode',
+		'country',
+		'phone',
+		'county',
+		'bio',
+		'status',
+		'account_status',
+		'approval_date',
+		'created_by',
+		'updated_by',
+		'deleted_by'
+	];
 }
