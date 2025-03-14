@@ -34,12 +34,12 @@ class SignUpController extends Controller
         {
             DB::beginTransaction();
             // Pass the validated data to the service to create the course
-            $parent_user = $this->signUpService->registerUser($request->validated());
+            $registeredUser = $this->signUpService->registerUser($request->validated());
 
             DB::commit();
 
             // Return a success JSON response with the newly created course data
-            return SignUpResponse::success('User registered successfully.', $parent_user, 201);
+            return SignUpResponse::success('User registered successfully.', $registeredUser, 201);
         } catch (\Exception $e) {
             // dd($e);
             DB::rollback();

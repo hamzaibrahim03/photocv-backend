@@ -13,6 +13,8 @@ use App\Events\LiveClassCreated;
 use App\Listeners\SendLiveClassCreatedNotification;
 use App\Events\SchoolCreated;
 use App\Listeners\LogSchoolCreation;
+use App\Events\UserRegistered;
+use App\Listeners\SendUserRegisteredEmail;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
@@ -43,6 +45,10 @@ class EventServiceProvider extends ServiceProvider
 
         SchoolCreated::class => [
             LogSchoolCreation::class,
+        ],
+
+        UserRegistered::class => [
+            SendUserRegisteredEmail::class,
         ],
     ];
 

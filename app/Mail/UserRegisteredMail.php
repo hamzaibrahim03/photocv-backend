@@ -14,6 +14,9 @@ class UserRegisteredMail extends Mailable
 {
     use Queueable, SerializesModels;
 
+    private $user;
+    private $password;
+    
     /**
      * Create a new message instance.
      */
