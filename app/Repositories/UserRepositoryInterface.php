@@ -13,4 +13,3 @@ interface UserRepositoryInterface
     public function update(User $user, array $data): bool;
     public function delete(User $user): bool;
 }
-?>

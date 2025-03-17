@@ -41,7 +41,6 @@ class SignUpController extends Controller
             // Return a success JSON response with the newly created course data
             return SignUpResponse::success('User registered successfully.', $registeredUser, 201);
         } catch (\Exception $e) {
-            // dd($e);
             DB::rollback();
             // Return an error response if something goes wrong
             return SignUpResponse::error('Failed to register user.', $e->getMessage(), 500);

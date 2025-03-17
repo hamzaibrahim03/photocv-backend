@@ -20,5 +20,3 @@ class SignUpRepository implements SignUpRepositoryInterface
         return $user;
     }
 }
-
-?>

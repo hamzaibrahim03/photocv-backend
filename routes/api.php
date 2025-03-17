@@ -7,6 +7,7 @@ use App\Http\Controllers\v1\SignUpController;
 use App\Http\Controllers\v1\AuthController;
 use App\Http\Controllers\v1\SchoolController;
 use App\Http\Controllers\v1\StudentController;
+use App\Http\Controllers\v1\CatalogController;
 
 
 Route::prefix('v1')->group(function() {
@@ -45,7 +46,7 @@ Route::prefix('v1')->group(function() {
         });
 
 
-
+        Route::apiResource('catalogs', CatalogController::class);
 
 
     });

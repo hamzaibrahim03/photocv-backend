@@ -51,6 +51,9 @@ use App\Repositories\StudentHomeWorkRepositoryInterface;
 use App\Repositories\StudentHomeWorkFileRepository;
 use App\Repositories\StudentHomeWorkFileRepositoryInterface;
 
+use App\Repositories\CatalogRepositoryInterface;
+use App\Repositories\CatalogRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -75,7 +78,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(StudentHomeWorkRepositoryInterface::class, StudentHomeWorkRepository::class);
         $this->app->bind(StudentHomeWorkFileRepositoryInterface::class, StudentHomeWorkFileRepository::class);
 
-
+        $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
 
     }
 
