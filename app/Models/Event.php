@@ -73,4 +73,9 @@ class Event extends Model
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function images()
+    {
+        return $this->hasMany(EventImage::class, 'event_id');
+    }
 }

@@ -8,6 +8,7 @@ use App\Http\Controllers\v1\AuthController;
 use App\Http\Controllers\v1\SchoolController;
 use App\Http\Controllers\v1\StudentController;
 use App\Http\Controllers\v1\CatalogController;
+use App\Http\Controllers\v1\EventController;
 
 
 Route::prefix('v1')->group(function() {
@@ -47,7 +48,7 @@ Route::prefix('v1')->group(function() {
 
 
         Route::apiResource('catalogs', CatalogController::class);
-
+        Route::apiResource('events', EventController::class);
 
     });
 

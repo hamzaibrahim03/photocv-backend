@@ -41,4 +41,9 @@ class EventImage extends Model
 		'image',
 		'created_by'
 	];
+
+	public function event()
+    {
+        return $this->belongsTo(Event::class, 'event_id');
+    }
 }
