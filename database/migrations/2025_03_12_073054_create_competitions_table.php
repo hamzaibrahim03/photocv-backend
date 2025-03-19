@@ -11,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('competetions', function (Blueprint $table) {
+        Schema::create('competitions', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->string('name', 100)->nullable();
             $table->text('description')->nullable();
-            $table->smallInteger('competetion_type_id')->nullable();
+            $table->smallInteger('competition_type_id')->nullable();
             $table->smallInteger('judging_type_id')->nullable();
             $table->dateTime('start_date')->nullable();
             $table->dateTime('submission_deadline')->nullable()->comment('2 hours, 10 hours, 10 days etc');
@@ -52,6 +52,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('competetions');
+        Schema::dropIfExists('competitions');
     }
 };

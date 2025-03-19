@@ -11,12 +11,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class Competetion
+ * Class Competition
  * 
  * @property int $id
  * @property string|null $name
  * @property string|null $description
- * @property int|null $competetion_type_id
+ * @property int|null $competition_type_id
  * @property int|null $judging_type_id
  * @property Carbon|null $start_date
  * @property Carbon|null $submission_deadline
@@ -49,13 +49,13 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @package App\Models
  */
-class Competetion extends Model
+class Competition extends Model
 {
 	use SoftDeletes;
-	protected $table = 'competetions';
+	protected $table = 'competitions';
 
 	protected $casts = [
-		'competetion_type_id' => 'int',
+		'competition_type_id' => 'int',
 		'judging_type_id' => 'int',
 		'start_date' => 'datetime',
 		'submission_deadline' => 'datetime',
@@ -80,7 +80,7 @@ class Competetion extends Model
 	protected $fillable = [
 		'name',
 		'description',
-		'competetion_type_id',
+		'competition_type_id',
 		'judging_type_id',
 		'start_date',
 		'submission_deadline',

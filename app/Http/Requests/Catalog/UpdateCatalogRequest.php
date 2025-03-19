@@ -23,7 +23,7 @@ class UpdateCatalogRequest extends FormRequest
     {
         return [
             'name' => 'sometimes|required|string|max:50',
-            'catalog_type' => 'sometimes|required|string|in:competetion_type,event_type,event_kind,judging_type,competetion_theme,competetion_catagories,competetion_voting_method,competetion_result_method',
+            'catalog_type' => 'sometimes|required|string|in:competition_type,event_type,event_kind,judging_type,competition_theme,competition_catagories,competition_voting_method,competition_result_method',
         ];
     }
 }
