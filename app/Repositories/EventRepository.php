@@ -4,14 +4,15 @@ namespace App\Repositories;
 
 use App\Models\Event;
 use App\Models\EventImage;
-use Illuminate\Support\Facades\Storage;
-use Yajra\DataTables\DataTables;
+use App\Traits\UtilityTrait;
 
 class EventRepository implements EventRepositoryInterface
 {
-    public function all()
+    use UtilityTrait;
+
+    public function all( $request )
     {
-        return Event::with('images')->get();
+        return $this->getAllEventData($request);
     }
 
     public function show( $id )

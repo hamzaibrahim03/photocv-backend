@@ -17,9 +17,9 @@ class EventController extends Controller
         $this->eventService = $eventService;
     }
 
-    public function index()
+    public function index( Request $request )
     {
-        return response()->json($this->eventService->allEvents( ));
+        return response()->json($this->eventService->allEvents( $request ));
     }
 
     public function show( $id ) {
