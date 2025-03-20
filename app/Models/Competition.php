@@ -71,7 +71,7 @@ class Competition extends Model
 		'commendation_number' => 'int',
 		'cc_allowed' => 'bool',
 		'auto_certificate' => 'bool',
-		'alllow_judges_feedback' => 'bool',
+		'allow_judges_feedback' => 'bool',
 		'created_by' => 'int',
 		'updated_by' => 'int',
 		'deleted_by' => 'int'
@@ -103,7 +103,7 @@ class Competition extends Model
 		'prizes',
 		'cc_allowed',
 		'auto_certificate',
-		'alllow_judges_feedback',
+		'allow_judges_feedback',
 		'created_by',
 		'updated_by',
 		'deleted_by'

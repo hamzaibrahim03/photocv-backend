@@ -24,14 +24,14 @@ class CompetitionService
         return $this->competitionRepository->show( $id );
     }
 
-    public function createCompetition(array $data, $files): Competition
+    public function createCompetition(array $data ): Competition
     {
-        return $this->competitionRepository->create($data, $files);
+        return $this->competitionRepository->create($data );
     }
 
-    public function updateCompetition(int $id, array $data, $files)
+    public function updateCompetition(int $id, array $data)
     {
-        return $this->competitionRepository->update($id, $data, $files);
+        return $this->competitionRepository->update($id, $data);
     }
 
     public function deleteCompetition( $id )

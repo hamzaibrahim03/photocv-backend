@@ -9,6 +9,7 @@ use App\Http\Controllers\v1\SchoolController;
 use App\Http\Controllers\v1\StudentController;
 use App\Http\Controllers\v1\CatalogController;
 use App\Http\Controllers\v1\EventController;
+use App\Http\Controllers\v1\CompetitionController;
 
 
 Route::prefix('v1')->group(function() {
@@ -49,6 +50,7 @@ Route::prefix('v1')->group(function() {
 
         Route::apiResource('catalogs', CatalogController::class);
         Route::apiResource('events', EventController::class);
+        Route::apiResource('competitions', CompetitionController::class);
 
     });
 

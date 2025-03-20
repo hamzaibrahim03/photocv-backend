@@ -30,7 +30,7 @@ class CompetitionController extends Controller
     {
         try {
             return response()->json(
-                $this->competitionService->createCompetition($request->except('images'), $request->file('images'))
+                $this->competitionService->createCompetition( $request->validated() )
             );
         } catch (\Exception $e) {
             return response()->json([
@@ -40,10 +40,10 @@ class CompetitionController extends Controller
         }
     }
 
-    public function update(UpdateCompetitionRequest $request, $id)
+    public function update(StoreCompetitionRequest $request, $id)
     {
         try {
-            return response()->json( $this->competitionService->updateCompetition( $id, $request->except('images'), $request->file('images') ) );
+            return response()->json( $this->competitionService->updateCompetition( $id, $request->validated() ) );
         } catch ( \Exception $e ) {
             return response()->json(['error' => 'Something went wrong', 'details' => $e->getMessage()], 500);
         }

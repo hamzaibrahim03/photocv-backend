@@ -38,7 +38,7 @@ return new class extends Migration
             $table->text('prizes')->nullable();
             $table->boolean('cc_allowed')->nullable()->default(false);
             $table->boolean('auto_certificate')->nullable()->default(false);
-            $table->boolean('alllow_judges_feedback')->nullable()->default(false);
+            $table->boolean('allow_judges_feedback')->nullable()->default(false);
             $table->bigInteger('created_by')->nullable();
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();
