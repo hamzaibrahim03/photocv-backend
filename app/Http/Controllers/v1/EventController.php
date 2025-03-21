@@ -19,38 +19,25 @@ class EventController extends Controller
 
     public function index( Request $request )
     {
-        return response()->json($this->eventService->allEvents( $request ));
+        return $this->eventService->allEvents( $request );
     }
 
     public function show( $id ) {
-        return response()->json( $this->eventService->showEvent( $id ) );
+        return $this->eventService->showEvent( $id );
     }
 
     public function store(StoreEventRequest $request)
     {
-        try {
-            return response()->json(
-                $this->eventService->createEvent($request->except('images'), $request->file('images'))
-            );
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Something went wrong',
-                'details' => $e->getMessage()
-            ], 500);
-        }
+        return $this->eventService->createEvent($request->except('images'), $request->file('images'));
     }
 
     public function update(UpdateEventRequest $request, $id)
     {
-        try {
-            return response()->json( $this->eventService->updateEvent( $id, $request->except('images'), $request->file('images') ) );
-        } catch ( \Exception $e ) {
-            return response()->json(['error' => 'Something went wrong', 'details' => $e->getMessage()], 500);
-        }
+        return $this->eventService->updateEvent( $id, $request->except('images'), $request->file('images') );
     }
 
     public function destroy( $id )
     {
-        return response()->json($this->eventService->deleteEvent( $id ) );
+        return $this->eventService->deleteEvent( $id );
     }
 }

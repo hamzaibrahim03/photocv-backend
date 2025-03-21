@@ -24,7 +24,7 @@ class EventService
         return $this->eventRepository->show( $id );
     }
 
-    public function createEvent(array $data, $files): Event
+    public function createEvent(array $data, $files)
     {
         return $this->eventRepository->create($data, $files);
     }

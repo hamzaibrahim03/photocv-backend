@@ -64,12 +64,13 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function delete($id)
     {
         try {
-            $deleted = Competition::findOrFail($id);
+            $competition = Competition::findOrFail($id);
 
-            if (!$deleted) {
+            if (!$competition) {
                 return CompetitionResponse::error('Competition not found or already deleted.', 404);
             }
 
+            $competition->delete();
             return CompetitionResponse::success('Competition deleted successfully.');
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);

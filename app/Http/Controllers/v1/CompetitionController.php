@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\CompetitionService;
 use App\Http\Requests\Competition\StoreCompetitionRequest;
-use App\Http\Responses\CompetitionResponse;
 
 class CompetitionController extends Controller
 {
