@@ -24,7 +24,7 @@ class CompetitionService
         return $this->competitionRepository->show( $id );
     }
 
-    public function createCompetition(array $data ): Competition
+    public function createCompetition(array $data )
     {
         return $this->competitionRepository->create($data );
     }

@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Yajra\DataTables\DataTables;
 use App\Models\Event;
+use App\Models\Competition;
 
 trait UtilityTrait
 {
@@ -11,7 +12,6 @@ trait UtilityTrait
 
     public function getAlltraitdata($request, $query)
     {
-
         // Apply global search filter
         if ($request->has('search_term') && $request->search_term != '') {
            $query =  $this->applySearchFilter($query, $request->search_term);
@@ -38,6 +38,29 @@ trait UtilityTrait
     {
         $query = Event::with('images');
 
+        // Apply search filter
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where('name', 'LIKE', '%' . $request->search_term . '%')
+                  ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        // Sorting
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function ($event) {
+                return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->make(true);
+    }
+
+    public function getAllIndexData($request, $query)
+    {
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {
             $query->where('name', 'LIKE', '%' . $request->search_term . '%')
