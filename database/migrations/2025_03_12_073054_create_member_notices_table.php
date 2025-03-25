@@ -19,8 +19,13 @@ return new class extends Migration
             $table->text('description')->nullable();
             $table->string('tags', 250)->nullable();
             $table->string('link_page_url', 250)->nullable();
-            $table->enum('status', ['scheduled', 'postponde', 'cancelled', 'completed', 'TBC'])->nullable()->default('scheduled');
+            $table->string('location')->nullable();
+            $table->enum('status', ['active', 'draft', 'scheduled', 'deleted', 'pending'])->nullable()->default('scheduled');
+            $table->enum('poll', ['none', 'anonymous', 'public'])->nullable()->default('none');
+            $table->enum('urgency_importance', ['general', 'urgent', 'important'])->nullable()->default('general');
+            $table->enum('comment_allowed', ['none', 'anonymous', 'public'])->nullable()->default('none');
             $table->string('notice_image', 250)->nullable();
+            $table->string('notice_document', 250)->nullable();
             $table->boolean('is_active')->nullable()->default(false);
             $table->timestamps();
             $table->softDeletes();

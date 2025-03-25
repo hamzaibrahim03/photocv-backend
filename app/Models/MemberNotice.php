@@ -46,9 +46,14 @@ class MemberNotice extends Model
 		'title',
 		'description',
 		'tags',
+		'location',
 		'link_page_url',
 		'status',
+		'poll',
+		'urgency_importance',
+		'comment_allowed',
 		'notice_image',
+		'notice_document',
 		'is_active'
 	];
 }

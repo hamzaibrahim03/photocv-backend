@@ -10,7 +10,7 @@ use App\Http\Controllers\v1\StudentController;
 use App\Http\Controllers\v1\CatalogController;
 use App\Http\Controllers\v1\EventController;
 use App\Http\Controllers\v1\CompetitionController;
-
+use App\Http\Controllers\v1\NoticeController;
 
 Route::prefix('v1')->group(function() {
 
@@ -38,8 +38,8 @@ Route::prefix('v1')->group(function() {
 
         // Parent Routes (Role: Parent)
         Route::middleware(['auth', 'role:club_admin'])->group(function () {
-            Route::apiResource('students', StudentController::class);           
-            Route::post('parent/add_student', [StudentController::class, 'add_student']);            
+            Route::apiResource('students', StudentController::class);
+            Route::post('parent/add_student', [StudentController::class, 'add_student']);
         });
 
         // Student Routes (Role: Student)
@@ -51,6 +51,7 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('catalogs', CatalogController::class);
         Route::apiResource('events', EventController::class);
         Route::apiResource('competitions', CompetitionController::class);
+        Route::apiResource('notices', NoticeController::class);
 
     });
 
