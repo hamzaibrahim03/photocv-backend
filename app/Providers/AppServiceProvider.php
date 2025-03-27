@@ -63,6 +63,9 @@ use App\Repositories\CompetitionRepository;
 use App\Repositories\NoticeRepositoryInterface;
 use App\Repositories\NoticeRepository;
 
+use App\Repositories\ClubNewsRepositoryInterface;
+use App\Repositories\ClubNewsRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -91,6 +94,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EventRepositoryInterface::class, EventRepository::class);
         $this->app->bind(CompetitionRepositoryInterface::class, CompetitionRepository::class);
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
+        $this->app->bind(ClubNewsRepositoryInterface::class, ClubNewsRepository::class);
 
     }
 

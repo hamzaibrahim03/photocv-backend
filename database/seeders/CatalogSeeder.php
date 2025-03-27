@@ -28,6 +28,8 @@ class CatalogSeeder extends Seeder
             ['name' => 'Ranked Choice', 'catalog_type' => 'competition_result_method', 'icon' => 'ranked.png'],
             ['name' => 'General Notice', 'catalog_type' => 'notice_type', 'icon' => 'general.png'],
             ['name' => 'Urgent Notice', 'catalog_type' => 'notice_type', 'icon' => 'urgent.png'],
+            ['name' => 'Urgent News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
+            ['name' => 'General News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
         ];
 
         DB::table('catalog')->insert($catalogs);
