@@ -33,9 +33,11 @@ class StoreNoticeRequest extends FormRequest
             'poll'                => 'nullable|in:none,anonymous,public',
             'urgency_importance'  => 'nullable|in:general,urgent,important',
             'comment_allowed'     => 'nullable|in:none,anonymous,public',
-            // 'notice_image'        => 'nullable|string|max:250',
-            // 'notice_document'     => 'nullable|string|max:250',
             'is_active'           => 'nullable|boolean',
+            'images'              => 'nullable|array', // Validate as an array
+            'images.*'            => 'file|mimes:jpeg,png,jpg,gif|max:2048', // Validate each file
+            'documents'           => 'nullable|array',
+            'documents.*'         => 'file|mimes:pdf,doc,docx|max:5120', // Validate each document
         ];
     }
 

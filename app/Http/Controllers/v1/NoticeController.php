@@ -28,12 +28,12 @@ class NoticeController extends Controller
 
     public function store(StoreNoticeRequest $request)
     {
-        return $this->noticeService->createNotice( $request->except('notice_image'), $request->file('notice_image'), $request->file('notice_document'));
+        return $this->noticeService->createNotice( $request->except('images'), $request->file('images'), $request->file('documents'));
     }
 
-    public function update(StoreNoticeRequest $request, $id)
+    public function update(UpdateNoticeRequest $request, $id)
     {
-        return $this->noticeService->updateNotice( $id, $request->except('notice_image'), $request->file('notice_image'), $request->file('notice_document') );
+        return $this->noticeService->updateNotice( $id, $request->except('images'), $request->file('images'), $request->file('documents') );
     }
 
     public function destroy( $id )

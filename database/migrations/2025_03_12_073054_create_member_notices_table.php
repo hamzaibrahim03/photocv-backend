@@ -24,8 +24,6 @@ return new class extends Migration
             $table->enum('poll', ['none', 'anonymous', 'public'])->nullable()->default('none');
             $table->enum('urgency_importance', ['general', 'urgent', 'important'])->nullable()->default('general');
             $table->enum('comment_allowed', ['none', 'anonymous', 'public'])->nullable()->default('none');
-            $table->string('notice_image', 250)->nullable();
-            $table->string('notice_document', 250)->nullable();
             $table->boolean('is_active')->nullable()->default(false);
             $table->timestamps();
             $table->softDeletes();

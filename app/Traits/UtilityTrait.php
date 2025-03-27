@@ -85,7 +85,7 @@ trait UtilityTrait
 
     public function getAllNoticeData($request)
     {
-        $query = MemberNotice::all();
+        $query = MemberNotice::with('files');
 
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {

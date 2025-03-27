@@ -56,4 +56,9 @@ class MemberNotice extends Model
 		'notice_document',
 		'is_active'
 	];
+
+	public function files()
+	{
+		return $this->hasMany(MemberNoticeFile::class, 'member_notice_id');
+	}
 }
