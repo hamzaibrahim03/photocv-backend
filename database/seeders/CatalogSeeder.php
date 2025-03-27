@@ -30,6 +30,7 @@ class CatalogSeeder extends Seeder
             ['name' => 'Urgent Notice', 'catalog_type' => 'notice_type', 'icon' => 'urgent.png'],
             ['name' => 'Urgent News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
             ['name' => 'General News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
+            ['name' => 'General Pages', 'catalog_type' => 'page_type', 'icon' => 'urgent.png'],
         ];
 
         DB::table('catalog')->insert($catalogs);

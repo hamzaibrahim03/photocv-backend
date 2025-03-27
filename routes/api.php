@@ -12,6 +12,7 @@ use App\Http\Controllers\v1\EventController;
 use App\Http\Controllers\v1\CompetitionController;
 use App\Http\Controllers\v1\NoticeController;
 use App\Http\Controllers\v1\ClubNewsController;
+use App\Http\Controllers\v1\PagesController;
 
 Route::prefix('v1')->group(function() {
 
@@ -54,6 +55,7 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('competitions', CompetitionController::class);
         Route::apiResource('notices', NoticeController::class);
         Route::apiResource('club-news', ClubNewsController::class);
+        Route::apiResource('pages', PagesController::class);
 
     });
 

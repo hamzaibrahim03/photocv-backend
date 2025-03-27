@@ -1,0 +1,12 @@
+<?php
+
+namespace App\Repositories;
+
+interface PagesRepositoryInterface
+{
+    public function all( $request );
+    public function create(array $data, $file);
+    public function show( $id );
+    public function update($id, array $data, $file);
+    public function delete($id);
+}

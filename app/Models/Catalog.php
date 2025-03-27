@@ -33,4 +33,9 @@ class Catalog extends Model
 		'catalog_type',
 		'icon'
 	];
+
+	public function pages()
+	{
+		return $this->hasMany(Page::class, 'page_type_id');
+	}
 }
