@@ -38,4 +38,9 @@ class Catalog extends Model
 	{
 		return $this->hasMany(Page::class, 'page_type_id');
 	}
+
+	public function clubNews()
+	{
+		return $this->hasMany(ClubNews::class, 'news_type_id');
+	}
 }

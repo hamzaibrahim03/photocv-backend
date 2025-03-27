@@ -19,4 +19,12 @@ class ClubNews extends Model
         'thumb_image',
         'publish_date',
     ];
+
+    /**
+     * Relationship: Page belongs to a catalog (page type).
+     */
+    public function clubNewsType()
+    {
+        return $this->belongsTo(Catalog::class, 'news_type_id');
+    }
 }

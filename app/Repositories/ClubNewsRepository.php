@@ -13,7 +13,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function all( $request )
     {
         try {
-            $clubNews = $this->getAllIndexData($request, ClubNews::all());
+            $clubNews = $this->getAllIndexData($request, ClubNews::with('clubNewsType')->get());
             return ClubNewsResponse::success('Club News retrieved successfully.', $clubNews);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
@@ -23,7 +23,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function show( $id )
     {
         try {
-            $clubNews = ClubNews::findOrFail($id);
+            $clubNews = ClubNews::with('clubNewsType')->findOrFail($id);
             if (!$clubNews) {
                 return ClubNewsResponse::error('Club news not found.', 404);
             }
