@@ -7,13 +7,22 @@ use App\Http\Responses\ClubSettingResponse;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
+    public function all( )
+    {
+        try {
+            $pages = ClubSetting::first();
+            return ClubSettingResponse::success('Settings retrieved successfully.', $pages);
+        } catch (\Exception $e) {
+            $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
+            return ClubSettingResponse::error($e->getMessage(), $statusCode);
+        }
+    }
 
     /**
      * Store or update club settings.
      */
     public function save(array $data, $logo = null, $clubBanner = null, $id = null)
     {
-
         try {
             if ($logo) {
                 $data['logo'] = $logo->store('club_logos', 'public');
@@ -33,8 +42,5 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
             return ClubSettingResponse::error($e->getMessage(), $statusCode);
         }
-
-        
     }
-
 }

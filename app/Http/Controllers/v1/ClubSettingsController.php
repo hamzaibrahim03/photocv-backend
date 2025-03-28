@@ -16,6 +16,11 @@ class ClubSettingsController extends Controller
         $this->clubSettingService = $clubSettingService;
     }
 
+    public function index( )
+    {
+        return $this->clubSettingService->showSettings( );
+    }
+
     public function store(StoreClubSettingsRequest $request)
     {
         return $this->clubSettingService->saveClubSettings($request->except('logo'), $request->file('logo'), $request->file('club_banner'), $request->id );
