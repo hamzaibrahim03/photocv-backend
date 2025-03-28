@@ -1,0 +1,19 @@
+<?php
+namespace App\Services;
+
+use App\Repositories\ClubSettingsRepositoryInterface;
+
+class ClubSettingService
+{
+    private $clubSettingRepository;
+
+    public function __construct(ClubSettingsRepositoryInterface $clubSettingRepository)
+    {
+        $this->clubSettingRepository = $clubSettingRepository;
+    }
+
+    public function saveClubSettings(array $data, $logo, $clubBanner, $id)
+    {
+        return $this->clubSettingRepository->save($data, $logo, $clubBanner, $id);
+    }
+}
