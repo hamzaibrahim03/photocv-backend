@@ -26,7 +26,6 @@ return new class extends Migration
             $table->string('postcode', 10)->nullable();
             $table->string('country', 20)->nullable();
             $table->string('phone', 20)->nullable();
-            $table->string('county', 100)->nullable();
             $table->text('bio')->nullable();
             $table->string('status', 15)->nullable()->default('pending')->comment('approved,pending,suspend');
             $table->string('account_status', 25)->nullable()->comment('active,inactive');

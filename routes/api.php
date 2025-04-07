@@ -14,6 +14,7 @@ use App\Http\Controllers\v1\NoticeController;
 use App\Http\Controllers\v1\ClubNewsController;
 use App\Http\Controllers\v1\PagesController;
 use App\Http\Controllers\v1\ClubSettingsController;
+use App\Http\Controllers\v1\MemberController;
 
 Route::prefix('v1')->group(function() {
 
@@ -58,6 +59,7 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('club-news', ClubNewsController::class);
         Route::apiResource('pages', PagesController::class);
         Route::apiResource('club-settings', ClubSettingsController::class);
+        Route::apiResource('members', MemberController::class);
 
     });
 

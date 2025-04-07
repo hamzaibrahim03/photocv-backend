@@ -72,6 +72,9 @@ use App\Repositories\PagesRepository;
 use App\Repositories\ClubSettingsRepositoryInterface;
 use App\Repositories\ClubSettingsRepository;
 
+use App\Repositories\MemberRepositoryInterface;
+use App\Repositories\MemberRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -103,6 +106,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClubNewsRepositoryInterface::class, ClubNewsRepository::class);
         $this->app->bind(PagesRepositoryInterface::class, PagesRepository::class);
         $this->app->bind(ClubSettingsRepositoryInterface::class, ClubSettingsRepository::class);
+        $this->app->bind(MemberRepositoryInterface::class, MemberRepository::class);
 
     }
 
