@@ -38,4 +38,8 @@ class MemberService
     {
         return $this->memberRepository->delete($id);
     }
+
+    public function uploadGalleryImages($images) {
+        return $this->memberRepository->memberGalleryImages( $images );
+    }
 }

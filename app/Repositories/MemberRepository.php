@@ -125,4 +125,8 @@ class MemberRepository implements MemberRepositoryInterface
         return $username;
     }
 
+    public function memberGalleryImages( $images ) {
+        
+    }
+
 }

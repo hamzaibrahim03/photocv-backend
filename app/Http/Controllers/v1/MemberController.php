@@ -40,4 +40,9 @@ class MemberController extends Controller
     {
         return $this->memberService->deleteMember( $id );
     }
+
+    public function uploadGalleryImages(Request $request)
+    {
+        return $this->memberService->memberGalleryImages( $request->file('images') );
+    }
 }
