@@ -54,8 +54,13 @@ Route::prefix('v1')->group(function() {
 
 
         Route::apiResource('catalogs', CatalogController::class);
+        
         Route::apiResource('events', EventController::class);
+        Route::get('/event-extras', [EventController::class, 'getEventExtras']);
+
         Route::apiResource('competitions', CompetitionController::class);
+        Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
+
         Route::apiResource('notices', NoticeController::class);
         Route::apiResource('club-news', ClubNewsController::class);
         Route::apiResource('pages', PagesController::class);
@@ -63,7 +68,7 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('members', MemberController::class);
         Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
         Route::post('/assign-club', [MemberController::class, 'assignClub']);
-        Route::get('/event-extras', [EventController::class, 'getEventExtras']);
+        
 
     });
 

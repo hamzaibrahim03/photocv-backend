@@ -2,10 +2,14 @@
 
 namespace App\Repositories;
 
+use App\Models\Event;
 use App\Models\Club;
+use App\Models\User;
 use App\Models\Competition;
+use Carbon\Carbon;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\CompetitionResponse;
+use App\Models\CompetitionMembersEntry;
 
 class CompetitionRepository implements CompetitionRepositoryInterface
 {
@@ -93,5 +97,99 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         }
     }
 
+    public function getCompetitionExtras($request)
+    {
+        $club = Club::where('user_id', auth()->id())->first();
 
+        if (!$club) {
+            return CompetitionResponse::error('No club found for the current user.', 404);
+        }
+
+        $clubId = $club->id;
+
+        // Month and Year logic
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
+            : Carbon::now()->startOfMonth();
+
+        $endOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
+            : Carbon::now()->endOfMonth();
+
+
+        // Random competitions
+        $randomCompetitions = Competition::select('id', 'name', 'start_date')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        // Upcoming competition (closest future competition)
+        $upcomingCompetition = Competition::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->first();
+
+        $upcoming = $upcomingCompetition
+            ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingCompetition->start_date)->startOfDay(), false)]
+            : null;
+
+        // Count of members in the club
+        $totalMemberCount = User::whereHas('clubs', function ($query) use ($clubId) {
+            $query->where('club_id', $clubId);
+        })
+        ->count();
+
+        $recentSubmissions = CompetitionMembersEntry::with([
+            'competitionMember.competition:id,name',
+            'competitionMember.member:id,name'
+        ])
+        ->latest()
+        ->take(4)
+        ->get()
+        ->map(function ($entry) {
+            return [
+                'member_name' => $entry->competitionMember->member->name ?? 'Unknown',
+                'competition_name' => $entry->competitionMember->competition->name ?? 'Unknown',
+                'entry_image' => $entry->entry_image,
+                'submitted_at' => $entry->created_at->toDateTimeString(),
+            ];
+        });
+
+        // Monthly calendar data
+        $events = Event::where('club_id', $clubId)
+            ->whereBetween('event_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('event_date', 'asc')
+            ->get(['event_date', 'name'])
+            ->map(fn($e) => [
+                'date' => $e->event_date->toDateString(),
+                'name' => $e->name,
+            ]);
+
+        $competitions = Competition::where('club_id', $clubId)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('start_date', 'asc')
+            ->get(['start_date', 'name'])
+            ->map(fn($c) => [
+                'date' => $c->start_date->toDateString(),
+                'name' => $c->name,
+            ]);
+
+        // Final response
+        return [
+            'data' => [
+                'random_competitions' => $randomCompetitions,
+                'upcoming_competition' => $upcoming,
+                'total_member_count' => $totalMemberCount,
+                'recent_submissions' => $recentSubmissions,
+                'calendar' => [
+                    'events' => $events,
+                    'competitions' => $competitions,
+                ],
+            ],
+        ];
+    }
 }

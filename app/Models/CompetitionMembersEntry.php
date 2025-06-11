@@ -37,4 +37,10 @@ class CompetitionMembersEntry extends Model
 		'entry_type',
 		'entry_image'
 	];
+
+	public function competitionMember()
+	{
+		return $this->belongsTo(CompetitionMember::class, 'member_comp_id');
+	}
+
 }

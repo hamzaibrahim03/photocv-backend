@@ -38,4 +38,9 @@ class CompetitionService
     {
         return $this->competitionRepository->delete($id);
     }
+
+    public function getCompetitionExtras( $request )
+    {
+        return $this->competitionRepository->getCompetitionExtras( $request );
+    }
 }

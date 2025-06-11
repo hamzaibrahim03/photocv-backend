@@ -38,4 +38,9 @@ class CompetitionController extends Controller
     {
         return $this->competitionService->deleteCompetition($id);
     }
+
+    public function getCompetitionExtras(Request $request)
+    {
+        return $this->competitionService->getCompetitionExtras( $request );
+    }
 }

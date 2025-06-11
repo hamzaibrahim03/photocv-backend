@@ -36,4 +36,15 @@ class CompetitionMember extends Model
 		'comp_id',
 		'member_id'
 	];
+
+	public function member()
+	{
+		return $this->belongsTo(Member::class);
+	}
+
+	public function competition()
+	{
+		return $this->belongsTo(Competition::class);
+	}
+
 }
