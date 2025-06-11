@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('members', MemberController::class);
         Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
         Route::post('/assign-club', [MemberController::class, 'assignClub']);
+        Route::get('/event-extras', [EventController::class, 'getEventExtras']);
 
     });
 

@@ -2,16 +2,25 @@
 
 namespace App\Repositories;
 
+use App\Models\Competition;
 use App\Models\Club;
 use App\Models\Event;
+use App\Models\EventComment;
 use App\Models\EventImage;
 use App\Traits\UtilityTrait;
+use Carbon\Carbon;
 use App\Http\Responses\EventResponse;
 
 class EventRepository implements EventRepositoryInterface
 {
     use UtilityTrait;
 
+    /**
+     * Get all event data with pagination and filtering.
+     *
+     * @param \Illuminate\Http\Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function all( $request )
     {
         try {
@@ -22,6 +31,12 @@ class EventRepository implements EventRepositoryInterface
         }
     }
 
+    /**
+     * Show a specific event by ID.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function show($id)
     {
         try {
@@ -43,7 +58,13 @@ class EventRepository implements EventRepositoryInterface
         }
     }
 
-
+    /**
+     * Create a new event.
+     *
+     * @param array $data
+     * @param mixed $files
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function create(array $data, $files = null)
     {
         try {
@@ -79,7 +100,14 @@ class EventRepository implements EventRepositoryInterface
         }
     }
 
-
+    /**
+     * Update an existing event.
+     *
+     * @param int $id
+     * @param array $data
+     * @param mixed $files
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update($id, array $data, $files = null)
     {
         try {
@@ -113,7 +141,12 @@ class EventRepository implements EventRepositoryInterface
         }
     }
 
-
+    /**
+     * Delete an event by ID.
+     *
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function delete($id)
     {
         try {
@@ -133,6 +166,94 @@ class EventRepository implements EventRepositoryInterface
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
+    }
+
+    /**
+     * Get additional event-related data for the club dashboard.
+     *
+     * @return array
+     */
+    public function getEventExtras($request)
+    {
+        $club = Club::where('user_id', auth()->id())->first();
+
+        if (!$club) {
+            return EventResponse::error('No club found for the current user.', 404);
+        }
+
+        $clubId = $club->id;
+
+        // Month and Year logic
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
+            : Carbon::now()->startOfMonth();
+
+        $endOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
+            : Carbon::now()->endOfMonth();
+
+        // Recent comments
+        $recentComments = EventComment::with('event:id,name,club_id,event_date')
+            ->whereHas('event', fn($q) => $q->where('club_id', $clubId))
+            ->latest()
+            ->take(5)
+            ->get();
+
+        // Random events
+        $randomEvents = Event::select('id', 'name', 'event_date')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        // Upcoming event (closest future event)
+        $upcomingEvent = Event::where('club_id', $clubId)
+            ->whereDate('event_date', '>=', now())
+            ->orderBy('event_date', 'asc')
+            ->first();
+
+        $upcoming = $upcomingEvent
+            ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
+            : null;
+
+        // Total event count
+        $totalEvents = Event::where('club_id', $clubId)->count();
+
+        // Monthly calendar data
+        $events = Event::where('club_id', $clubId)
+            ->whereBetween('event_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('event_date', 'asc')
+            ->get(['event_date', 'name'])
+            ->map(fn($e) => [
+                'date' => $e->event_date->toDateString(),
+                'name' => $e->name,
+            ]);
+
+        $competitions = Competition::where('club_id', $clubId)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('start_date', 'asc')
+            ->get(['start_date', 'name'])
+            ->map(fn($c) => [
+                'date' => $c->start_date->toDateString(),
+                'name' => $c->name,
+            ]);
+
+        // Final response
+        return [
+            'data' => [
+                'recent_comments' => $recentComments,
+                'random_events' => $randomEvents,
+                'upcoming_event' => $upcoming,
+                'total_events' => $totalEvents,
+                'calendar' => [
+                    'events' => $events,
+                    'competitions' => $competitions,
+                ],
+            ],
+        ];
     }
 
 

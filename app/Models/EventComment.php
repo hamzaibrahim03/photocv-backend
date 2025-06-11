@@ -45,4 +45,9 @@ class EventComment extends Model
 		'is_published',
 		'admin_notes'
 	];
+
+	public function event()
+	{
+		return $this->belongsTo(Event::class);
+	}
 }
