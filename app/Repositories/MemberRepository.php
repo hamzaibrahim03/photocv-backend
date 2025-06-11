@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Club;
 use App\Models\User;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
@@ -66,6 +67,7 @@ class MemberRepository implements MemberRepositoryInterface
         try {
             unset($data['password']);
             unset($data['email']);
+            unset($data['username']);
 
             $member = User::findOrFail($id);
     
@@ -123,6 +125,15 @@ class MemberRepository implements MemberRepositoryInterface
         }
 
         return $username;
+    }
+
+    public function assignClubToUser($userId, $clubId)
+    {
+        $user = User::findOrFail($userId);
+        $club = Club::findOrFail($clubId);
+
+        $user->clubs()->syncWithoutDetaching([$clubId => ['joined_at' => now()]]);
+        return true;
     }
 
     public function memberGalleryImages( $images ) {

@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
+use App\Models\Club;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -44,5 +45,35 @@ class UserSeeder extends Seeder
             ]
         );
         $member->assignRole('member');
+
+        // Create another Club Admin with a club
+        $john = User::firstOrCreate(
+            ['email' => 'johndoe@photocv.com'],
+            [
+                'username' => 'johnphotocv',
+                'password' => Hash::make('secret123'),
+            ]
+        );
+        $john->assignRole('club_admin');
+
+        // Create Club for John if not already exists
+        $club = Club::firstOrCreate(
+            ['user_id' => $john->id], // assuming 'user_id' is the foreign key in clubs table
+            [
+                'club_name'           => 'My First Club',
+                'tag_line'            => 'Anyone can join',
+                'domain_type'         => 'custom',
+                'registration'        => 'open',
+                'directory_visibility'=> 'visible',
+                'comments'            => 'enabled',
+                'likes'               => 'enabled',
+                'news'                => 'enabled',
+                'events'              => 'enabled',
+                'galleries'           => 'enabled',
+                'competitions'        => 'enabled',
+                'reminders'           => 'all',
+                'home_page_blocks'    => 'all',
+            ]
+        );
     }
 }

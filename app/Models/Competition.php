@@ -78,6 +78,7 @@ class Competition extends Model
 	];
 
 	protected $fillable = [
+		'club_id',
 		'name',
 		'description',
 		'competition_type_id',

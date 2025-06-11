@@ -14,6 +14,9 @@ return new class extends Migration
         Schema::create('clubs', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->bigInteger('user_id')->nullable();
+            $table->string('club_name', 250);
+            $table->string('tag_line', 250)->nullable();
+            $table->string('typography', 250)->nullable();
             $table->string('contact_details', 250)->nullable();
             $table->enum('domain_type', ['custom', 'subdomain'])->nullable();
             $table->string('domain_name', 250)->nullable();
@@ -24,7 +27,7 @@ return new class extends Migration
             $table->text('footer_text')->nullable();
             $table->string('logo', 250)->nullable();
             $table->string('cover_image', 250)->nullable();
-            $table->enum('registration', ['open', 'invite'])->nullable()->default('open');
+            $table->enum('registration', ['open', 'invite', 'manual_approval'])->nullable()->default('open');
             $table->enum('directory_visibility', ['visible', 'club_only'])->nullable()->comment('Member directory public visibility');
             $table->enum('comments', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->enum('likes', ['enabled', 'disabled'])->nullable()->default('disabled');

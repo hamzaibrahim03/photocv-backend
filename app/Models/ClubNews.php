@@ -12,6 +12,7 @@ class ClubNews extends Model
     protected $table = 'club_news';
 
     protected $fillable = [
+        'club_id',
         'title',
         'news_type_id',
         'short_description',

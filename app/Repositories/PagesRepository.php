@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Club;
 use App\Models\Page;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\PagesResponse;
@@ -53,6 +54,11 @@ class PagesRepository implements PagesRepositoryInterface
             if ($file) {
                 $imagePath = $file->store('page_images', 'public');
                 $data['thumb_image'] = $imagePath;
+            }
+
+            $club = Club::where('user_id', auth()->id())->first();
+            if ($club) {
+                $data['club_id'] = $club->id;
             }
 
             // Create the page

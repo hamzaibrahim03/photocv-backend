@@ -28,13 +28,13 @@ class SignUpController extends Controller
         $this->signUpService = $signUpService;
     }
 
-    public function store(SignUpRequest $request)
+    public function store(Request $request)
     {
         try
         {
             DB::beginTransaction();
             // Pass the validated data to the service to create the course
-            $registeredUser = $this->signUpService->registerUser($request->validated());
+            $registeredUser = $this->signUpService->registerUser($request->all());
 
             DB::commit();
 

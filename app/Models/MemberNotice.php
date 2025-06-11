@@ -41,6 +41,7 @@ class MemberNotice extends Model
 	];
 
 	protected $fillable = [
+		'club_id',
 		'member_id',
 		'notice_type_id',
 		'title',

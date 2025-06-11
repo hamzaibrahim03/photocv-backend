@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('pages', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('club_id')->nullable();
             $table->string('title');
             $table->date('publish_date');
             $table->longText('description');

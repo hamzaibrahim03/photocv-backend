@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Permission\Traits\HasRoles;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
  * Class User
@@ -43,7 +44,7 @@ use Laravel\Sanctum\HasApiTokens;
  *
  * @package App\Models
  */
-class User extends Model
+class User extends Authenticatable
 {
 	use SoftDeletes, HasRoles, HasApiTokens;
 	protected $table = 'users';
@@ -82,4 +83,16 @@ class User extends Model
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function clubs()
+	{
+		return $this->belongsToMany(Club::class)->withTimestamps()->withPivot('joined_at');
+	}
+
+
+	public function club()
+	{
+		return $this->hasOne(Club::class);
+	}
+
 }

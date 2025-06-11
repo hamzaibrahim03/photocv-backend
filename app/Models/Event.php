@@ -54,6 +54,7 @@ class Event extends Model
 	];
 
 	protected $fillable = [
+		'club_id',
 		'name',
 		'event_date',
 		'description',
@@ -78,4 +79,10 @@ class Event extends Model
     {
         return $this->hasMany(EventImage::class, 'event_id');
     }
+
+	public function club()
+	{
+		return $this->belongsTo(Club::class);
+	}
+
 }

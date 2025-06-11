@@ -41,6 +41,18 @@ class MemberController extends Controller
         return $this->memberService->deleteMember( $id );
     }
 
+    public function assignClub(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'club_id' => 'required|exists:clubs,id',
+        ]);
+
+        $this->memberService->assignMember($validated['user_id'], $validated['club_id']);
+
+        return response()->json(['message' => 'Club assigned successfully']);
+    }
+
     public function uploadGalleryImages(Request $request)
     {
         return $this->memberService->memberGalleryImages( $request->file('images') );

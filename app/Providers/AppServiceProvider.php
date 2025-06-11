@@ -75,6 +75,9 @@ use App\Repositories\ClubSettingsRepository;
 use App\Repositories\MemberRepositoryInterface;
 use App\Repositories\MemberRepository;
 
+use App\Repositories\ClubDashboardRepositoryInterface;
+use App\Repositories\ClubDashboardRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -83,21 +86,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(CourseRepositoryInterface::class, CourseRepository::class);
 		$this->app->bind(RoleRepositoryInterface::class, RoleRepository::class);
         $this->app->bind(PermissionRepositoryInterface::class, PermissionRepository::class);
-        $this->app->bind(FranchiseRepositoryInterface::class, FranchiseRepository::class);
         $this->app->bind(UserRepositoryInterface::class, UserRepository::class);
-		$this->app->bind(CourseModuleRepositoryInterface::class, CourseModuleRepository::class);
-        $this->app->bind(EnrollmentRepositoryInterface::class, EnrollmentRepository::class);
-        $this->app->bind(ClassScheduleRepositoryInterface::class, ClassScheduleRepository::class);
-        $this->app->bind(LiveClassRepositoryInterface::class, LiveClassRepository::class);
         $this->app->bind(SignUpRepositoryInterface::class, SignUpRepository::class);
         $this->app->bind(AuthRepositoryInterface::class, AuthRepository::class);
-        $this->app->bind(SchoolRepositoryInterface::class, SchoolRepository::class);
-        $this->app->bind(StudentRepositoryInterface::class, StudentRepository::class);
-        $this->app->bind(StudentHomeWorkRepositoryInterface::class, StudentHomeWorkRepository::class);
-        $this->app->bind(StudentHomeWorkFileRepositoryInterface::class, StudentHomeWorkFileRepository::class);
 
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
         $this->app->bind(EventRepositoryInterface::class, EventRepository::class);
@@ -107,6 +100,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PagesRepositoryInterface::class, PagesRepository::class);
         $this->app->bind(ClubSettingsRepositoryInterface::class, ClubSettingsRepository::class);
         $this->app->bind(MemberRepositoryInterface::class, MemberRepository::class);
+        $this->app->bind(ClubDashboardRepositoryInterface::class, ClubDashboardRepository::class);
 
     }
 

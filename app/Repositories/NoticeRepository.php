@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Club;
 use App\Models\MemberNotice;
 use App\Models\MemberNoticeFile;
 use App\Traits\UtilityTrait;
@@ -40,6 +41,16 @@ class NoticeRepository implements NoticeRepositoryInterface
     public function create(array $data, $images = [], $documents = [])
     {
         try {
+
+            $club = Club::where('user_id', auth()->id())->first();
+
+            if (!$club) {
+                return NoticeResponse::error('No club found for the current user.', 404);
+            }
+
+            // Inject club_id into the data array
+            $data['club_id'] = $club->id;
+
             // Create the notice
             $notice = MemberNotice::create($data);
 

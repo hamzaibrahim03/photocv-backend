@@ -12,6 +12,7 @@ class Page extends Model
     protected $table = 'pages';
 
     protected $fillable = [
+        'club_id',
         'title',
         'publish_date',
         'description',

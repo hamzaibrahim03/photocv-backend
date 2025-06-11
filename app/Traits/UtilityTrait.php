@@ -4,6 +4,7 @@ namespace App\Traits;
 
 use Yajra\DataTables\DataTables;
 use App\Models\Event;
+use App\Models\Club;
 use App\Models\MemberNotice;
 use App\Models\Competition;
 
@@ -39,13 +40,21 @@ trait UtilityTrait
     {
         $query = Event::with('images');
 
-        // Apply search filter
-        if ($request->has('search_term') && $request->search_term != '') {
-            $query->where('name', 'LIKE', '%' . $request->search_term . '%')
-                  ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+        $club = Club::where('user_id', auth()->id())->first();
+        if ($club) {
+            $query->where('club_id', $club->id);
+        } else {
+            // Optionally return an empty result if user has no club
+            return DataTables::of(collect([]))->make(true);
         }
 
-        // Sorting
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->search_term . '%')
+                ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+            });
+        }
+
         if ($request->has('order') && count($request->order)) {
             $column = $request->columns[$request->order[0]['column']]['data'];
             $direction = $request->order[0]['dir'];
@@ -55,10 +64,11 @@ trait UtilityTrait
         return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('action', function ($event) {
-                return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+                return '<a href="' . route('events.show', $event->id) . '" class="btn btn-sm btn-primary">View</a>';
             })
             ->make(true);
     }
+
 
     public function getAllIndexData($request, $query)
     {
@@ -86,6 +96,14 @@ trait UtilityTrait
     public function getAllNoticeData($request)
     {
         $query = MemberNotice::with('files');
+
+        $club = Club::where('user_id', auth()->id())->first();
+        if ($club) {
+            $query->where('club_id', $club->id);
+        } else {
+            // Optionally return an empty result if user has no club
+            return DataTables::of(collect([]))->make(true);
+        }
 
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {

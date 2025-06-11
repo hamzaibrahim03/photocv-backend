@@ -39,6 +39,11 @@ class MemberService
         return $this->memberRepository->delete($id);
     }
 
+    public function assignMember( $user_id, $club_id )
+    {
+        return $this->memberRepository->assignClubToUser($user_id, $club_id);
+    }
+
     public function uploadGalleryImages($images) {
         return $this->memberRepository->memberGalleryImages( $images );
     }

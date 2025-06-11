@@ -65,6 +65,9 @@ class Club extends Model
 
 	protected $fillable = [
 		'user_id',
+		'club_name',
+		'tag_line',
+		'typography',
 		'contact_details',
 		'domain_type',
 		'domain_name',
@@ -96,4 +99,20 @@ class Club extends Model
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function user()
+	{
+		return $this->belongsTo(User::class);
+	}
+
+	public function events()
+	{
+		return $this->hasMany(Event::class);
+	}
+
+	public function users()
+	{
+		return $this->belongsToMany(User::class)->withTimestamps()->withPivot('joined_at');
+	}
+
 }

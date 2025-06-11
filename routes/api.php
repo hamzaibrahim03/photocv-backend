@@ -15,6 +15,7 @@ use App\Http\Controllers\v1\ClubNewsController;
 use App\Http\Controllers\v1\PagesController;
 use App\Http\Controllers\v1\ClubSettingsController;
 use App\Http\Controllers\v1\MemberController;
+use App\Http\Controllers\v1\ClubDashboardController;
 
 Route::prefix('v1')->group(function() {
 
@@ -60,6 +61,8 @@ Route::prefix('v1')->group(function() {
         Route::apiResource('pages', PagesController::class);
         Route::apiResource('club-settings', ClubSettingsController::class);
         Route::apiResource('members', MemberController::class);
+        Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
+        Route::post('/assign-club', [MemberController::class, 'assignClub']);
 
     });
 

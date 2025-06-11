@@ -9,5 +9,6 @@ interface MemberRepositoryInterface
     public function show( $id );
     public function update($id, array $data, $files);
     public function delete($id);
+    public function assignClubToUser($userId, $clubId);
     public function memberGalleryImages($images);
 }

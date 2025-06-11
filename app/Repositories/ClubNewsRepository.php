@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Models\Club;
 use App\Models\ClubNews;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\ClubNewsResponse;
@@ -37,12 +38,22 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function create(array $data, $file = null)
     {
         try {
-            $imagePath = $file->store('news_images', 'public');
-            $data['thumb_image'] = $imagePath;
-            $data['publish_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
+            if ($file) {
+                $imagePath = $file->store('news_images', 'public');
+                $data['thumb_image'] = $imagePath;
+            }
+
+            if (!empty($data['publish_date'])) {
+                $data['publish_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
+            }
+
+            $club = Club::where('user_id', auth()->id())->first();
+            if ($club) {
+                $data['club_id'] = $club->id;
+            }
 
             $clubNews = ClubNews::create($data);
-            
+
             return ClubNewsResponse::success('Club news created successfully.', $clubNews, 201);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
