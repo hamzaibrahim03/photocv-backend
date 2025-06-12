@@ -246,8 +246,8 @@ class EventRepository implements EventRepositoryInterface
         $endOfMonth = Carbon::now()->endOfMonth();
 
         $eventCountThisMonth = Event::where('club_id', $clubId)
-            ->whereDate('start_date', '>=', $today)
-            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->whereDate('event_date', '>=', $today)
+            ->whereBetween('event_date', [$startOfMonth, $endOfMonth])
             ->count();
 
 
