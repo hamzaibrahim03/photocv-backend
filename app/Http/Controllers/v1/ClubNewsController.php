@@ -40,4 +40,9 @@ class ClubNewsController extends Controller
     {
         return $this->clubNewsService->deleteClubNews( $id );
     }
+
+    public function getClubNewsExtras( Request $request )
+    {
+        return $this->clubNewsService->getClubNewsExtras( $request );
+    }
 }

@@ -9,4 +9,5 @@ interface NoticeRepositoryInterface
     public function show( $id );
     public function update($id, array $data, $images, $document);
     public function delete($id);
+    public function getNoticeExtras( $request );
 }

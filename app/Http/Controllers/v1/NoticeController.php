@@ -40,4 +40,9 @@ class NoticeController extends Controller
     {
         return $this->noticeService->deleteNotice( $id );
     }
+
+    public function getNoticeExtras( Request $request )
+    {
+        return $this->noticeService->getNoticeExtras( $request );
+    }
 }

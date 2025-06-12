@@ -9,4 +9,5 @@ interface ClubNewsRepositoryInterface
     public function show( $id );
     public function update($id, array $data, $file);
     public function delete($id);
+    public function getClubNewsExtras( $request );
 }

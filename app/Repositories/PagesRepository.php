@@ -7,6 +7,7 @@ use App\Models\Page;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\PagesResponse;
 use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class PagesRepository implements PagesRepositoryInterface
 {
@@ -124,6 +125,50 @@ class PagesRepository implements PagesRepositoryInterface
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
             return PagesResponse::error($e->getMessage(), $statusCode);
         }
+    }
+
+    public function getPagesExtras($request)
+    {
+        $club = Club::where('user_id', auth()->id())->first();
+
+        if (!$club) {
+            return PagesResponse::error('No club found for the current user.', 404);
+        }
+
+        $clubId = $club->id;
+
+        // Random pages
+        $randomPages = Page::select('id', 'title', 'created_at')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(6)
+            ->get();
+
+        $lastPageChange = Page::where('club_id', $clubId)
+            ->latest('updated_at')
+            ->first();
+
+        $daysAgo = $lastPageChange
+            ? Carbon::parse($lastPageChange->updated_at)->startOfDay()->diffInDays(Carbon::now()->startOfDay(), false)
+            : null;
+
+        $lastPageChangeDaysFormatted = $daysAgo !== null
+            ? ($daysAgo < 0 ? '-' : '') . sprintf('%02d', abs($daysAgo))
+            : null;
+
+        $totalDraftedPages = Page::where('club_id', $clubId)->where('status', 'draft')->count();
+
+        $totalPages = Page::where('club_id', $clubId)->where('status', 'publish')->count();
+
+        // Final response
+        return [
+            'data' => [
+                'total_live_pages' => $totalPages,
+                'last_page_days_ago' => $lastPageChangeDaysFormatted,
+                'total_drafted_pages' => $totalDraftedPages,
+                'random_pages' => $randomPages,
+            ],
+        ];
     }
 
 }

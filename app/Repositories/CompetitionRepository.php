@@ -178,6 +178,15 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'name' => $c->name,
             ]);
 
+        $today = Carbon::today();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $competitionCountThisMonth = Competition::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', $today)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->count();
+
         // Final response
         return [
             'data' => [
@@ -185,6 +194,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'upcoming_competition' => $upcoming,
                 'total_member_count' => $totalMemberCount,
                 'recent_submissions' => $recentSubmissions,
+                'current_month_competition_count' => $competitionCountThisMonth,
                 'calendar' => [
                     'events' => $events,
                     'competitions' => $competitions,

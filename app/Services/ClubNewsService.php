@@ -38,4 +38,9 @@ class ClubNewsService
     {
         return $this->clubNewsRepository->delete($id);
     }
+
+    public function getClubNewsExtras( $request )
+    {
+        return $this->clubNewsRepository->getClubNewsExtras($request);
+    }
 }

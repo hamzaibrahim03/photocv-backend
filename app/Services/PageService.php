@@ -35,4 +35,9 @@ class PageService
     {
         return $this->pageRepository->delete($id);
     }
+
+    public function getPagesExtras( $request )
+    {
+        return $this->pageRepository->getPagesExtras( $request );
+    }
 }

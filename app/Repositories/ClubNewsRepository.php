@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Club;
 use App\Models\ClubNews;
 use App\Traits\UtilityTrait;
+use Carbon\Carbon;
 use App\Http\Responses\ClubNewsResponse;
 
 class ClubNewsRepository implements ClubNewsRepositoryInterface
@@ -89,7 +90,6 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
         }
     }
 
-
     public function delete($id)
     {
         try {
@@ -104,6 +104,78 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
         }
+    }
+
+    public function getClubNewsExtras($request)
+    {
+        $club = Club::where('user_id', auth()->id())->first();
+
+        if (!$club) {
+            return ClubNewsResponse::error('No club found for the current user.', 404);
+        }
+
+        $clubId = $club->id;
+
+        // Month and Year logic
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
+            : Carbon::now()->startOfMonth();
+
+        $endOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
+            : Carbon::now()->endOfMonth();
+
+        // Random notices
+        $randomClubNews = ClubNews::select('id', 'title', 'created_at')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        // Monthly calendar data
+        $clubNews = ClubNews::where('club_id', $clubId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->orderBy('created_at', 'asc')
+            ->get(['created_at', 'title'])
+            ->map(fn($e) => [
+                'date' => $e->created_at->toDateString(),
+                'name' => $e->title,
+            ]);
+
+        // Last notice days ago (formatted)
+        $lastNotice = ClubNews::where('club_id', $clubId)
+            ->latest('created_at')
+            ->first();
+
+        $daysAgo = $lastNotice
+            ? Carbon::parse($lastNotice->created_at)->startOfDay()->diffInDays(Carbon::now()->startOfDay(), false)
+            : null;
+
+        $lastNewsDaysFormatted = $daysAgo !== null
+            ? ($daysAgo < 0 ? '-' : '') . sprintf('%02d', abs($daysAgo))
+            : null;
+
+        $totalClubNews = ClubNews::where('club_id', $clubId)->count();
+
+        $newsCountThisMonth = ClubNews::where('club_id', $clubId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->count();
+
+        // Final response
+        return [
+            'data' => [
+                'current_month_news_count' => $newsCountThisMonth,
+                'last_news_days_ago' => $lastNewsDaysFormatted,
+                'total_news' => $totalClubNews,
+                'random_news' => $randomClubNews,
+                'calendar' => [
+                    'news' => $clubNews,
+                ],
+            ],
+        ];
     }
 
 }

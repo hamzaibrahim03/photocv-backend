@@ -241,6 +241,16 @@ class EventRepository implements EventRepositoryInterface
                 'name' => $c->name,
             ]);
 
+        $today = Carbon::today();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $eventCountThisMonth = Event::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', $today)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->count();
+
+
         // Final response
         return [
             'data' => [
@@ -248,6 +258,7 @@ class EventRepository implements EventRepositoryInterface
                 'random_events' => $randomEvents,
                 'upcoming_event' => $upcoming,
                 'total_events' => $totalEvents,
+                'current_month_event_count' => $eventCountThisMonth,
                 'calendar' => [
                     'events' => $events,
                     'competitions' => $competitions,
@@ -255,6 +266,4 @@ class EventRepository implements EventRepositoryInterface
             ],
         ];
     }
-
-
 }

@@ -62,8 +62,14 @@ Route::prefix('v1')->group(function() {
         Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
 
         Route::apiResource('notices', NoticeController::class);
+        Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);
+
         Route::apiResource('club-news', ClubNewsController::class);
+        Route::get('/club-news-extras', [ClubNewsController::class, 'getClubNewsExtras']);
+
         Route::apiResource('pages', PagesController::class);
+        Route::get('/pages-extras', [PagesController::class, 'getPagesExtras']);
+
         Route::apiResource('club-settings', ClubSettingsController::class);
         Route::apiResource('members', MemberController::class);
         Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);

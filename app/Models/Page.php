@@ -19,6 +19,7 @@ class Page extends Model
         'thumb_image',
         'page_type_id',
         'page_slug',
+        'status',
     ];
 
     /**

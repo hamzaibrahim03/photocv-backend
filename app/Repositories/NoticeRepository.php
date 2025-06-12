@@ -7,6 +7,7 @@ use App\Models\MemberNotice;
 use App\Models\MemberNoticeFile;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\NoticeResponse;
+use Carbon\Carbon;
 
 class NoticeRepository implements NoticeRepositoryInterface
 {
@@ -150,6 +151,78 @@ class NoticeRepository implements NoticeRepositoryInterface
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
+    }
+
+    public function getNoticeExtras($request)
+    {
+        $club = Club::where('user_id', auth()->id())->first();
+
+        if (!$club) {
+            return NoticeResponse::error('No club found for the current user.', 404);
+        }
+
+        $clubId = $club->id;
+
+        // Month and Year logic
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
+            : Carbon::now()->startOfMonth();
+
+        $endOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
+            : Carbon::now()->endOfMonth();
+
+        // Random notices
+        $randomNotices = MemberNotice::select('id', 'title', 'created_at')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        // Monthly calendar data
+        $memberNotices = MemberNotice::where('club_id', $clubId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->orderBy('created_at', 'asc')
+            ->get(['created_at', 'title'])
+            ->map(fn($e) => [
+                'date' => $e->created_at->toDateString(),
+                'name' => $e->title,
+            ]);
+
+        // Last notice days ago (formatted)
+        $lastNotice = MemberNotice::where('club_id', $clubId)
+            ->latest('created_at')
+            ->first();
+
+        $daysAgo = $lastNotice
+            ? Carbon::parse($lastNotice->created_at)->startOfDay()->diffInDays(Carbon::now()->startOfDay(), false)
+            : null;
+
+        $lastNoticeDaysFormatted = $daysAgo !== null
+            ? ($daysAgo < 0 ? '-' : '') . sprintf('%02d', abs($daysAgo))
+            : null;
+
+        $totalNotices = MemberNotice::where('club_id', $clubId)->count();
+
+        $noticeCountThisMonth = MemberNotice::where('club_id', $clubId)
+            ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->count();
+
+        // Final response
+        return [
+            'data' => [
+                'current_month_notice_count' => $noticeCountThisMonth,
+                'last_notice_days_ago' => $lastNoticeDaysFormatted,
+                'total_notices' => $totalNotices,
+                'random_notices' => $randomNotices,
+                'calendar' => [
+                    'notices' => $memberNotices,
+                ],
+            ],
+        ];
     }
 
 }

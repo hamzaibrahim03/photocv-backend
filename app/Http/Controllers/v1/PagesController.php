@@ -40,4 +40,8 @@ class PagesController extends Controller
     {
         return $this->pageService->deletePage( $id );
     }
+
+    public function getPagesExtras( Request $request ) {
+        return $this->pageService->getPagesExtras( $request );
+    }
 }

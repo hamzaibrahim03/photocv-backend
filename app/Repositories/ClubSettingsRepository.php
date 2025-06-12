@@ -3,6 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\ClubSetting;
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Event;
+use App\Models\Club;
 use App\Http\Responses\ClubSettingResponse;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
@@ -10,8 +14,35 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
     public function all( )
     {
         try {
-            $pages = ClubSetting::first();
-            return ClubSettingResponse::success('Settings retrieved successfully.', $pages);
+            $club = Club::where('user_id', auth()->id())->first();
+
+            if (!$club) {
+                return ClubSettingResponse::error('No club found for the current user.', 404);
+            }
+
+            $clubSettings = ClubSetting::first();
+
+            $totalMemberCount = User::whereHas('clubs', function ($query) use ($club) {
+                $query->where('club_id', $club->id);
+            })
+            ->count();
+
+            // Upcoming event (closest future event)
+            $upcomingEvent = Event::where('club_id', $club->id)
+                ->whereDate('event_date', '>=', now())
+                ->orderBy('event_date', 'asc')
+                ->first();
+
+            $upcoming = $upcomingEvent
+                ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
+                : null;
+
+            return ClubSettingResponse::success('Settings retrieved successfully.', [
+                'settings' => $clubSettings,
+                'total_members' => $totalMemberCount,
+                'upcoming_event_days_count' => $upcoming,
+            ]);
+
         } catch (\Exception $e) {
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
             return ClubSettingResponse::error($e->getMessage(), $statusCode);

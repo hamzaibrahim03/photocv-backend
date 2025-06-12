@@ -35,4 +35,9 @@ class NoticeService
     {
         return $this->noticeRepository->delete($id);
     }
+
+    public function getNoticeExtras( $request )
+    {
+        return $this->noticeRepository->getNoticeExtras($request);
+    }
 }
