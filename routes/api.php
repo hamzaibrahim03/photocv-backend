@@ -20,6 +20,8 @@ use App\Http\Controllers\v1\ClubDashboardController;
 Route::prefix('v1')->group(function() {
 
     Route::post('sign-up', [SignUpController::class, 'store']);
+    Route::post('already-registered', [SignUpController::class, 'alreadyRegistered']);
+    Route::post('already-registered-domain', [SignUpController::class, 'alreadyRegisteredDomain']);
     Route::get('email-verified', [SignUpController::class, 'EmailVerification'])->name('email-verified');
 
     Route::post('login', [AuthController::class, 'login']);
@@ -32,49 +34,36 @@ Route::prefix('v1')->group(function() {
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
 
-
-        // Admin/Teacher Routes (Role: Admin/Teacher)
-        Route::middleware(['auth', 'role:admin,club_admin'])->group(function () {
-            Route::apiResource('schools', SchoolController::class);
-           
-            
-
-        });
-
-        // Parent Routes (Role: Parent)
+        // club admin routes
         Route::middleware(['auth', 'role:club_admin'])->group(function () {
-            Route::apiResource('students', StudentController::class);
-            Route::post('parent/add_student', [StudentController::class, 'add_student']);
+            Route::apiResource('catalogs', CatalogController::class);
+        
+            Route::apiResource('events', EventController::class);
+            Route::get('/event-extras', [EventController::class, 'getEventExtras']);
+
+            Route::apiResource('competitions', CompetitionController::class);
+            Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
+
+            Route::apiResource('notices', NoticeController::class);
+            Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);
+
+            Route::apiResource('club-news', ClubNewsController::class);
+            Route::get('/club-news-extras', [ClubNewsController::class, 'getClubNewsExtras']);
+
+            Route::apiResource('pages', PagesController::class);
+            Route::get('/pages-extras', [PagesController::class, 'getPagesExtras']);
+
+            Route::apiResource('club-settings', ClubSettingsController::class);
+            Route::apiResource('members', MemberController::class);
+            Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
         });
 
-        // Student Routes (Role: Student)
+        // member routes
         Route::middleware(['auth', 'role:member'])->group(function () {
-           
+            Route::post('/assign-club', [MemberController::class, 'assignClub']);
+            Route::post('/create-gallery', [MemberController::class, 'createGallery']);
+            Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
         });
-
-
-        Route::apiResource('catalogs', CatalogController::class);
-        
-        Route::apiResource('events', EventController::class);
-        Route::get('/event-extras', [EventController::class, 'getEventExtras']);
-
-        Route::apiResource('competitions', CompetitionController::class);
-        Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
-
-        Route::apiResource('notices', NoticeController::class);
-        Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);
-
-        Route::apiResource('club-news', ClubNewsController::class);
-        Route::get('/club-news-extras', [ClubNewsController::class, 'getClubNewsExtras']);
-
-        Route::apiResource('pages', PagesController::class);
-        Route::get('/pages-extras', [PagesController::class, 'getPagesExtras']);
-
-        Route::apiResource('club-settings', ClubSettingsController::class);
-        Route::apiResource('members', MemberController::class);
-        Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
-        Route::post('/assign-club', [MemberController::class, 'assignClub']);
-        
 
     });
 

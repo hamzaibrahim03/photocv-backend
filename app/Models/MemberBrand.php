@@ -29,12 +29,14 @@ class MemberBrand extends Model
 	protected $table = 'member_brands';
 
 	protected $casts = [
-		'member_id' => 'int'
+		'member_id' => 'int',
+		'interest' => 'array',
+    	'brands' => 'array',
 	];
 
 	protected $fillable = [
 		'member_id',
-		'brand',
+		'brands',
 		'interest'
 	];
 }

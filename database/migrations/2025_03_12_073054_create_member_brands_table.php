@@ -14,8 +14,8 @@ return new class extends Migration
         Schema::create('member_brands', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->bigInteger('member_id')->nullable();
-            $table->string('brand', 250)->nullable();
-            $table->string('interest', 250)->nullable();
+            $table->json('interest')->nullable();
+            $table->json('brands')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

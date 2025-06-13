@@ -65,6 +65,7 @@ class User extends Authenticatable
 		'first_name',
 		'last_name',
 		'tag_line',
+		'domain_name',
 		'about',
 		'email',
 		'password',
@@ -89,10 +90,14 @@ class User extends Authenticatable
 		return $this->belongsToMany(Club::class)->withTimestamps()->withPivot('joined_at');
 	}
 
-
 	public function club()
 	{
 		return $this->hasOne(Club::class);
+	}
+
+	public function member()
+	{
+		return $this->hasOne(Member::class);
 	}
 
 }

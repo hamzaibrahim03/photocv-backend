@@ -22,7 +22,6 @@ class AuthRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
             'email' => 'required|email',
             'password' => 'required|string'
         ];
@@ -40,7 +39,6 @@ class AuthRequest extends FormRequest
             'email.email' => 'Enter a valid email address.',
             'password.required' => 'Password is required',
             'password.min' => 'Password must be at least 8 characters.',
-
         ];
     }
 }

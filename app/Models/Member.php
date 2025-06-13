@@ -44,19 +44,23 @@ class Member extends Model
 		'user_id' => 'int',
 		'created_by' => 'int',
 		'updated_by' => 'int',
-		'deleted_by' => 'int'
+		'deleted_by' => 'int',
+		'social_links_visibility' => 'array',
 	];
 
 	protected $fillable = [
 		'user_id',
 		'header_image',
 		'club_privacy',
+		'profile_privacy',
 		'header_text',
 		'footer_text',
 		'background_color',
 		'font',
 		'logo',
 		'cover_image',
+		'color_theme',
+		'social_links_visibility',
 		'user_consent_cookie',
 		'data_collection_preference',
 		'content_moderation_reporting',

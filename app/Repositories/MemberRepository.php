@@ -7,6 +7,8 @@ use App\Models\User;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
 use Illuminate\Support\Str;
+use App\Models\MemberGallery;
+use App\Models\MemberPhoto;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MemberCreatedMail;
 use Illuminate\Support\Facades\Storage;
@@ -15,6 +17,12 @@ class MemberRepository implements MemberRepositoryInterface
 {
     use UtilityTrait;
 
+    /**
+     * Get all members with optional filtering and pagination.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function all( $request )
     {
         try {
@@ -25,6 +33,12 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Show a specific member by ID.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function show( $id )
     {
         try {
@@ -39,6 +53,13 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Create a new member.
+     *
+     * @param  array  $data
+     * @param  mixed  $file
+     * @return \Illuminate\Http\Response
+     */
     public function create(array $data, $file = null)
     {
         try {
@@ -62,6 +83,14 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Update an existing member.
+     *
+     * @param  int  $id
+     * @param  array  $data
+     * @param  mixed  $file
+     * @return \Illuminate\Http\Response
+     */
     public function update($id, array $data, $file = null)
     {
         try {
@@ -97,6 +126,12 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Delete a member by ID.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function delete($id)
     {
         try {
@@ -113,7 +148,12 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
-    // Function to ensure unique username
+    /**
+     * Ensure unique username for the member.
+     *
+     * @param  string  $usernameBase
+     * @return string
+     */
     private function generateUniqueUsername($usernameBase)
     {
         $username = $usernameBase;
@@ -127,6 +167,13 @@ class MemberRepository implements MemberRepositoryInterface
         return $username;
     }
 
+    /**
+     * Assign a club to a member.
+     *
+     * @param  int  $userId
+     * @param  int  $clubId
+     * @return bool
+     */
     public function assignClubToUser($userId, $clubId)
     {
         $user = User::findOrFail($userId);
@@ -136,8 +183,59 @@ class MemberRepository implements MemberRepositoryInterface
         return true;
     }
 
-    public function memberGalleryImages( $images ) {
-        
+    /**
+     * Create a new gallery for the member.
+     *
+     * @param  array  $data
+     * @return \Illuminate\Http\Response
+     */
+    public function createGallery($data) {
+        try {
+            $data['member_id'] = auth()->user()->member->id;
+
+            // Create the gallery
+            $createdGallery = MemberGallery::create($data);
+
+            return MemberResponse::success('Gallery created successfully.', $createdGallery, 201);
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Process member gallery images.
+     *
+     * @param  array  $data
+     * @return void
+     */
+    public function memberGalleryImages( $data )
+    {
+        try {
+            $galleryId = $data['gallery_id'];
+            $images = $data['images'];
+            $titles = $data['title'] ?? [];
+            $descriptions = $data['description'] ?? [];
+            $isActive = isset($data['is_active']) ? (bool) $data['is_active'] : true;
+
+            foreach ($images as $index => $image) {
+                // Store the image
+                $path = $image->store('member-galleries', 'public');
+
+                // Create entry in member_photos
+                MemberPhoto::create([
+                    'gallery_id'  => $galleryId,
+                    'title'       => $titles[$index] ?? null,
+                    'description' => $descriptions[$index] ?? null,
+                    'image'       => $path,
+                    'is_active'   => $isActive,
+                ]);
+            }
+
+
+            return MemberResponse::success('Gallery created successfully.');
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
     }
 
 }

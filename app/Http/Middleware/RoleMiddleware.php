@@ -17,7 +17,7 @@ class RoleMiddleware
     public function handle(Request $request, Closure $next, ...$roles)
     {
         $user = auth()->user();
-        $user_role = $user->role->name;
+        $user_role = $user->getRoleNames()->first();
 
         if (!auth()->check() || !in_array($user_role, $roles)) {
             return response()->json(['message' => 'Forbidden'], 403);

@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\MemberService;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
+use App\Http\Requests\Member\GalleryRequest ;
 
 class MemberController extends Controller
 {
@@ -17,30 +18,66 @@ class MemberController extends Controller
         $this->memberService = $memberService;
     }
 
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
     public function index( Request $request )
     {
         return $this->memberService->allMembers( $request );
     }
 
+    /**
+     * Display the specified resource.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function show( $id ) {
         return $this->memberService->showMember( $id );
     }
 
+    /**
+     * Store a newly created resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function store(StoreMemberRequest $request)
     {
         return $this->memberService->createMember($request->except('profile_image'), $request->file('profile_image'));
     }
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function update(UpdateMemberRequest $request, $id)
     {
         return $this->memberService->updateMember( $id, $request->except('profile_image'), $request->file('profile_image') );
     }
 
+    /**
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
     public function destroy( $id )
     {
         return $this->memberService->deleteMember( $id );
     }
 
+    /**
+     * Assign a club to a member.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
     public function assignClub(Request $request)
     {
         $validated = $request->validate([
@@ -53,8 +90,25 @@ class MemberController extends Controller
         return response()->json(['message' => 'Club assigned successfully']);
     }
 
-    public function uploadGalleryImages(Request $request)
+    /**
+     * Create a new gallery for a member.
+     *
+     * @param  \App\Http\Requests\Member\GalleryRequest  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function createGallery(GalleryRequest $request)
     {
-        return $this->memberService->memberGalleryImages( $request->file('images') );
+        return $this->memberService->createGallery($request->validated());
+    }
+
+    /**
+     * Upload gallery images for a member.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\Response
+     */
+    public function uploadGalleryImages(GalleryRequest $request)
+    {
+        return $this->memberService->memberGalleryImages( $request->validated() );
     }
 }
