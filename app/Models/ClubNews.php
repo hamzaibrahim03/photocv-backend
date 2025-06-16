@@ -28,4 +28,12 @@ class ClubNews extends Model
     {
         return $this->belongsTo(Catalog::class, 'news_type_id');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'news')
+            ->where('is_published', true)
+            ->with('user'); // Eager load user
+    }
 }

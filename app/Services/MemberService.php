@@ -105,4 +105,9 @@ class MemberService
     {
         return $this->memberRepository->memberGalleryImages( $data );
     }
+
+    public function postCommentOrLikes($data)
+    {
+        return $this->memberRepository->postCommentOrLikes($data);
+    }
 }

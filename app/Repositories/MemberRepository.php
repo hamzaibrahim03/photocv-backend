@@ -12,6 +12,11 @@ use App\Models\MemberPhoto;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MemberCreatedMail;
 use Illuminate\Support\Facades\Storage;
+use App\Models\Comment;
+use App\Models\Page;
+use App\Models\MemberNotice;
+use App\Models\ClubNews;
+use App\Models\Event;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -233,6 +238,39 @@ class MemberRepository implements MemberRepositoryInterface
 
 
             return MemberResponse::success('Gallery created successfully.');
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    public function postCommentOrLikes($data){
+        try {
+
+            $recordExists = false;
+
+            switch ($data['record_type']) {
+                case 'page':
+                    $recordExists = Page::where('id', $data['record_id'])->exists();
+                    break;
+                case 'notice':
+                    $recordExists = MemberNotice::where('id', $data['record_id'])->exists();
+                    break;
+                case 'event':
+                    $recordExists = Event::where('id', $data['record_id'])->exists();
+                    break;
+                case 'news':
+                    $recordExists = ClubNews::where('id', $data['record_id'])->exists();
+                    break;
+            }
+
+            if (! $recordExists) {
+                return MemberResponse::error('The selected record does not exist.', 422);
+            }
+
+            $data['interacted_by'] = auth()->id();
+            $comment = Comment::create($data);
+
+            return MemberResponse::success('Comment saved successfully.', $comment, 201);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }

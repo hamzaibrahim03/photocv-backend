@@ -62,4 +62,12 @@ class MemberNotice extends Model
 	{
 		return $this->hasMany(MemberNoticeFile::class, 'member_notice_id');
 	}
+
+	public function comments()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'notice')
+            ->where('is_published', true)
+            ->with('user'); // Eager load user
+    }
 }

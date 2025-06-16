@@ -25,7 +25,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function show( $id )
     {
         try {
-            $clubNews = ClubNews::with('clubNewsType')->findOrFail($id);
+            $clubNews = ClubNews::with('clubNewsType', 'comments')->findOrFail($id);
             if (!$clubNews) {
                 return ClubNewsResponse::error('Club news not found.', 404);
             }

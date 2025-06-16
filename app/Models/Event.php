@@ -85,4 +85,12 @@ class Event extends Model
 		return $this->belongsTo(Club::class);
 	}
 
+	public function comments()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'event')
+            ->where('is_published', true)
+            ->with('user'); // Eager load user
+    }
+
 }

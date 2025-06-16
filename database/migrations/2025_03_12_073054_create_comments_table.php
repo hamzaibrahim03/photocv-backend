@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('event_comments', function (Blueprint $table) {
+        Schema::create('comments', function (Blueprint $table) {
             $table->bigInteger('id', true);
-            $table->bigInteger('event_id')->nullable();
-            $table->enum('record_type', ['comment', 'liking'])->nullable()->default('liking');
+            $table->bigInteger('record_id')->nullable();
+            $table->enum('record_type', ['page', 'news', 'notice', 'event']);
+            $table->enum('comment_type', ['comment', 'liking'])->nullable()->default('liking');
             $table->text('comment')->nullable();
             $table->bigInteger('interacted_by')->nullable()->comment('the user who commented');
             $table->boolean('is_published')->nullable()->default(true);
@@ -29,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('event_comments');
+        Schema::dropIfExists('comments');
     }
 };

@@ -26,7 +26,7 @@ class NoticeRepository implements NoticeRepositoryInterface
     public function show( $id )
     {
         try {
-            $notice = MemberNotice::findOrFail($id);
+            $notice = MemberNotice::with('comments')->findOrFail($id);
             if (!$notice) {
                 return NoticeResponse::error('Notice not found.', 404);
             }

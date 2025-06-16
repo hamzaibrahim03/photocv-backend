@@ -63,6 +63,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/assign-club', [MemberController::class, 'assignClub']);
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
+            Route::post('/post-comment', [MemberController::class, 'postCommentOrLikes']);
         });
 
     });

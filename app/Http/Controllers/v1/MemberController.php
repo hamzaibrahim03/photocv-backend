@@ -111,4 +111,9 @@ class MemberController extends Controller
     {
         return $this->memberService->memberGalleryImages( $request->validated() );
     }
+
+    public function postCommentOrLikes(StoreMemberRequest $request)
+    {
+        return $this->memberService->postCommentOrLikes($request->validated());
+    }
 }

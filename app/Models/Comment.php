@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class EventComment
+ * Class Comment
  * 
  * @property int $id
  * @property int|null $event_id
@@ -26,28 +26,54 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @package App\Models
  */
-class EventComment extends Model
+class Comment extends Model
 {
 	use SoftDeletes;
-	protected $table = 'event_comments';
+	protected $table = 'comments';
 
 	protected $casts = [
-		'event_id' => 'int',
+		'record_id' => 'int',
 		'interacted_by' => 'int',
 		'is_published' => 'bool'
 	];
 
 	protected $fillable = [
-		'event_id',
+		'record_id',
 		'record_type',
+		'comment_type',
 		'comment',
 		'interacted_by',
 		'is_published',
 		'admin_notes'
 	];
 
+	// public function event()
+	// {
+	// 	return $this->belongsTo(Event::class);
+	// }
+
+	public function page()
+	{
+		return $this->belongsTo(Page::class, 'record_id')->where('record_type', 'page');
+	}
+
+	public function clubNews()
+	{
+		return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'page');
+	}
+
+	public function memberNotice()
+	{
+		return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'page');
+	}
+
 	public function event()
 	{
-		return $this->belongsTo(Event::class);
+		return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'page');
+	}
+
+	public function user()
+	{
+		return $this->belongsTo(User::class, 'interacted_by');
 	}
 }

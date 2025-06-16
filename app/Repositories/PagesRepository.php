@@ -27,7 +27,7 @@ class PagesRepository implements PagesRepositoryInterface
     public function show( $id )
     {
         try {
-            $page = Page::with('pageType')->findOrFail($id);
+            $page = Page::with('pageType', 'comments')->findOrFail($id);
             if (!$page) {
                 return PagesResponse::error('Page not found.', 404);
             }

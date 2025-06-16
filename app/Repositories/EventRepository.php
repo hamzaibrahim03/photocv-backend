@@ -5,7 +5,7 @@ namespace App\Repositories;
 use App\Models\Competition;
 use App\Models\Club;
 use App\Models\Event;
-use App\Models\EventComment;
+use App\Models\Comment;
 use App\Models\EventImage;
 use App\Traits\UtilityTrait;
 use Carbon\Carbon;
@@ -40,7 +40,7 @@ class EventRepository implements EventRepositoryInterface
     public function show($id)
     {
         try {
-            $event = Event::findOrFail($id);
+            $event = Event::with('comments')->findOrFail($id);
 
             // Get logged-in user's club
             $club = Club::where('user_id', auth()->id())->first();
@@ -196,7 +196,7 @@ class EventRepository implements EventRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Recent comments
-        $recentComments = EventComment::with('event:id,name,club_id,event_date')
+        $recentComments = Comment::with('event:id,name,club_id,event_date')
             ->whereHas('event', fn($q) => $q->where('club_id', $clubId))
             ->latest()
             ->take(5)

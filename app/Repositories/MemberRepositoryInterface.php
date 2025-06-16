@@ -12,4 +12,5 @@ interface MemberRepositoryInterface
     public function assignClubToUser($userId, $clubId);
     public function createGallery($data);
     public function memberGalleryImages($data);
+    public function postCommentOrLikes($data);
 }

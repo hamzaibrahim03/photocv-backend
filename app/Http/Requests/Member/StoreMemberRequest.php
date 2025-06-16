@@ -21,6 +21,21 @@ class StoreMemberRequest extends FormRequest
      */
     public function rules(): array
     {
+        $route = $this->route()->getActionMethod();
+
+        // Define validation rules based on the route
+        if ($route === 'postCommentOrLikes') {
+            return [
+                'record_id'     => 'required|integer',
+                'record_type'   => 'required|in:page,news,notice,event',
+                'comment_type'   => 'required|in:comment,liking',
+                'comment'       => 'nullable|string',
+                'interacted_by' => 'nullable|integer|exists:users,id',
+                'is_published'  => 'nullable|boolean',
+                'admin_notes'   => 'nullable|string|max:250',
+            ];
+        }
+
         return [
             'first_name'    => 'required|string|max:255',
             'last_name'     => 'required|string|max:255',

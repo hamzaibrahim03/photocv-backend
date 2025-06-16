@@ -29,4 +29,12 @@ class Page extends Model
     {
         return $this->belongsTo(Catalog::class, 'page_type_id');
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'page')
+            ->where('is_published', true)
+            ->with('user'); // Eager load user
+    }
 }
