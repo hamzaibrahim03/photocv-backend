@@ -196,9 +196,9 @@ class EventRepository implements EventRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Recent comments
-        $recentComments = Comment::with('event:id,name,club_id,event_date')
-            ->whereHas('event', fn($q) => $q->where('club_id', $clubId))
-            ->latest()
+        $recentComments = Event::with('comments') // Eager load comments
+            ->where('club_id', $clubId)
+            ->latest('event_date')
             ->take(5)
             ->get();
 

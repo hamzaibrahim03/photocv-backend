@@ -160,10 +160,18 @@ class PagesRepository implements PagesRepositoryInterface
 
         $totalPages = Page::where('club_id', $clubId)->where('status', 'publish')->count();
 
+        // Recent comments
+        $recentComments = Page::with('comments') // Eager load comments
+            ->where('club_id', $clubId)
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+
         // Final response
         return [
             'data' => [
                 'total_live_pages' => $totalPages,
+                'recent_comments' => $recentComments,
                 'last_page_days_ago' => $lastPageChangeDaysFormatted,
                 'total_drafted_pages' => $totalDraftedPages,
                 'random_pages' => $randomPages,

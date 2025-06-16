@@ -164,10 +164,18 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->count();
 
+        // Recent comments
+        $recentComments = ClubNews::with('comments') // Eager load comments
+            ->where('club_id', $clubId)
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+
         // Final response
         return [
             'data' => [
                 'current_month_news_count' => $newsCountThisMonth,
+                'recent_comments' => $recentComments,
                 'last_news_days_ago' => $lastNewsDaysFormatted,
                 'total_news' => $totalClubNews,
                 'random_news' => $randomClubNews,

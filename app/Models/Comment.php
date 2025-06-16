@@ -59,17 +59,17 @@ class Comment extends Model
 
 	public function clubNews()
 	{
-		return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'page');
+		return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'news');
 	}
 
 	public function memberNotice()
 	{
-		return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'page');
+		return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'notice');
 	}
 
 	public function event()
 	{
-		return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'page');
+		return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'event');
 	}
 
 	public function user()

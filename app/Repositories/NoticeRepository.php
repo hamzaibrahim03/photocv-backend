@@ -211,6 +211,13 @@ class NoticeRepository implements NoticeRepositoryInterface
             ->whereBetween('created_at', [$startOfMonth, $endOfMonth])
             ->count();
 
+        // Recent comments
+        $recentComments = MemberNotice::with('comments') // Eager load comments
+            ->where('club_id', $clubId)
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+
         // Final response
         return [
             'data' => [
@@ -218,6 +225,7 @@ class NoticeRepository implements NoticeRepositoryInterface
                 'last_notice_days_ago' => $lastNoticeDaysFormatted,
                 'total_notices' => $totalNotices,
                 'random_notices' => $randomNotices,
+                'recent_comments' => $recentComments,
                 'calendar' => [
                     'notices' => $memberNotices,
                 ],
