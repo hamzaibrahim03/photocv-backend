@@ -50,8 +50,7 @@ trait UtilityTrait
 
         if ($request->has('search_term') && $request->search_term != '') {
             $query->where(function ($q) use ($request) {
-                $q->where('name', 'LIKE', '%' . $request->search_term . '%')
-                ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+                $q->where('name', 'LIKE', '%' . $request->search_term . '%');
             });
         }
 
@@ -70,12 +69,11 @@ trait UtilityTrait
     }
 
 
-    public function getAllIndexData($request, $query)
+    public function getAllIndexData($request, $query, $search)
     {
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {
-            $query->where('name', 'LIKE', '%' . $request->search_term . '%')
-                  ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+            $query->where($search, 'LIKE', '%' . $request->search_term . '%');
         }
 
         // Sorting
@@ -107,8 +105,7 @@ trait UtilityTrait
 
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {
-            $query->where('name', 'LIKE', '%' . $request->search_term . '%')
-                  ->orWhere('speaker', 'LIKE', '%' . $request->search_term . '%');
+            $query->where('title', 'LIKE', '%' . $request->search_term . '%');
         }
 
         // Sorting

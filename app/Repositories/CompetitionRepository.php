@@ -20,7 +20,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         try {
             $clubId = auth()->user()->club->id;
             $query = Competition::where('club_id', $clubId); // filters competitions by user's club
-            $competitions = $this->getAllIndexData($request, $query);
+            $competitions = $this->getAllIndexData($request, $query, 'name');
             return CompetitionResponse::success('Competitions retrieved successfully.', $competitions);
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
