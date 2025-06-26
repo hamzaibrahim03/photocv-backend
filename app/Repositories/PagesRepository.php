@@ -16,7 +16,7 @@ class PagesRepository implements PagesRepositoryInterface
     public function all( $request )
     {
         try {
-            $pages = $this->getAllIndexData($request, Page::with('pageType'), 'title');
+            $pages = $this->getAllIndexData($request, Page::with(['pageType', 'comments']), 'title');
             return PagesResponse::success('Pages retrieved successfully.', $pages);
         } catch (\Exception $e) {
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;

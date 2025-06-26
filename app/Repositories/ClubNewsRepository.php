@@ -15,7 +15,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function all( $request )
     {
         try {
-            $clubNews = $this->getAllIndexData($request, ClubNews::with('clubNewsType'), 'title');
+            $clubNews = $this->getAllIndexData($request, ClubNews::with(['clubNewsType', 'comments']), 'title');
             return ClubNewsResponse::success('Club News retrieved successfully.', $clubNews);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);

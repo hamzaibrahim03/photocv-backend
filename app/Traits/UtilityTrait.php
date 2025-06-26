@@ -38,13 +38,12 @@ trait UtilityTrait
 
     public function getAllEventData($request)
     {
-        $query = Event::with('images');
+        $query = Event::with(['images', 'comments']);
 
         $club = Club::where('user_id', auth()->id())->first();
         if ($club) {
             $query->where('club_id', $club->id);
         } else {
-            // Optionally return an empty result if user has no club
             return DataTables::of(collect([]))->make(true);
         }
 
@@ -65,6 +64,7 @@ trait UtilityTrait
             ->addColumn('action', function ($event) {
                 return '<a href="' . route('events.show', $event->id) . '" class="btn btn-sm btn-primary">View</a>';
             })
+            ->rawColumns(['action'])
             ->make(true);
     }
 
