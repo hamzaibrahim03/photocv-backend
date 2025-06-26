@@ -93,7 +93,7 @@ trait UtilityTrait
 
     public function getAllNoticeData($request)
     {
-        $query = MemberNotice::with('files');
+        $query = MemberNotice::with(['files', 'comments']);
 
         $club = Club::where('user_id', auth()->id())->first();
         if ($club) {

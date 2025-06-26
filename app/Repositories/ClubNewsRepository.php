@@ -45,7 +45,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
             }
 
             if (!empty($data['publish_date'])) {
-                $data['publish_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
+                $data['publish_date'] = Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
             }
 
             $club = Club::where('user_id', auth()->id())->first();
