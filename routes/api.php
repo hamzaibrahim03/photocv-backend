@@ -5,8 +5,6 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\v1\SignUpController;
 use App\Http\Controllers\v1\AuthController;
-use App\Http\Controllers\v1\SchoolController;
-use App\Http\Controllers\v1\StudentController;
 use App\Http\Controllers\v1\CatalogController;
 use App\Http\Controllers\v1\EventController;
 use App\Http\Controllers\v1\CompetitionController;
@@ -16,6 +14,7 @@ use App\Http\Controllers\v1\PagesController;
 use App\Http\Controllers\v1\ClubSettingsController;
 use App\Http\Controllers\v1\MemberController;
 use App\Http\Controllers\v1\ClubDashboardController;
+use App\Http\Controllers\v1\FeaturedImageController;
 
 Route::prefix('v1')->group(function() {
 
@@ -56,6 +55,8 @@ Route::prefix('v1')->group(function() {
             Route::apiResource('club-settings', ClubSettingsController::class);
             Route::apiResource('members', MemberController::class);
             Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
+
+            Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);
         });
 
         // member routes

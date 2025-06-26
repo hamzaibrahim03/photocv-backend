@@ -31,7 +31,19 @@ class NoticeRepository implements NoticeRepositoryInterface
                 return NoticeResponse::error('Notice not found.', 404);
             }
 
+            // Get logged-in user's club
+            $club = Club::where('user_id', auth()->id())->first();
+
+            // Check if the event belongs to the user's club
+            if (!$club || $notice->club_id !== $club->id) {
+                return NoticeResponse::error('Unauthorized to view this notice.', 403);
+            }
+
             $notice->load('files');
+            // Transform the featured_image to full URL
+            $notice->featured_image = $notice->featured_image 
+                ? asset('storage/' . $notice->featured_image) 
+                : null;
 
             return NoticeResponse::success('Notice retrieved successfully.', $notice);
         } catch (\Exception $e) {

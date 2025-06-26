@@ -18,7 +18,7 @@ return new class extends Migration
             $table->integer('news_type_id');
             $table->text('short_description')->nullable();
             $table->longText('description');
-            $table->string('thumb_image')->nullable();
+            $table->string('featured_image')->nullable();
             $table->date('publish_date');
             $table->timestamps();
         });

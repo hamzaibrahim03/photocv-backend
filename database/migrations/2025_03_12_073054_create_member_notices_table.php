@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('member_notices', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->unsignedBigInteger('club_id')->nullable();
+            $table->string('featured_image', 250)->nullable();
             $table->bigInteger('member_id')->nullable();
             $table->smallInteger('notice_type_id')->nullable();
             $table->string('title', 250)->nullable();

@@ -42,6 +42,7 @@ class MemberNotice extends Model
 
 	protected $fillable = [
 		'club_id',
+		'featured_image',
 		'member_id',
 		'notice_type_id',
 		'title',

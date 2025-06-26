@@ -30,6 +30,19 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
                 return ClubNewsResponse::error('Club news not found.', 404);
             }
 
+            // Get logged-in user's club
+            $club = Club::where('user_id', auth()->id())->first();
+
+            // Check if the event belongs to the user's club
+            if (!$club || $clubNews->club_id !== $club->id) {
+                return ClubNewsResponse::error('Unauthorized to view this event.', 403);
+            }
+
+            // Transform the featured_image to full URL
+            $clubNews->featured_image = $clubNews->featured_image 
+                ? asset('storage/' . $clubNews->featured_image) 
+                : null;
+
             return ClubNewsResponse::success('Club news retrieved successfully.', $clubNews);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
@@ -39,10 +52,10 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function create(array $data, $file = null)
     {
         try {
-            if ($file) {
-                $imagePath = $file->store('news_images', 'public');
-                $data['thumb_image'] = $imagePath;
-            }
+            // if ($file) {
+            //     $imagePath = $file->store('news_images', 'public');
+            //     $data['thumb_image'] = $imagePath;
+            // }
 
             if (!empty($data['publish_date'])) {
                 $data['publish_date'] = Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
@@ -67,15 +80,15 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
             $clubNews = ClubNews::findOrFail($id);
 
             // Delete old image if a new file is uploaded
-            if ($file) {
-                if ($clubNews->thumb_image && \Storage::disk('public')->exists($clubNews->thumb_image)) {
-                    \Storage::disk('public')->delete($clubNews->thumb_image);
-                }
+            // if ($file) {
+            //     if ($clubNews->thumb_image && \Storage::disk('public')->exists($clubNews->thumb_image)) {
+            //         \Storage::disk('public')->delete($clubNews->thumb_image);
+            //     }
 
-                // Store new image and update data
-                $imagePath = $file->store('news_images', 'public');
-                $data['thumb_image'] = $imagePath;
-            }
+            //     // Store new image and update data
+            //     $imagePath = $file->store('news_images', 'public');
+            //     $data['thumb_image'] = $imagePath;
+            // }
 
             // Handle publish_date format conversion
             if (!empty($data['publish_date'])) {

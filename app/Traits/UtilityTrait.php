@@ -64,6 +64,9 @@ trait UtilityTrait
             ->addColumn('action', function ($event) {
                 return '<a href="' . route('events.show', $event->id) . '" class="btn btn-sm btn-primary">View</a>';
             })
+            ->editColumn('featured_image', function ($event) {
+                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
+            })
             ->rawColumns(['action'])
             ->make(true);
     }
@@ -87,6 +90,9 @@ trait UtilityTrait
             ->addIndexColumn()
             ->addColumn('action', function ($event) {
                 return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($event) {
+                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
             })
             ->make(true);
     }
@@ -119,6 +125,9 @@ trait UtilityTrait
             ->addIndexColumn()
             ->addColumn('action', function ($event) {
                 return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($event) {
+                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
             })
             ->make(true);
     }

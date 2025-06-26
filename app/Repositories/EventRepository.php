@@ -50,6 +50,11 @@ class EventRepository implements EventRepositoryInterface
                 return EventResponse::error('Unauthorized to view this event.', 403);
             }
 
+            // Transform the featured_image to full URL
+            $event->featured_image = $event->featured_image 
+                ? asset('storage/' . $event->featured_image) 
+                : null;
+
             $event->load('images');
 
             return EventResponse::success('Event retrieved successfully.', $event);

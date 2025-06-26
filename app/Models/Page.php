@@ -16,7 +16,7 @@ class Page extends Model
         'title',
         'publish_date',
         'description',
-        'thumb_image',
+        'featured_image',
         'page_type_id',
         'page_slug',
         'status',

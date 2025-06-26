@@ -79,6 +79,7 @@ class Competition extends Model
 
 	protected $fillable = [
 		'club_id',
+		'featured_image',
 		'name',
 		'description',
 		'competition_type_id',

@@ -37,6 +37,19 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 return CompetitionResponse::error('Competition not found.', 404);
             }
 
+            // Get logged-in user's club
+            $club = Club::where('user_id', auth()->id())->first();
+
+            // Check if the event belongs to the user's club
+            if (!$club || $competition->club_id !== $club->id) {
+                return CompetitionResponse::error('Unauthorized to view this competition.', 403);
+            }
+
+            // Transform the featured_image to full URL
+            $competition->featured_image = $competition->featured_image 
+                ? asset('storage/' . $competition->featured_image) 
+                : null;
+
             return CompetitionResponse::success('Competition retrieved successfully.', $competition);
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);

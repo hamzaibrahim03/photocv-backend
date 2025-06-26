@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('title');
             $table->date('publish_date');
             $table->longText('description');
-            $table->string('thumb_image')->nullable();
+            $table->string('featured_image')->nullable();
             $table->foreignId('page_type_id');
             $table->string('page_slug')->unique();
             $table->enum('status', ['draft', 'publish'])->nullable()->default('publish');

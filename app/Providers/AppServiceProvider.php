@@ -5,51 +5,21 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 
-use App\Repositories\CourseRepositoryInterface;
-use App\Repositories\CourseRepository;
-
 use App\Repositories\RoleRepositoryInterface;
 use App\Repositories\RoleRepository;
 
 use App\Repositories\PermissionRepositoryInterface;
 use App\Repositories\PermissionRepository;
 
-use App\Repositories\FranchiseRepositoryInterface;
-use App\Repositories\FranchiseRepository;
-
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 
-
-use App\Repositories\CourseModuleRepositoryInterface;
-use App\Repositories\CourseModuleRepository;
-
-use App\Repositories\EnrollmentRepositoryInterface;
-use App\Repositories\EnrollmentRepository;
-
-use App\Repositories\ClassScheduleRepositoryInterface;
-use App\Repositories\ClassScheduleRepository;
-
-use App\Repositories\LiveClassRepositoryInterface;
-use App\Repositories\LiveClassRepository;
 
 use App\Repositories\SignUpRepositoryInterface;
 use App\Repositories\SignUpRepository;
 
 use App\Repositories\AuthRepositoryInterface;
 use App\Repositories\AuthRepository;
-
-use App\Repositories\SchoolRepositoryInterface;
-use App\Repositories\SchoolRepository;
-
-use App\Repositories\StudentRepositoryInterface;
-use App\Repositories\StudentRepository;
-
-use App\Repositories\StudentHomeWorkRepository;
-use App\Repositories\StudentHomeWorkRepositoryInterface;
-
-use App\Repositories\StudentHomeWorkFileRepository;
-use App\Repositories\StudentHomeWorkFileRepositoryInterface;
 
 use App\Repositories\CatalogRepositoryInterface;
 use App\Repositories\CatalogRepository;
@@ -78,6 +48,9 @@ use App\Repositories\MemberRepository;
 use App\Repositories\ClubDashboardRepositoryInterface;
 use App\Repositories\ClubDashboardRepository;
 
+use App\Repositories\FeatureImageRepositoryInterface;
+use App\Repositories\FeatureImageRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -101,6 +74,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClubSettingsRepositoryInterface::class, ClubSettingsRepository::class);
         $this->app->bind(MemberRepositoryInterface::class, MemberRepository::class);
         $this->app->bind(ClubDashboardRepositoryInterface::class, ClubDashboardRepository::class);
+        $this->app->bind(FeatureImageRepositoryInterface::class, FeatureImageRepository::class);
 
     }
 

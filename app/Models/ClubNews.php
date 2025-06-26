@@ -17,7 +17,7 @@ class ClubNews extends Model
         'news_type_id',
         'short_description',
         'description',
-        'thumb_image',
+        'featured_image',
         'publish_date',
     ];
 

@@ -55,6 +55,7 @@ class Event extends Model
 
 	protected $fillable = [
 		'club_id',
+		'featured_image',
 		'name',
 		'event_date',
 		'description',

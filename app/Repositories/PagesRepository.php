@@ -32,6 +32,19 @@ class PagesRepository implements PagesRepositoryInterface
                 return PagesResponse::error('Page not found.', 404);
             }
 
+            // Get logged-in user's club
+            $club = Club::where('user_id', auth()->id())->first();
+
+            // Check if the event belongs to the user's club
+            if (!$club || $page->club_id !== $club->id) {
+                return PagesResponse::error('Unauthorized to view this event.', 403);
+            }
+
+            // Transform the featured_image to full URL
+            $page->featured_image = $page->featured_image 
+                ? asset('storage/' . $page->featured_image) 
+                : null;
+
             return PagesResponse::success('Page retrieved successfully.', $page);
         } catch (\Exception $e) {
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
@@ -52,10 +65,10 @@ class PagesRepository implements PagesRepositoryInterface
             }
 
             // Store image if provided
-            if ($file) {
-                $imagePath = $file->store('page_images', 'public');
-                $data['thumb_image'] = $imagePath;
-            }
+            // if ($file) {
+            //     $imagePath = $file->store('page_images', 'public');
+            //     $data['thumb_image'] = $imagePath;
+            // }
 
             $club = Club::where('user_id', auth()->id())->first();
             if ($club) {
@@ -89,16 +102,16 @@ class PagesRepository implements PagesRepositoryInterface
             }
 
             // Handle image update
-            if ($file) {
-                // Delete old image if exists
-                if ($page->thumb_image && \Storage::disk('public')->exists($page->thumb_image)) {
-                    \Storage::disk('public')->delete($page->thumb_image);
-                }
+            // if ($file) {
+            //     // Delete old image if exists
+            //     if ($page->thumb_image && \Storage::disk('public')->exists($page->thumb_image)) {
+            //         \Storage::disk('public')->delete($page->thumb_image);
+            //     }
 
-                // Store new image
-                $imagePath = $file->store('page_images', 'public');
-                $data['thumb_image'] = $imagePath;
-            }
+            //     // Store new image
+            //     $imagePath = $file->store('page_images', 'public');
+            //     $data['thumb_image'] = $imagePath;
+            // }
 
             // Update the page
             $page->update($data);

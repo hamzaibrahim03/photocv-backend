@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('events', function (Blueprint $table) {
             $table->bigInteger('id', true);
             $table->unsignedBigInteger('club_id')->nullable();
+            $table->string('featured_image', 250)->nullable();
             $table->string('name', 100)->nullable();
             $table->dateTime('event_date')->nullable();
             $table->text('description')->nullable();
