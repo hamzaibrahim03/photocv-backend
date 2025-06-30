@@ -41,4 +41,15 @@ class MemberGallery extends Model
 		'gallery_name',
 		'is_active'
 	];
+
+	public function photos()
+	{
+		return $this->hasMany(MemberPhoto::class, 'gallery_id');
+	}
+
+	public function member()
+	{
+		return $this->belongsTo(User::class, 'member_id');
+	}
+
 }

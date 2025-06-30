@@ -100,4 +100,9 @@ class User extends Authenticatable
 		return $this->hasOne(Member::class);
 	}
 
+	public function galleries()
+	{
+		return $this->hasMany(MemberGallery::class, 'member_id');
+	}
+
 }

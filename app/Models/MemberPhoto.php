@@ -47,4 +47,10 @@ class MemberPhoto extends Model
 		'club_admin_notes',
 		'allow_cc'
 	];
+
+	public function gallery()
+	{
+		return $this->belongsTo(MemberGallery::class, 'gallery_id');
+	}
+
 }

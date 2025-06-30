@@ -52,8 +52,11 @@ Route::prefix('v1')->group(function() {
             Route::apiResource('pages', PagesController::class);
             Route::get('/pages-extras', [PagesController::class, 'getPagesExtras']);
 
-            Route::apiResource('club-settings', ClubSettingsController::class);
             Route::apiResource('members', MemberController::class);
+            Route::get('/members-galleries', [MemberController::class, 'membersGalleries']);
+            Route::get('/member/{member}/galleries', [MemberController::class, 'memberGalleryDetails']);
+
+            Route::apiResource('club-settings', ClubSettingsController::class);
             Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
 
             Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);

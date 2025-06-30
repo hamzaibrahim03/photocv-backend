@@ -196,7 +196,7 @@ class MemberRepository implements MemberRepositoryInterface
      */
     public function createGallery($data) {
         try {
-            $data['member_id'] = auth()->user()->member->id;
+            $data['member_id'] = auth()->user()->id;
 
             // Create the gallery
             $createdGallery = MemberGallery::create($data);
@@ -237,7 +237,7 @@ class MemberRepository implements MemberRepositoryInterface
             }
 
 
-            return MemberResponse::success('Gallery created successfully.');
+            return MemberResponse::success('Images uploaded successfully.');
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
@@ -275,5 +275,85 @@ class MemberRepository implements MemberRepositoryInterface
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
+    public function membersGalleries()
+    {
+        try {
+            $clubId = auth()->user()->club->id;
+
+            $members = User::whereHas('clubs', function ($query) use ($clubId) {
+                    $query->where('clubs.id', $clubId);
+                })
+                ->withCount(['galleries']) // gallery count
+                ->with([
+                    'galleries.photos' => function ($query) {
+                        $query->where('is_active', true);
+                    },
+                ])
+                ->get();
+
+            // Add average image count per gallery for each member
+            $members->each(function ($member) {
+                $totalPhotos = 0;
+                $totalGalleries = $member->galleries->count();
+
+                foreach ($member->galleries as $gallery) {
+                    $totalPhotos += $gallery->photos->count();
+                }
+
+                $member->gallery_average_photos = $totalGalleries > 0
+                    ? round($totalPhotos / $totalGalleries, 2)
+                    : 0;
+            });
+
+            return MemberResponse::success('Club members with galleries and photos retrieved successfully.', $members);
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+
+    }
+
+    public function memberGalleryDetails($memberId)
+    {
+        try {
+            // Fetch the User model instance
+            $member = User::findOrFail($memberId);
+
+            // Load member's galleries and active photos
+            $member->load([
+                'galleries' => function ($query) {
+                    $query->where('is_active', true)
+                        ->with(['photos' => function ($photoQuery) {
+                            $photoQuery->where('is_active', true);
+                        }]);
+                }
+            ]);
+
+            // Calculate gallery and photo stats
+            $galleryCount = $member->galleries->count();
+            $totalPhotos = $member->galleries->sum(function ($gallery) {
+                return $gallery->photos->count();
+            });
+
+            $averagePhotos = $galleryCount > 0
+                ? round($totalPhotos / $galleryCount, 2)
+                : 0;
+
+            // Prepare response
+            $data = [
+                'member' => $member,
+                'gallery_count' => $galleryCount,
+                'total_photos' => $totalPhotos,
+                'average_photos_per_gallery' => $averagePhotos,
+                // 'galleries' => $member->galleries,
+            ];
+
+            return MemberResponse::success('Member galleries retrieved successfully.', $data);
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+
 
 }

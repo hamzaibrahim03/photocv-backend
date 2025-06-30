@@ -13,4 +13,6 @@ interface MemberRepositoryInterface
     public function createGallery($data);
     public function memberGalleryImages($data);
     public function postCommentOrLikes($data);
+    public function membersGalleries();
+    public function memberGalleryDetails($memberId);
 }
