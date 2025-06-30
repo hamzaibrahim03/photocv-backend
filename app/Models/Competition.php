@@ -110,4 +110,9 @@ class Competition extends Model
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function competitionMembers()
+	{
+		return $this->hasMany(CompetitionMember::class, 'comp_id');
+	}
 }

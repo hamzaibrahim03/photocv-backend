@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('competition_members_entries', function (Blueprint $table) {
             $table->bigInteger('id', true);
-            $table->bigInteger('member_comp_id')->nullable();
+            $table->bigInteger('member_comp_id');
             $table->enum('entry_type', ['print', 'digital'])->nullable();
             $table->string('entry_image', 250)->nullable();
             $table->timestamps();

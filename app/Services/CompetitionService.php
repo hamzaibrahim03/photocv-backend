@@ -43,4 +43,13 @@ class CompetitionService
     {
         return $this->competitionRepository->getCompetitionExtras( $request );
     }
+
+    public function joinCompetition( $data )
+    {
+        return $this->competitionRepository->joinCompetition( $data );
+    }
+
+    public function submitCompetitionEntry($data){
+        return $this->competitionRepository->submitCompetitionEntry($data);
+    }
 }

@@ -39,12 +39,11 @@ class CompetitionMember extends Model
 
 	public function member()
 	{
-		return $this->belongsTo(Member::class);
+		return $this->belongsTo(User::class, 'member_id');
 	}
 
 	public function competition()
 	{
-		return $this->belongsTo(Competition::class);
+		return $this->belongsTo(Competition::class, 'comp_id');
 	}
-
 }
