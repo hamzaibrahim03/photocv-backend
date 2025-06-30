@@ -112,18 +112,39 @@ class MemberController extends Controller
         return $this->memberService->memberGalleryImages( $request->validated() );
     }
 
+    /**
+     * Method to post comments or likes on member galleries.
+     * @param \App\Http\Requests\Member\StoreMemberRequest $request
+     */
     public function postCommentOrLikes(StoreMemberRequest $request)
     {
         return $this->memberService->postCommentOrLikes($request->validated());
     }
 
+    /**
+     * Method to get all member galleries.
+     * @return \Illuminate\Http\Response
+     */
     public function membersGalleries()
     {
         return $this->memberService->membersGalleries();
     }
 
+    /**
+     * Method to get member gallery details.
+     * @param mixed $memberId
+     */
     public function memberGalleryDetails($memberId)
     {
         return $this->memberService->memberGalleryDetails($memberId);
+    }
+
+    /**
+     * Method to update member profile.
+     * @param \App\Http\Requests\Member\UpdateMemberRequest $request
+     */
+    public function profileUpdate(UpdateMemberRequest $request)
+    {
+        return $this->memberService->profileUpdate($request->all());
     }
 }

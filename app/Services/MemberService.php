@@ -120,4 +120,9 @@ class MemberService
     {
         return $this->memberRepository->memberGalleryDetails($memberId);
     }
+
+    public function profileUpdate($data)
+    {
+        return $this->memberRepository->profileUpdate($data);
+    }
 }

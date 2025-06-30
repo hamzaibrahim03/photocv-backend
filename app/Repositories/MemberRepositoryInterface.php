@@ -15,4 +15,5 @@ interface MemberRepositoryInterface
     public function postCommentOrLikes($data);
     public function membersGalleries();
     public function memberGalleryDetails($memberId);
+    public function profileUpdate($data);
 }

@@ -22,12 +22,30 @@ class UpdateMemberRequest extends FormRequest
     public function rules()
     {
         return [
-            'first_name' => 'nullable|string|max:255',
-            'last_name' => 'nullable|string|max:255',
-            'email' => 'nullable|email|unique:users,email,' . $this->route('user'), // Ensures the email is unique except for the current user
-            'username' => 'nullable|string|max:255|unique:users,username,' . $this->route('user'), // Ensures username is unique except for the current user
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048', // Validates image upload
-            'role' => 'nullable|string|in:member,admin', // Validating role, add more roles if needed
+            // 'email' => 'nullable|email|max:255|unique:users,email',
+            'password' => 'nullable|string|min:6',
+            'tag_line' => 'nullable|string',
+            'about' => 'nullable|string',
+            'name' => 'nullable|string',
+
+            'member.domain_name' => 'nullable|string',
+            'member.color_theme' => 'nullable|string',
+            'member.cover_image' => 'nullable|string',
+            'member.font' => 'nullable|string',
+            'member.profile_privacy' => 'nullable|string',
+            'member.footer_text' => 'nullable|string',
+            'member.social_links_visibility' => 'nullable|array',
+
+            'member_brands.interest' => 'nullable|array',
+            'member_brands.brands' => 'nullable|array',
+
+            'member_contact.email' => 'nullable|email',
+            'member_contact.phone' => 'nullable|string',
+            'member_contact.address' => 'nullable|string',
+
+            'member_social_media' => 'nullable|array',
+            'member_social_media.*.social_media_name' => 'required_with:member_social_media|string',
+            'member_social_media.*.social_link' => 'required_with:member_social_media|url',
         ];
     }
 
@@ -36,15 +54,15 @@ class UpdateMemberRequest extends FormRequest
      *
      * @return array
      */
-    public function attributes()
-    {
-        return [
-            'first_name' => 'First Name',
-            'last_name' => 'Last Name',
-            'email' => 'Email Address',
-            'profile_image' => 'Profile Image',
-            'role' => 'Role',
-            'username' => 'Username',
-        ];
-    }
+    // public function attributes()
+    // {
+    //     return [
+    //         'first_name' => 'First Name',
+    //         'last_name' => 'Last Name',
+    //         'email' => 'Email Address',
+    //         'profile_image' => 'Profile Image',
+    //         'role' => 'Role',
+    //         'username' => 'Username',
+    //     ];
+    // }
 }

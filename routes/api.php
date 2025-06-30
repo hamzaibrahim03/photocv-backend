@@ -68,6 +68,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
             Route::post('/post-comment', [MemberController::class, 'postCommentOrLikes']);
+            Route::put('/profile/update', [MemberController::class, 'profileUpdate']);
 
             //competition routes
             Route::post('/join-competition', [CompetitionController::class, 'joinCompetition']);

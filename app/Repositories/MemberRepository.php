@@ -354,6 +354,80 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    public function profileUpdate($data)
+    {
+        $user = auth()->user();
 
+        // Update user
+        $user->update(array_filter([
+            // 'username' => $data['username'] ?? null,
+            'email' => $data['email'] ?? null,
+            'password' => isset($data['password']) ? bcrypt($data['password']) : null,
+            'tag_line' => $data['tag_line'] ?? null,
+            'about' => $data['about'] ?? null,
+            'first_name' => $data['first_name'] ?? null,
+            'last_name' => $data['last_name'] ?? null,
+            'phone' => $data['phone'] ?? null,
+            'address' => $data['address'] ?? null,
+        ]));
+
+        // Update member
+        if ($user->member) {
+            $user->member->update(array_filter([
+                'domain_name' => $data['member']['domain_name'] ?? null,
+                'color_theme' => $data['member']['color_theme'] ?? null,
+                'cover_image' => $data['member']['cover_image'] ?? null,
+                'font' => $data['member']['font'] ?? null,
+                'profile_privacy' => $data['member']['profile_privacy'] ?? null,
+                'footer_text' => $data['member']['footer_text'] ?? null,
+                'social_links_visibility' => $data['member']['social_links_visibility'] ?? [],
+            ]));
+        }
+
+        // Update or create contact
+        if (!empty($data['member_contact'])) {
+            $user->member->memberContact()->updateOrCreate(
+                ['member_id' => $user->member->id],
+                [
+                    'email' => $data['member_contact']['email'] ?? null,
+                    'phone' => $data['member_contact']['phone'] ?? null,
+                    'address' => $data['member_contact']['address'] ?? null,
+                ]
+            );
+        }
+
+        // Update or create brands/interests
+        if (!empty($data['member_brands'])) {
+            $user->member->memberBrand()->updateOrCreate(
+                ['member_id' => $user->member->id],
+                [
+                    'brands' => $data['member_brands']['brands'] ?? [],
+                    'interest' => $data['member_brands']['interest'] ?? [],
+                ]
+            );
+        }
+
+        // Replace all social links
+        if (!empty($data['member_social_media'])) {
+            $user->member->memberSocialLinks()->delete();
+
+            foreach ($data['member_social_media'] as $social) {
+                $user->member->memberSocialLinks()->create([
+                    'social_media_name' => $social['social_media_name'],
+                    'social_link' => $social['social_link'],
+                ]);
+            }
+        }
+
+        return response()->json([
+            'message' => 'Profile updated successfully.',
+            'user' => $user->load([
+                'member',
+                'member.memberContact',
+                'member.memberBrand',
+                'member.memberSocialLinks'
+            ]),
+        ]);
+    }
 
 }

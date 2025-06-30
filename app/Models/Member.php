@@ -68,4 +68,20 @@ class Member extends Model
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function memberContact()
+	{
+		return $this->hasOne(MemberContact::class);
+	}
+
+	public function memberBrand()
+	{
+		return $this->hasOne(MemberBrand::class);
+	}
+
+	public function memberSocialLinks()
+	{
+		return $this->hasMany(MemberSocialLink::class);
+	}
+
 }
