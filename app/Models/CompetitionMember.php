@@ -46,4 +46,9 @@ class CompetitionMember extends Model
 	{
 		return $this->belongsTo(Competition::class, 'comp_id');
 	}
+
+	public function entries()
+	{
+		return $this->hasMany(CompetitionMembersEntry::class, 'member_comp_id');
+	}
 }

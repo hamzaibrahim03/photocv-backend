@@ -53,4 +53,11 @@ class MemberPhoto extends Model
 		return $this->belongsTo(MemberGallery::class, 'gallery_id');
 	}
 
+	public function likes()
+	{
+		return $this->hasMany(Comment::class, 'record_id')
+			->where('record_type', 'photo')
+			->where('comment_type', 'like');
+	}
+
 }

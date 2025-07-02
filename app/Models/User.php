@@ -105,4 +105,27 @@ class User extends Authenticatable
 		return $this->hasMany(MemberGallery::class, 'member_id');
 	}
 
+	public function comments()
+	{
+		return $this->hasMany(Comment::class, 'interacted_by');
+	}
+
+	public function competitionMembers()
+	{
+		return $this->hasMany(CompetitionMember::class, 'member_id');
+	}
+
+	public function memberAwards()
+	{
+		return $this->hasMany(MemberAward::class, 'member_id');
+	}
+
+	// public function likedPhotos()
+	// {
+	// 	return MemberPhoto::whereHas('likes')
+	// 		->whereHas('gallery', function ($q) {
+	// 			$q->where('member_id', $this->id);
+	// 		});
+	// }
+
 }

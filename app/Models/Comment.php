@@ -47,33 +47,56 @@ class Comment extends Model
 		'admin_notes'
 	];
 
-	// public function event()
-	// {
-	// 	return $this->belongsTo(Event::class);
-	// }
-
-	public function page()
-	{
-		return $this->belongsTo(Page::class, 'record_id')->where('record_type', 'page');
-	}
-
-	public function clubNews()
-	{
-		return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'news');
-	}
-
-	public function memberNotice()
-	{
-		return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'notice');
-	}
-
-	public function event()
-	{
-		return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'event');
-	}
 
 	public function user()
 	{
 		return $this->belongsTo(User::class, 'interacted_by');
 	}
+
+	public function page()
+	{
+		return $this->belongsTo(Page::class, 'record_id');
+	}
+
+	public function clubNews()
+	{
+		return $this->belongsTo(ClubNews::class, 'record_id');
+	}
+
+	public function memberNotice()
+	{
+		return $this->belongsTo(MemberNotice::class, 'record_id');
+	}
+
+	public function event()
+	{
+		return $this->belongsTo(Event::class, 'record_id');
+	}
+
+
+
+	// public function event()
+	// {
+	// 	return $this->belongsTo(Event::class);
+	// }
+
+	// public function page()
+	// {
+	// 	return $this->belongsTo(Page::class, 'record_id')->where('record_type', 'page');
+	// }
+
+	// public function clubNews()
+	// {
+	// 	return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'news');
+	// }
+
+	// public function memberNotice()
+	// {
+	// 	return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'notice');
+	// }
+
+	// public function event()
+	// {
+	// 	return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'event');
+	// }
 }

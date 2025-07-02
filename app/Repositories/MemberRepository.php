@@ -48,9 +48,55 @@ class MemberRepository implements MemberRepositoryInterface
     {
         try {
             $member = User::findOrFail($id);
-            if (!$member) {
-                return MemberResponse::error('Member not found.', 404);
-            }
+
+            // Load galleries with active photos
+            $member->load([
+                'galleries' => function ($query) {
+                    $query->where('is_active', true)
+                        ->with(['photos' => function ($photoQuery) {
+                            $photoQuery->where('is_active', true);
+                        }]);
+                },
+                'competitionMembers.competition',
+                'competitionMembers.entries'
+            ]);
+
+            // Load recent comments with related record titles
+            $recentComments = $member->comments()
+                ->latest()
+                ->get()
+                ->map(function ($comment) {
+                    $related = match ($comment->record_type) {
+                        'event'  => $comment->event,
+                        'page'   => $comment->page,
+                        'notice' => $comment->memberNotice,
+                        'news'   => $comment->clubNews,
+                        default  => null,
+                    };
+
+                    $comment->related_record_name = optional($related)->title ?? optional($related)->name ?? null;
+
+                    return $comment;
+                });
+
+            // Load recent awarded photos from member_awards → member_photos
+            $recentAwards = $member->memberAwards()
+                ->with('photo')
+                ->latest('award_date')
+                ->get();
+
+            // Get recent liked photos (photos owned by this member that received likes)
+            $recentLikedPhotos = MemberPhoto::whereHas('likes')
+                ->whereHas('gallery', function ($query) use ($member) {
+                    $query->where('member_id', $member->id);
+                })
+                ->latest()
+                ->get();
+
+            // Attach comments to member
+            $member->recent_comments = $recentComments;
+            $member->recent_awards = $recentAwards;
+            $member->recent_liked_photos = $recentLikedPhotos;
 
             return MemberResponse::success('Member retrieved successfully.', $member);
         } catch (\Exception $e) {
@@ -243,6 +289,11 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Method to post comments or likes
+     * @param mixed $data
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
     public function postCommentOrLikes($data){
         try {
 
@@ -276,6 +327,10 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Method to load all member galleries
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
     public function membersGalleries()
     {
         try {
@@ -313,6 +368,11 @@ class MemberRepository implements MemberRepositoryInterface
 
     }
 
+    /**
+     * Method to get single member gallery details
+     * @param mixed $memberId
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
     public function memberGalleryDetails($memberId)
     {
         try {
@@ -354,6 +414,11 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    /**
+     * Method to update member's profile
+     * @param mixed $data
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
     public function profileUpdate($data)
     {
         $user = auth()->user();

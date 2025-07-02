@@ -41,4 +41,10 @@ class MemberAward extends Model
 		'award_standing',
 		'award_date'
 	];
+
+	public function photo()
+	{
+		return $this->belongsTo(MemberPhoto::class, 'photo_id');
+	}
+
 }
