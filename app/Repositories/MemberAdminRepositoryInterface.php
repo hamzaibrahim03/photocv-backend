@@ -6,5 +6,7 @@ interface MemberAdminRepositoryInterface
 {
     public function allEvents( $request );
     public function memberSingleEvent($id);
+    public function allCompetitions($request);
+    public function memberSingleCompetition($id);
 
 }

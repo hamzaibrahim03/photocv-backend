@@ -8,6 +8,9 @@ use App\Models\Club;
 use App\Models\Comment;
 use App\Models\MemberNotice;
 use Carbon\Carbon;
+use App\Models\Competition;
+use App\Models\CompetitionMembersEntry;
+use Illuminate\Support\Facades\Storage;
 
 trait UtilityTrait
 {
@@ -71,7 +74,6 @@ trait UtilityTrait
             ->rawColumns(['action'])
             ->make(true);
     }
-
 
     public function getAllIndexData($request, $query, $search)
     {
@@ -274,5 +276,130 @@ trait UtilityTrait
         ]);
     }
 
+    public function getAllAdminCompetitionData($request)
+    {
+        $clubIds = auth()->user()->clubs->pluck('id')->toArray();
+
+        if (empty($clubIds)) {
+            return response()->json([
+                'dataTable' => [],
+                'totalCompetitionCount' => 0,
+                'daysUntilNextCompetition' => null,
+                'calendarCompetitions' => [],
+                'recentCompetitions' => [],
+                'recentSubmissions' => [],
+            ]);
+        }
+
+        // Base query
+        $competitionQuery = Competition::whereIn('club_id', $clubIds);
+
+        // Total count
+        $totalCompetitionCount = (clone $competitionQuery)->count();
+
+        // Handle ordering/search if needed
+        if ($request->has('search_term') && $request->search_term !== '') {
+            $competitionQuery->where('name', 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $competitionQuery->orderBy($column, $direction);
+        }
+
+        // DataTables response
+        $dataTable = DataTables::of($competitionQuery)
+            ->addIndexColumn()
+            ->addColumn('action', function ($competition) {
+                return '<a href="' . route('competitions.show', $competition->id) . '" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($competition) {
+                return $competition->featured_image
+                    ? asset('storage/' . $competition->featured_image)
+                    : null;
+            })
+            ->rawColumns(['action'])
+            ->toArray();
+
+        // Upcoming competition
+        $nextCompetition = (clone $competitionQuery)
+            ->whereDate('start_date', '>=', now())
+            ->orderBy('start_date')
+            ->first();
+
+        $daysUntilNextCompetition = $nextCompetition
+            ? now()->diffInDays($nextCompetition->start_date, false)
+            : null;
+
+        // Calendar competitions
+        $month = $request->input('month');
+        $year = $request->input('year');
+
+        $startOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
+            : now()->startOfMonth();
+
+        $endOfMonth = $month && $year
+            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
+            : now()->endOfMonth();
+
+        $calendarCompetitions = (clone $competitionQuery)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->orderBy('start_date')
+            ->get(['start_date', 'name'])
+            ->map(fn($comp) => [
+                'date' => $comp->start_date->toDateString(),
+                'name' => $comp->name,
+            ]);
+
+        // Recent competitions
+        $recentCompetitions = (clone $competitionQuery)
+            ->latest('start_date')
+            ->take(6)
+            ->get(['id', 'name', 'start_date', 'featured_image'])
+            ->map(function ($comp) {
+                return [
+                    'id' => $comp->id,
+                    'title' => $comp->name,
+                    'start_date' => $comp->start_date->toDateString(),
+                    'featured_image' => $comp->featured_image
+                        ? asset('storage/' . $comp->featured_image)
+                        : null,
+                ];
+            });
+
+        // Recent submissions
+        $recentSubmissions = CompetitionMembersEntry::with([
+                'competitionMember.competition:id,name,club_id',
+                'competitionMember.member:id,username',
+            ])
+            ->whereHas('competitionMember.competition', fn($q) => $q->whereIn('club_id', $clubIds))
+            ->latest()
+            ->take(4)
+            ->get()
+            ->map(function ($entry) {
+                $competition = optional($entry->competitionMember)->competition;
+                $member = optional($entry->competitionMember)->member;
+
+                return [
+                    'member_username' => $member->username ?? 'Unknown',
+                    'competition_name' => $competition->name ?? 'Unknown',
+                    'entry_image' => $entry->entry_image
+                        ? url(Storage::url($entry->entry_image))
+                        : null,
+                    'submitted_at' => optional($entry->created_at)->toDateTimeString(),
+                ];
+            });
+
+        return response()->json([
+            'dataTable' => $dataTable,
+            'totalCompetitionCount' => $totalCompetitionCount,
+            'daysUntilNextCompetition' => $daysUntilNextCompetition,
+            'calendarCompetitions' => $calendarCompetitions,
+            'recentCompetitions' => $recentCompetitions,
+            'recentSubmissions' => $recentSubmissions,
+        ]);
+    }
 
 }

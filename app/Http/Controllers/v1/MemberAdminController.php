@@ -25,8 +25,31 @@ class MemberAdminController extends Controller
         return $this->memberAdminService->memberEvents( $request );
     }
     
+    /**
+     * Method to get single event details with extra information
+     * @param mixed $id
+     */
     public function memberSingleEvent( $id )
     {
         return $this->memberAdminService->memberSingleEvent( $id );
+    }
+
+    /**
+     * Method to get member admin competition data with extra information
+     * @return void
+     */
+    public function memberCompetitions(Request $request)
+    {
+        return $this->memberAdminService->memberCompetitions( $request );
+    }
+
+    /**
+     * Method to load single competition with extra information
+     * @param mixed $id
+     * @return void
+     */
+    public function memberSingleCompetition($id)
+    {
+        return $this->memberAdminService->memberSingleCompetition($id);
     }
 }

@@ -53,6 +53,8 @@ class Competition extends Model
 {
 	use SoftDeletes;
 	protected $table = 'competitions';
+	protected $appends = ['featured_image_url'];
+	protected $hidden = ['featured_image'];
 
 	protected $casts = [
 		'competition_type_id' => 'int',
@@ -115,4 +117,12 @@ class Competition extends Model
 	{
 		return $this->hasMany(CompetitionMember::class, 'comp_id');
 	}
+
+	public function getFeaturedImageUrlAttribute()
+	{
+		return $this->featured_image
+			? asset('storage/' . $this->featured_image)
+			: null;
+	}
+
 }

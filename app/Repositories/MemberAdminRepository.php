@@ -2,18 +2,11 @@
 
 namespace App\Repositories;
 
-use App\Models\Club;
-use App\Models\User;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\EventResponse;
-use Illuminate\Support\Str;
-use App\Models\MemberGallery;
-use App\Models\MemberPhoto;
+use App\Models\Competition;
+use App\Models\CompetitionMembersEntry;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Comment;
-use App\Models\Page;
-use App\Models\MemberNotice;
-use App\Models\ClubNews;
 use App\Models\Event;
 
 class MemberAdminRepository implements MemberAdminRepositoryInterface
@@ -121,5 +114,117 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
+    /**
+     * Method to get all competitions for member admin with additional information
+     * @return void
+     */
+    public function allCompetitions($request)
+    {
+        try {
+            $competitions = $this->getAllAdminCompetitionData($request);
+            return EventResponse::success('Competitions retrieved successfully.', $competitions);
+        } catch (\Exception $e) {
+            return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Method to load single competition information
+     * @param mixed $id
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
+    public function memberSingleCompetition($id)
+    {
+        try {
+            $competition = Competition::findOrFail($id);
+
+            // Get club
+            $clubId = $competition->club_id;
+
+            // Days until next competition in this club (excluding current)
+            $nextCompetition = Competition::where('club_id', $clubId)
+                ->where('id', '!=', $competition->id)
+                ->whereDate('start_date', '>', now())
+                ->orderBy('start_date')
+                ->first();
+
+            $daysUntilNextCompetition = $nextCompetition
+                ? now()->diffInDays($nextCompetition->start_date, false)
+                : null;
+
+            // Calendar competitions in this month
+            $startOfMonth = now()->startOfMonth();
+            $endOfMonth = now()->endOfMonth();
+
+            $calendarCompetitions = Competition::where('club_id', $clubId)
+                ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+                ->orderBy('start_date')
+                ->get(['start_date', 'name'])
+                ->map(fn($comp) => [
+                    'date' => $comp->start_date->toDateString(),
+                    'name' => $comp->name,
+                ]);
+
+            // Recent submissions on this competition
+            $recentSubmissions = CompetitionMembersEntry::with([
+                'competitionMember.competition:id,name,club_id',
+                'competitionMember.member:id,username',
+            ])
+            ->whereHas('competitionMember.competition', fn($q) => $q->where('club_id', $clubId))
+            ->latest()
+            ->take(4)
+            ->get()
+            ->map(function ($entry) {
+                $competition = optional($entry->competitionMember)->competition;
+                $member = optional($entry->competitionMember)->member;
+
+                return [
+                    'member_username' => $member->username ?? 'Unknown',
+                    'competition_name' => $competition->name ?? 'Unknown',
+                    'entry_image' => $entry->entry_image
+                        ? url(Storage::url($entry->entry_image))
+                        : null,
+                    'submitted_at' => optional($entry->created_at)->toDateTimeString(),
+                ];
+            });
+
+            // More competitions from same club (excluding current)
+            $moreCompetitions = Competition::where('club_id', $clubId)
+                ->where('id', '!=', $competition->id)
+                ->latest('start_date')
+                ->take(4)
+                ->get(['id', 'name', 'start_date', 'featured_image'])
+                ->map(function ($comp) {
+                    return [
+                        'id' => $comp->id,
+                        'title' => $comp->name,
+                        'start_date' => $comp->start_date->toDateString(),
+                        'featured_image' => $comp->featured_image
+                            ? asset('storage/' . $comp->featured_image)
+                            : null,
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Competition details retrieved successfully.',
+                'data' => [
+                    'competition' => $competition,
+                    'daysUntilNextCompetition' => $daysUntilNextCompetition,
+                    'calendarCompetitions' => $calendarCompetitions,
+                    'recentSubmissions' => $recentSubmissions,
+                    'moreCompetitions' => $moreCompetitions,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage(),
+                'code' => $e->getCode() ?: 500
+            ]);
+        }
+    }
+
 
 }

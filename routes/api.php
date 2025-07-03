@@ -78,6 +78,8 @@ Route::prefix('v1')->group(function() {
             //member admin routes
             Route::get('/member-admin-events', [MemberAdminController::class, 'memberEvents']);
             Route::get('/member-admin-event/{id}', [MemberAdminController::class, 'memberSingleEvent']);
+            Route::get('/member-admin-competitions', [MemberAdminController::class, 'memberCompetitions']);
+            Route::get('/member-admin-competition/{id}', [MemberAdminController::class, 'memberSingleCompetition']);
         });
 
     });
