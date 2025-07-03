@@ -15,6 +15,7 @@ use App\Http\Controllers\v1\ClubSettingsController;
 use App\Http\Controllers\v1\MemberController;
 use App\Http\Controllers\v1\ClubDashboardController;
 use App\Http\Controllers\v1\FeaturedImageController;
+use App\Http\Controllers\v1\MemberAdminController;
 
 Route::prefix('v1')->group(function() {
 
@@ -73,6 +74,10 @@ Route::prefix('v1')->group(function() {
             //competition routes
             Route::post('/join-competition', [CompetitionController::class, 'joinCompetition']);
             Route::post('/submit-competition-entry', [CompetitionController::class, 'submitCompetitionEntry']);
+
+            //member admin routes
+            Route::get('/member-admin-events', [MemberAdminController::class, 'memberEvents']);
+            Route::get('/member-admin-event/{id}', [MemberAdminController::class, 'memberSingleEvent']);
         });
 
     });

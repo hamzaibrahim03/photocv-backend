@@ -51,6 +51,9 @@ use App\Repositories\ClubDashboardRepository;
 use App\Repositories\FeatureImageRepositoryInterface;
 use App\Repositories\FeatureImageRepository;
 
+use App\Repositories\MemberAdminRepositoryInterface;
+use App\Repositories\MemberAdminRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -75,6 +78,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MemberRepositoryInterface::class, MemberRepository::class);
         $this->app->bind(ClubDashboardRepositoryInterface::class, ClubDashboardRepository::class);
         $this->app->bind(FeatureImageRepositoryInterface::class, FeatureImageRepository::class);
+        $this->app->bind(MemberAdminRepositoryInterface::class, MemberAdminRepository::class);
 
     }
 
