@@ -31,7 +31,7 @@ class MemberRepository implements MemberRepositoryInterface
     public function all( $request )
     {
         try {
-            $members = $this->getAllIndexData($request, User::role('member'), 'username');
+            $members = $this->getAllIndexData($request, User::role('member')->with(['galleries.photos']), 'username');
             return MemberResponse::success( 'Members retrieved successfully.', $members );
         } catch (\Exception $e) {
             return MemberResponse::error( $e->getMessage(), $e->getCode() ?: 500 );
