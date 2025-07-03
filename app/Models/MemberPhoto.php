@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Class MemberPhoto
@@ -31,6 +32,8 @@ class MemberPhoto extends Model
 {
 	use SoftDeletes;
 	protected $table = 'member_photos';
+	protected $appends = ['image_url'];
+	protected $hidden = ['image'];
 
 	protected $casts = [
 		'gallery_id' => 'int',
@@ -58,6 +61,13 @@ class MemberPhoto extends Model
 		return $this->hasMany(Comment::class, 'record_id')
 			->where('record_type', 'photo')
 			->where('comment_type', 'like');
+	}
+
+	public function getImageUrlAttribute()
+	{
+		return $this->image
+			? URL::to('storage/' . $this->image)
+			: null;
 	}
 
 }
