@@ -126,7 +126,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
                         ->with(['photos' => function ($photoQuery) {
                             $photoQuery->where('is_active', true)
                                     ->orderBy('created_at', 'desc')
-                                    ->limit(1); // ✅ Get only one photo per gallery
+                                    ->limit(1);
                         }]);
                 }
             ])
@@ -134,33 +134,6 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
             ->limit($limit)
             ->get();
     }
-
-    /**
-     * Method to return all members galleries
-     * @param int $clubId
-     * @param int $limit
-     * @return \Illuminate\Database\Eloquent\Collection<int, User>
-     */
-    public function getClubGallerries(int $clubId, int $limit = 10)
-    {
-        return User::whereHas('clubs', function ($query) use ($clubId) {
-                $query->where('club_id', $clubId);
-            })
-            ->with([
-                'galleries' => function ($galleryQuery) {
-                    $galleryQuery->where('is_active', true)
-                        ->with(['photos' => function ($photoQuery) {
-                            $photoQuery->where('is_active', true)
-                                    ->orderBy('created_at', 'desc')
-                                    ->limit(1); // ✅ Get only one photo per gallery
-                        }]);
-                }
-            ])
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
-    }
-    
 
     public function getCurrentMonthActivities(int $clubId)
     {

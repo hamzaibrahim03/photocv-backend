@@ -28,7 +28,7 @@ class ClubDashboardService
             'club_news' => $this->clubDashboardRepository->getLatestClubNews($clubId),
             'latest_members' => $latestMembersData['members'],
             'member_galleries' => $this->clubDashboardRepository->getMembersGallerries($clubId),
-            'club_galleries' => $this->clubDashboardRepository->getClubGallerries($clubId),
+            'club_galleries' => $this->clubDashboardRepository->getMembersGallerries($clubId),
             'total_members_count' => $latestMembersData['total_count'],
             'current_month_activities' => $this->clubDashboardRepository->getCurrentMonthActivities($clubId),
         ];
