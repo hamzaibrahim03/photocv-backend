@@ -190,7 +190,7 @@ trait UtilityTrait
                 $q->whereIn('club_id', $clubIds);
             })
             ->orderBy('created_at', 'desc')
-            ->take(6) // adjust the number as needed
+            ->take(6)
             ->get()
             ->map(function ($comment) {
                 return [
@@ -216,43 +216,6 @@ trait UtilityTrait
             ? Carbon::now()->diffInDays(Carbon::parse($nextEvent->event_date), false)
             : null;
 
-        $recentEventsList = (clone $query)
-            ->latest('event_date') // or 'created_at' if that's more appropriate
-            ->take(6)
-            ->get(['id', 'name', 'event_date', 'featured_image', 'created_at']); // select only needed fields
-
-        $recentEvents = $recentEventsList->map(function ($event) {
-            return [
-                'id' => $event->id,
-                'name' => $event->name,
-                'event_date' => $event->event_date->toDateString(),
-                'featured_image' => $event->featured_image
-                    ? asset('storage/' . $event->featured_image)
-                    : null,
-            ];
-        });
-
-        // Handle month/year filtering
-        $month = $request->input('month');
-        $year = $request->input('year');
-
-        $startOfMonth = $month && $year
-            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
-            : Carbon::now()->startOfMonth();
-
-        $endOfMonth = $month && $year
-            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
-            : Carbon::now()->endOfMonth();
-
-        // Get events in the selected month for all user's clubs
-        $calendarEvents = Event::whereIn('club_id', $clubIds)
-            ->whereBetween('event_date', [$startOfMonth, $endOfMonth])
-            ->orderBy('event_date', 'asc')
-            ->get(['event_date', 'name'])
-            ->map(fn($event) => [
-                'date' => $event->event_date->toDateString(),
-                'name' => $event->name,
-            ]);
 
         $dataTable = DataTables::of($query)
             ->addIndexColumn()
@@ -271,8 +234,6 @@ trait UtilityTrait
             'recentComments' => $recentComments,
             'totalEventCount' => $totalEventCount,
             'daysUntilNextEvent' => $daysUntilNextEvent,
-            'recentEvents' => $recentEvents,
-            'calendarEvents' => $calendarEvents,
         ]);
     }
 

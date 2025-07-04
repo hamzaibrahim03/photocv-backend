@@ -8,5 +8,5 @@ interface MemberAdminRepositoryInterface
     public function memberSingleEvent($id);
     public function allCompetitions($request);
     public function memberSingleCompetition($id);
-
+    public function getMemberNotices();
 }

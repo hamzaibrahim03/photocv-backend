@@ -54,15 +54,16 @@ class NoticeRepository implements NoticeRepositoryInterface
     public function create(array $data, $images = [], $documents = [])
     {
         try {
+            $userId = auth()->id();
+            $club = Club::where('user_id', $userId)->first();
 
-            $club = Club::where('user_id', auth()->id())->first();
-
-            if (!$club) {
-                return NoticeResponse::error('No club found for the current user.', 404);
+            if ($club) {
+                // Inject club_id into the data array
+                $data['club_id'] = $club->id;
+            } else {
+                // Fallback: set member_id if no club found
+                $data['member_id'] = $userId;
             }
-
-            // Inject club_id into the data array
-            $data['club_id'] = $club->id;
 
             // Create the notice
             $notice = MemberNotice::create($data);
@@ -71,7 +72,7 @@ class NoticeRepository implements NoticeRepositoryInterface
             if (!empty($images) && is_array($images)) {
                 foreach ($images as $image) {
                     if ($image) {
-                        $imagePath = $image->store('notices/images', 'public'); 
+                        $imagePath = $image->store('notices/images', 'public');
                         MemberNoticeFile::create([
                             'member_notice_id' => $notice->id,
                             'file_name' => $image->getClientOriginalName(),
@@ -98,9 +99,11 @@ class NoticeRepository implements NoticeRepositoryInterface
             }
 
             return NoticeResponse::success('Notice created successfully.', $notice, 201);
+
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
+
     }
 
 

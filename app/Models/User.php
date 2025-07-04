@@ -120,6 +120,11 @@ class User extends Authenticatable
 		return $this->hasMany(MemberAward::class, 'member_id');
 	}
 
+	public function memberNotices()
+	{
+		return $this->hasMany(MemberNotice::class, 'member_id', 'id');
+	}
+
 	// public function likedPhotos()
 	// {
 	// 	return MemberPhoto::whereHas('likes')

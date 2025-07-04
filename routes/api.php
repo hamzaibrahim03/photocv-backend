@@ -80,6 +80,11 @@ Route::prefix('v1')->group(function() {
             Route::get('/member-admin-event/{id}', [MemberAdminController::class, 'memberSingleEvent']);
             Route::get('/member-admin-competitions', [MemberAdminController::class, 'memberCompetitions']);
             Route::get('/member-admin-competition/{id}', [MemberAdminController::class, 'memberSingleCompetition']);
+            Route::get('/profile/posts/view', [MemberAdminController::class, 'memberProfilePostsView']);
+            Route::post('/notices', [NoticeController::class, 'create']);
+            Route::put('/notices/{id}', [NoticeController::class, 'update']);
+            Route::get('/member-admin-profile', [MemberAdminController::class, 'memberAdminProfile']);
+            
         });
 
     });

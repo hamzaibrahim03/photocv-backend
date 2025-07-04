@@ -71,4 +71,13 @@ class MemberNotice extends Model
             ->where('is_published', true)
             ->with('user'); // Eager load user
     }
+
+	// Define relationship for likes (assuming is_like = true is stored)
+	public function likes()
+	{
+		return $this->hasMany(Comment::class, 'record_id')
+			->where('record_type', 'notice')
+			->where('comment_type', 'like') // or use is_like = true if stored as boolean
+			->where('is_published', true);
+	}
 }

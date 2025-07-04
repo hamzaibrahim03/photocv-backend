@@ -22,7 +22,8 @@ class MemberAdminController extends Controller
      */
     public function memberEvents( Request $request )
     {
-        return $this->memberAdminService->memberEvents( $request );
+        $data = $this->memberAdminService->memberEvents( $request );
+        return response()->json($data);
     }
     
     /**
@@ -51,5 +52,19 @@ class MemberAdminController extends Controller
     public function memberSingleCompetition($id)
     {
         return $this->memberAdminService->memberSingleCompetition($id);
+    }
+
+    /**
+     * Method to get gallery and notices information
+     * @return void
+     */
+    public function memberProfilePostsView()
+    {
+        return $this->memberAdminService->memberProfilePostsView();
+    }
+
+    public function memberAdminProfile()
+    {
+        return $this->memberAdminService->memberAdminProfile();
     }
 }
