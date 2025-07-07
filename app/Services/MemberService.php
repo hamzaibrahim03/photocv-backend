@@ -125,4 +125,12 @@ class MemberService
     {
         return $this->memberRepository->profileUpdate($data);
     }
+
+    /**
+     * Method to return member's joined clubs
+     */
+    public function getJoinedClubs()
+    {
+        return $this->memberRepository->getJoinedClubs();
+    }
 }

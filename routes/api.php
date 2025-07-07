@@ -66,6 +66,8 @@ Route::prefix('v1')->group(function() {
         // member routes
         Route::middleware(['auth', 'role:member'])->group(function () {
             Route::post('/assign-club', [MemberController::class, 'assignClub']);
+            Route::get('/joined-clubs', [MemberController::class, 'joinedClubs']);
+
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
             Route::post('/post-comment', [MemberController::class, 'postCommentOrLikes']);

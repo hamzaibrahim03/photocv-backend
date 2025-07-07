@@ -532,4 +532,9 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
         dd($data);
     }
 
+    public function memberNotes($data)
+    {
+        
+    }
+
 }

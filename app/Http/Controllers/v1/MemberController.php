@@ -147,4 +147,13 @@ class MemberController extends Controller
     {
         return $this->memberService->profileUpdate($request->all());
     }
+
+    /**
+     * Method to get photographer joined clubs
+     * @return void
+     */
+    public function joinedClubs()
+    {
+        return $this->memberService->getJoinedClubs();
+    }
 }

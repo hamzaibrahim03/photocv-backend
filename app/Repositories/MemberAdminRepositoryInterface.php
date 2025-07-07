@@ -9,6 +9,6 @@ interface MemberAdminRepositoryInterface
     public function allCompetitions($request);
     public function memberSingleCompetition($id);
     public function getMemberNotices();
-
     public function addMemberNotes($data);
+    public function memberNotes($data);
 }

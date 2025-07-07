@@ -495,4 +495,18 @@ class MemberRepository implements MemberRepositoryInterface
         ]);
     }
 
+    /**
+     * Method to return member's joined clubs
+     * @return mixed|\Illuminate\Http\JsonResponse
+     */
+    public function getJoinedClubs()
+    {
+        try{
+            $clubs = auth()->user()->clubs;
+            return MemberResponse::success('Member clubs retrieved successfully.', $clubs);
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
 }

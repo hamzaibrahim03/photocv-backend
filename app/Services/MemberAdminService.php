@@ -105,4 +105,9 @@ class MemberAdminService
         ];
     }
 
+    public function memberNotes($data)
+    {
+        return $this->memberAdminRepository->memberNotes($data);
+    }
+
 }
