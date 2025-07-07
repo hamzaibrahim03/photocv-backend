@@ -84,6 +84,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/notices', [NoticeController::class, 'create']);
             Route::put('/notices/{id}', [NoticeController::class, 'update']);
             Route::get('/member-admin-profile', [MemberAdminController::class, 'memberAdminProfile']);
+            Route::get('/member-admin/profile/portfolio', [MemberAdminController::class, 'memberAdminProfilePortfolio']);
             
         });
 

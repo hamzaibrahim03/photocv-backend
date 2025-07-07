@@ -63,8 +63,17 @@ class MemberAdminController extends Controller
         return $this->memberAdminService->memberProfilePostsView();
     }
 
+    /**
+     * Method to get profile data
+     * @return array{gallery: mixed, member_info: mixed, my_awards: mixed, profile_extras: mixed, recent_comments_and_interactions: mixed, recent_competition_submissions: mixed}
+     */
     public function memberAdminProfile()
     {
         return $this->memberAdminService->memberAdminProfile();
+    }
+
+    public function memberAdminProfilePortfolio()
+    {
+        return $this->memberAdminService->memberAdminProfilePortfolio();
     }
 }

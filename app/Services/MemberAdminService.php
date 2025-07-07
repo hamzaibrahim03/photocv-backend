@@ -83,4 +83,13 @@ class MemberAdminService
         ];
     }
 
+    public function memberAdminProfilePortfolio()
+    {
+        return [
+            'member_info' => $this->memberAdminRepository->getMemberInformation(),
+            'recent_comments_and_interactions' => $this->memberAdminRepository->getMemberNoticesRecentComments(),
+            'gallery' => $this->memberAdminRepository->getMemberGallery(),
+        ];
+    }
+
 }
