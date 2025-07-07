@@ -89,4 +89,14 @@ class MemberNotice extends Model
 			? asset('storage/' . $this->featured_image)
 			: null;
 	}
+
+	public function club()
+	{
+		return $this->belongsTo(Club::class, 'club_id');
+	}
+
+	public function member()
+	{
+		return $this->belongsTo(User::class, 'user_id');
+	}
 }

@@ -102,14 +102,16 @@ trait UtilityTrait
 
     public function getAllNoticeData($request)
     {
-        $query = MemberNotice::with(['files', 'comments']);
+        $query = MemberNotice::with(['files', 'comments', 'club', 'member']);
 
         $club = Club::where('user_id', auth()->id())->first();
+        $userId = auth()->id();
+
         if ($club) {
             $query->where('club_id', $club->id);
         } else {
-            // Optionally return an empty result if user has no club
-            return DataTables::of(collect([]))->make(true);
+            // Fall back to notices created by this user (member)
+            $query->where('member_id', $userId);
         }
 
         // Apply search filter
@@ -126,14 +128,25 @@ trait UtilityTrait
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('action', function ($event) {
-                return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+            ->addColumn('related_by', function ($notice) {
+                if ($notice->club) {
+                    return 'Club: ' . optional($notice->club)->name;
+                } elseif ($notice->member) {
+                    return 'Member: ' . optional($notice->member)->name;
+                }
+                return 'Unknown';
             })
-            ->editColumn('featured_image', function ($event) {
-                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
+            ->addColumn('action', function ($notice) {
+                return '<a href="' . route('events.show', $notice->id) . '" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($notice) {
+                return $notice->featured_image
+                    ? asset('storage/' . $notice->featured_image)
+                    : null;
             })
             ->make(true);
     }
+
 
     public function getAllAdminEventData($request)
     {

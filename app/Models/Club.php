@@ -115,4 +115,17 @@ class Club extends Model
 		return $this->belongsToMany(User::class)->withTimestamps()->withPivot('joined_at');
 	}
 
+	public function getRelatedEntityAttribute()
+	{
+		if (!is_null($this->club_id)) {
+			return $this->club;
+		}
+
+		if (!is_null($this->member_id)) {
+			return $this->member;
+		}
+
+		return null;
+	}
+
 }

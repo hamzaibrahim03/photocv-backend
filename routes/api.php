@@ -88,7 +88,8 @@ Route::prefix('v1')->group(function() {
             Route::get('/member-admin-profile', [MemberAdminController::class, 'memberAdminProfile']);
             Route::get('/member-admin/profile/portfolio', [MemberAdminController::class, 'memberAdminProfilePortfolio']);
             Route::get('/member-admin/profile/learning', [MemberAdminController::class, 'memberAdminProfileLearning']);
-            Route::get('/member-admin-notes', [MemberAdminController::class, 'memberNotes']);
+            
+            Route::post('/member-admin-notes', [MemberAdminController::class, 'memberNotes']);
             
         });
 
