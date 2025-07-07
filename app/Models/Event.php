@@ -42,6 +42,8 @@ class Event extends Model
 {
 	use SoftDeletes;
 	protected $table = 'events';
+	protected $appends = ['featured_image_url'];
+	protected $hidden = ['featured_image'];
 
 	protected $casts = [
 		'event_date' => 'datetime',
@@ -93,5 +95,12 @@ class Event extends Model
             ->where('is_published', true)
             ->with('user'); // Eager load user
     }
+
+	public function getFeaturedImageUrlAttribute()
+	{
+		return $this->featured_image
+			? asset('storage/' . $this->featured_image)
+			: null;
+	}
 
 }

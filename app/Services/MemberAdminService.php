@@ -83,12 +83,25 @@ class MemberAdminService
         ];
     }
 
+    /**
+     * Method to return portfolio information
+     * @return array{gallery: mixed, member_info: mixed, recent_comments_and_interactions: mixed}
+     */
     public function memberAdminProfilePortfolio()
     {
         return [
             'member_info' => $this->memberAdminRepository->getMemberInformation(),
             'recent_comments_and_interactions' => $this->memberAdminRepository->getMemberNoticesRecentComments(),
             'gallery' => $this->memberAdminRepository->getMemberGallery(),
+        ];
+    }
+
+    public function memberAdminProfileLearning($data)
+    {
+        return [
+            'member_info' => $this->memberAdminRepository->getMemberInformation(),
+            'recent_comments_and_interactions' => $this->memberAdminRepository->getMemberNoticesRecentComments(),
+            'notes' => $this->memberAdminRepository->addMemberNotes($data),
         ];
     }
 

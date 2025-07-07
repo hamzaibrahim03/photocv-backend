@@ -142,7 +142,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Random notices
-        $randomClubNews = ClubNews::select('id', 'title', 'created_at')
+        $randomClubNews = ClubNews::select('id', 'title', 'created_at', 'featured_image')
             ->where('club_id', $clubId)
             ->inRandomOrder()
             ->take(5)

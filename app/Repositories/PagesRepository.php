@@ -151,7 +151,7 @@ class PagesRepository implements PagesRepositoryInterface
         $clubId = $club->id;
 
         // Random pages
-        $randomPages = Page::select('id', 'title', 'created_at')
+        $randomPages = Page::select('id', 'title', 'created_at', 'featured_image')
             ->where('club_id', $clubId)
             ->inRandomOrder()
             ->take(6)

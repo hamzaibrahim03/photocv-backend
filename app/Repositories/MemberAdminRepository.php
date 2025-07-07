@@ -527,4 +527,9 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
         ]);
     }
 
+    public function addMemberNotes($data)
+    {
+        dd($data);
+    }
+
 }

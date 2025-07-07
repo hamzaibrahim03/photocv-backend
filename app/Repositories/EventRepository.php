@@ -208,7 +208,7 @@ class EventRepository implements EventRepositoryInterface
             ->get();
 
         // Random events
-        $randomEvents = Event::select('id', 'name', 'event_date')
+        $randomEvents = Event::select('id', 'name', 'event_date', 'featured_image')
             ->where('club_id', $clubId)
             ->inRandomOrder()
             ->take(5)

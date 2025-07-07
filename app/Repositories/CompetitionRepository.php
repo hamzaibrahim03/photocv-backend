@@ -135,7 +135,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
 
         // Random competitions
-        $randomCompetitions = Competition::select('id', 'name', 'start_date')
+        $randomCompetitions = Competition::select('id', 'name', 'start_date', 'featured_image')
             ->where('club_id', $clubId)
             ->inRandomOrder()
             ->take(5)

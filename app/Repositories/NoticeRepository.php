@@ -191,7 +191,7 @@ class NoticeRepository implements NoticeRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Random notices
-        $randomNotices = MemberNotice::select('id', 'title', 'created_at')
+        $randomNotices = MemberNotice::select('id', 'title', 'created_at', 'featured_image')
             ->where('club_id', $clubId)
             ->inRandomOrder()
             ->take(5)

@@ -33,6 +33,8 @@ class MemberNotice extends Model
 {
 	use SoftDeletes;
 	protected $table = 'member_notices';
+	protected $appends = ['featured_image_url'];
+	protected $hidden = ['featured_image'];
 
 	protected $casts = [
 		'member_id' => 'int',
@@ -79,5 +81,12 @@ class MemberNotice extends Model
 			->where('record_type', 'notice')
 			->where('comment_type', 'like') // or use is_like = true if stored as boolean
 			->where('is_published', true);
+	}
+
+	public function getFeaturedImageUrlAttribute()
+	{
+		return $this->featured_image
+			? asset('storage/' . $this->featured_image)
+			: null;
 	}
 }

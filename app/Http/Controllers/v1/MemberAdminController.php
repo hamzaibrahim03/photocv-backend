@@ -72,8 +72,22 @@ class MemberAdminController extends Controller
         return $this->memberAdminService->memberAdminProfile();
     }
 
+    /**
+     * Method to get profile portfolio information
+     * @return array{gallery: mixed, member_info: mixed, recent_comments_and_interactions: mixed}
+     */
     public function memberAdminProfilePortfolio()
     {
         return $this->memberAdminService->memberAdminProfilePortfolio();
+    }
+
+    public function memberAdminProfileLearning(Request $request)
+    {
+        return $this->memberAdminService->memberAdminProfileLearning($request->all());
+    }
+
+    public function memberNotes(Request $request)
+    {
+        return $this->memberAdminService->memberNotes($request->validated());
     }
 }

@@ -10,6 +10,8 @@ class Page extends Model
     use HasFactory;
 
     protected $table = 'pages';
+    protected $appends = ['featured_image_url'];
+	protected $hidden = ['featured_image'];
 
     protected $fillable = [
         'club_id',
@@ -37,4 +39,11 @@ class Page extends Model
             ->where('is_published', true)
             ->with('user'); // Eager load user
     }
+
+    public function getFeaturedImageUrlAttribute()
+	{
+		return $this->featured_image
+			? asset('storage/' . $this->featured_image)
+			: null;
+	}
 }
