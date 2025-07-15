@@ -7,6 +7,11 @@ use Illuminate\Database\Eloquent\Model;
 class MemberNote extends Model
 {
     protected $fillable = [
-        'title', 'description', 'type',
+        'member_id', 'title', 'description', 'type',
     ];
+
+    public function member()
+    {
+        return $this->belongsTo(User::class, 'member_id');
+    }
 }

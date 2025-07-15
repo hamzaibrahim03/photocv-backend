@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('member_notes', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('member_id');
             $table->string('title');
             $table->text('description')->nullable();
             $table->string('type')->nullable();

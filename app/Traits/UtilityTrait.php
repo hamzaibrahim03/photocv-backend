@@ -7,6 +7,7 @@ use App\Models\Event;
 use App\Models\Club;
 use App\Models\Comment;
 use App\Models\MemberNotice;
+use App\Models\MemberNote;
 use Carbon\Carbon;
 use App\Models\Competition;
 use App\Models\CompetitionMembersEntry;
@@ -50,6 +51,34 @@ trait UtilityTrait
         } else {
             return DataTables::of(collect([]))->make(true);
         }
+
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'LIKE', '%' . $request->search_term . '%');
+            });
+        }
+
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function ($event) {
+                return '<a href="' . route('events.show', $event->id) . '" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($event) {
+                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function getAllMemberNotes($request, $memberId)
+    {
+        $query = MemberNote::where('member_id', $memberId)->get();
 
         if ($request->has('search_term') && $request->search_term != '') {
             $query->where(function ($q) use ($request) {
@@ -146,8 +175,6 @@ trait UtilityTrait
             })
             ->make(true);
     }
-
-
     public function getAllAdminEventData($request)
     {
         $query = Event::with(['images', 'comments.user']);
@@ -249,7 +276,6 @@ trait UtilityTrait
             'daysUntilNextEvent' => $daysUntilNextEvent,
         ]);
     }
-
     public function getAllAdminCompetitionData($request)
     {
         $clubIds = auth()->user()->clubs->pluck('id')->toArray();
