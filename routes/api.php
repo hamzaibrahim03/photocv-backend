@@ -17,6 +17,7 @@ use App\Http\Controllers\v1\ClubDashboardController;
 use App\Http\Controllers\v1\FeaturedImageController;
 use App\Http\Controllers\v1\MemberAdminController;
 use App\Http\Controllers\v1\MemberNoteController;
+use App\Http\Controllers\v1\MemberClassLogController;
 
 Route::prefix('v1')->group(function() {
 
@@ -91,6 +92,7 @@ Route::prefix('v1')->group(function() {
             Route::get('/member-admin/profile/learning', [MemberAdminController::class, 'memberAdminProfileLearning']);
             
             Route::apiResource('member-admin/profile/notes', MemberNoteController::class);
+            Route::apiResource('member-admin/profile/class-logs', MemberClassLogController::class);
             
         });
 
