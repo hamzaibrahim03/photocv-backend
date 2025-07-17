@@ -69,7 +69,7 @@ Route::prefix('v1')->group(function() {
         });
 
         Route::domain('{username}.staging.cameraclub.website')->group(function () {
-            Route::get('/data', [PublicClubController::class, 'getClubData']);
+            Route::get('/club-public-data', [PublicClubController::class, 'getClubData']);
         });
 
         // member routes
