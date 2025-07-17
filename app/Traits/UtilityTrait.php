@@ -8,6 +8,7 @@ use App\Models\Club;
 use App\Models\Comment;
 use App\Models\MemberNotice;
 use App\Models\MemberNote;
+use App\Models\MemberBrand;
 use Carbon\Carbon;
 use App\Models\Competition;
 use App\Models\CompetitionMembersEntry;
@@ -75,6 +76,45 @@ trait UtilityTrait
             ->rawColumns(['action'])
             ->make(true);
     }
+
+    public function getAllMemberInterestsBrands($request, $memberId)
+    {
+        $query = MemberBrand::where('member_id', $memberId);
+
+        // Filter by type
+        if ($request->has('type') && in_array($request->type, ['interest', 'brands'])) {
+            $query->whereNotNull($request->type);
+        }
+
+        // Search term filter
+        if ($request->has('search_term') && $request->search_term !== '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('interest', 'like', '%' . $request->search_term . '%')
+                ->orWhere('brands', 'like', '%' . $request->search_term . '%');
+            });
+        }
+
+        // Order by column if provided (DataTables)
+        if ($request->has('order') && count($request->order)) {
+            $columnIndex = $request->order[0]['column'];
+            $column = $request->columns[$columnIndex]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        // Get results
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function ($item) {
+                return '<a href="' . route('events.show', $item->id) . '" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('image', function ($item) {
+                return $item->image ? asset('storage/' . $item->image) : null;
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
 
     public function getAllMemberNotes($request, $memberId)
     {

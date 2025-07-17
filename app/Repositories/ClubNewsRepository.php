@@ -142,11 +142,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Random notices
-        $randomClubNews = ClubNews::select('id', 'title', 'created_at', 'featured_image')
-            ->where('club_id', $clubId)
-            ->inRandomOrder()
-            ->take(5)
-            ->get();
+        $randomClubNews = $this->getClubNews($clubId);
 
         // Monthly calendar data
         $clubNews = ClubNews::where('club_id', $clubId)
@@ -197,6 +193,15 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
                 ],
             ],
         ];
+    }
+
+    public function getClubNews($clubId)
+    {
+        return ClubNews::select('id', 'title', 'created_at', 'featured_image')
+            ->where('club_id', $clubId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
     }
 
 }

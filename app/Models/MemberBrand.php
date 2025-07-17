@@ -27,16 +27,28 @@ class MemberBrand extends Model
 {
 	use SoftDeletes;
 	protected $table = 'member_brands';
+	protected $appends = ['image_url'];
 
-	protected $casts = [
-		'member_id' => 'int',
-		'interest' => 'array',
-    	'brands' => 'array',
-	];
+	// protected $casts = [
+	// 	'member_id' => 'int',
+	// 	'interest' => 'array',
+    // 	'brands' => 'array',
+	// ];
 
 	protected $fillable = [
 		'member_id',
 		'brands',
-		'interest'
+		'interest',
+		'image'
 	];
+
+	public function getImageUrlAttribute()
+    {
+        return $this->image ? url($this->image) : null;
+    }
+
+	public function member()
+    {
+        return $this->belongsTo(User::class, 'member_id');
+    }
 }

@@ -142,10 +142,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ->get();
 
         // Upcoming competition (closest future competition)
-        $upcomingCompetition = Competition::where('club_id', $clubId)
-            ->whereDate('start_date', '>=', now())
-            ->orderBy('start_date', 'asc')
-            ->first();
+        $upcomingCompetition = $this->getUpcomingCompetitions($clubId);
 
         $upcoming = $upcomingCompetition
             ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingCompetition->start_date)->startOfDay(), false)]
@@ -176,6 +173,30 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ];
         });
 
+        $today = Carbon::today();
+        $startOfMonth = Carbon::now()->startOfMonth();
+        $endOfMonth = Carbon::now()->endOfMonth();
+
+        $competitionCountThisMonth = Competition::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', $today)
+            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
+            ->count();
+
+        // Final response
+        return [
+            'data' => [
+                'random_competitions' => $randomCompetitions,
+                'upcoming_competition' => $upcoming,
+                'total_member_count' => $totalMemberCount,
+                'recent_submissions' => $recentSubmissions,
+                'current_month_competition_count' => $competitionCountThisMonth,
+                'calendar' => $this->getCalenderCompetitionData($clubId, $startOfMonth, $endOfMonth),
+            ],
+        ];
+    }
+
+    public function getCalenderCompetitionData($clubId, $startOfMonth, $endOfMonth)
+    {
         // Monthly calendar data
         $events = Event::where('club_id', $clubId)
             ->whereBetween('event_date', [$startOfMonth, $endOfMonth])
@@ -195,29 +216,18 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'name' => $c->name,
             ]);
 
-        $today = Carbon::today();
-        $startOfMonth = Carbon::now()->startOfMonth();
-        $endOfMonth = Carbon::now()->endOfMonth();
-
-        $competitionCountThisMonth = Competition::where('club_id', $clubId)
-            ->whereDate('start_date', '>=', $today)
-            ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
-            ->count();
-
-        // Final response
         return [
-            'data' => [
-                'random_competitions' => $randomCompetitions,
-                'upcoming_competition' => $upcoming,
-                'total_member_count' => $totalMemberCount,
-                'recent_submissions' => $recentSubmissions,
-                'current_month_competition_count' => $competitionCountThisMonth,
-                'calendar' => [
-                    'events' => $events,
-                    'competitions' => $competitions,
-                ],
-            ],
+            'events' => $events,
+            'competitions' => $competitions,
         ];
+    }
+
+    public function getUpcomingCompetitions($clubId)
+    {
+        return Competition::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
+            ->first();
     }
 
     public function joinCompetition($data)
@@ -256,7 +266,6 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
         return $response;
     }
-
     
     public function submitCompetitionEntry($data)
     {

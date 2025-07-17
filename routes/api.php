@@ -18,6 +18,8 @@ use App\Http\Controllers\v1\FeaturedImageController;
 use App\Http\Controllers\v1\MemberAdminController;
 use App\Http\Controllers\v1\MemberNoteController;
 use App\Http\Controllers\v1\MemberClassLogController;
+use App\Http\Controllers\v1\MemberInterestBrandController;
+use App\Http\Controllers\v1\PublicClubController;
 
 Route::prefix('v1')->group(function() {
 
@@ -63,6 +65,11 @@ Route::prefix('v1')->group(function() {
             Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
 
             Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);
+            
+        });
+
+        Route::domain('{username}.staging.cameraclub.website')->group(function () {
+            Route::get('/data', [PublicClubController::class, 'getClubData']);
         });
 
         // member routes
@@ -93,6 +100,7 @@ Route::prefix('v1')->group(function() {
             
             Route::apiResource('member-admin/profile/notes', MemberNoteController::class);
             Route::apiResource('member-admin/profile/class-logs', MemberClassLogController::class);
+            Route::apiResource('member-admin/profile/interests-brands', MemberInterestBrandController::class);
             
         });
 

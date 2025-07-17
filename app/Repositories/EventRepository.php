@@ -215,10 +215,7 @@ class EventRepository implements EventRepositoryInterface
             ->get();
 
         // Upcoming event (closest future event)
-        $upcomingEvent = Event::where('club_id', $clubId)
-            ->whereDate('event_date', '>=', now())
-            ->orderBy('event_date', 'asc')
-            ->first();
+        $upcomingEvent = $this->getUpcomingEvents($clubId);
 
         $upcoming = $upcomingEvent
             ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
@@ -270,5 +267,13 @@ class EventRepository implements EventRepositoryInterface
                 ],
             ],
         ];
+    }
+
+    public function getUpcomingEvents($clubId)
+    {
+        return Event::where('club_id', $clubId)
+            ->whereDate('event_date', '>=', now())
+            ->orderBy('event_date', 'asc')
+            ->first();
     }
 }
