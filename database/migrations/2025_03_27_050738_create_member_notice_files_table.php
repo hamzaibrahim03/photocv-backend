@@ -12,14 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_notice_files', function (Blueprint $table) {
-            $table->id();
+            $table->bigIncrements('id');
             $table->bigInteger('member_notice_id');
             $table->string('file_name', 250);
             $table->string('file_type', 50);
             $table->string('file_path', 500);
             $table->timestamps();
 
-            $table->foreign('member_notice_id')->references('id')->on('member_notices')->onDelete('cascade');
+            // $table->foreign('member_notice_id')->references('id')->on('member_notices')->onDelete('cascade');
         });
     }
 

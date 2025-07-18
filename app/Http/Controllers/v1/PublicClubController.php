@@ -11,6 +11,7 @@ use App\Repositories\ClubNewsRepository;
 use App\Repositories\ClubSettingsRepository;
 use App\Models\User;
 use App\Models\MemberPhoto;
+use App\Models\MemberAward;
 use Carbon\Carbon;
 
 class PublicClubController extends Controller
@@ -59,7 +60,11 @@ class PublicClubController extends Controller
             'message' => 'Data retreived successfully',
             'data' => [
                 'user' => $user,
-                'clubGallery' => $user->galleries,
+                'clubGalleries' => MemberAward::with([
+                        'photo.gallery' => function ($query) {
+                            $query->with('member.clubs');
+                        }
+                    ])->get(),
                 'memberGalleries' => $this->clubDashboardRepo->getMembersGallerries($clubId),
                 'latestMembers' => $this->clubDashboardRepo->getLatestMembers($clubId),
                 'upcomingEvents' => $this->eventRepo->getUpcomingEvents($clubId),
