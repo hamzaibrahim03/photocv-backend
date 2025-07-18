@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_notice_files', function (Blueprint $table) {
-            $table->bigIncrements('id');
+            $table->id();
             $table->bigInteger('member_notice_id');
             $table->string('file_name', 250);
             $table->string('file_type', 50);

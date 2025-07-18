@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_awards', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('member_id')->nullable();
             $table->bigInteger('photo_id')->nullable();
             $table->string('award_standing', 250)->nullable()->comment('means, what type of award he achieved. Any medal , gold medal etc');

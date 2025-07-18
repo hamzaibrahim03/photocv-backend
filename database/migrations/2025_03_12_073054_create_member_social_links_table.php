@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_social_links', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('member_id')->nullable();
             $table->string('social_media_name', 20)->nullable();
             $table->string('social_link', 250)->nullable();

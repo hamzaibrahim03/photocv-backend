@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('competition_members_entries', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('member_comp_id');
             $table->enum('entry_type', ['print', 'digital'])->nullable();
             $table->string('entry_image', 250)->nullable();

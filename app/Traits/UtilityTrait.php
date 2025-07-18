@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\MemberNotice;
 use App\Models\MemberNote;
 use App\Models\MemberBrand;
+use App\Models\MemberPracticeLog;
 use Carbon\Carbon;
 use App\Models\Competition;
 use App\Models\CompetitionMembersEntry;
@@ -115,6 +116,32 @@ trait UtilityTrait
             ->make(true);
     }
 
+    public function getDataTableResponse($request, $type)
+    {
+        $query = MemberPracticeLog::where('member_id', auth()->id())
+            ->where('type', $type);
+
+        if ($request->has('search_term') && $request->search_term !== '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search_term . '%')
+                ->orWhere('description', 'like', '%' . $request->search_term . '%');
+            });
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('file', function ($log) {
+                return $log->file ? asset('storage/' . $log->file) : null;
+            })
+            ->addColumn('action', function ($log) {
+                if ($log->file) {
+                    return '<a href="' . asset('storage/' . $log->file) . '" target="_blank" class="btn btn-sm btn-primary">View</a>';
+                }
+                return '';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
 
     public function getAllMemberNotes($request, $memberId)
     {

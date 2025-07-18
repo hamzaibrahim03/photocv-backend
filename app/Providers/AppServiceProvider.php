@@ -63,6 +63,9 @@ use App\Repositories\MemberAdminRepository;
 use App\Repositories\MemberInterestBrandRepositoryInterface;
 use App\Repositories\MemberInterestBrandRepository;
 
+use App\Repositories\MemberPracticeLogRepositoryInterface;
+use App\Repositories\MemberPracticeLogRepository;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -86,6 +89,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ClubSettingsRepositoryInterface::class, ClubSettingsRepository::class);
         $this->app->bind(MemberRepositoryInterface::class, MemberRepository::class);
         $this->app->bind(MemberNoteRepositoryInterface::class, MemberNoteRepository::class);
+        $this->app->bind(MemberPracticeLogRepositoryInterface::class, MemberPracticeLogRepository::class);
         $this->app->bind(MemberInterestBrandRepositoryInterface::class, MemberInterestBrandRepository::class);
         $this->app->bind(MemberClassLogRepositoryInterface::class, MemberClassLogRepository::class);
         $this->app->bind(ClubDashboardRepositoryInterface::class, ClubDashboardRepository::class);

@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_photo_comments', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('member_id')->nullable();
             $table->bigInteger('photo_id')->nullable();
             $table->enum('record_type', ['comment', 'liking'])->nullable()->default('liking');

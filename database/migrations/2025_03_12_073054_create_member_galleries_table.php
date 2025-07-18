@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('member_galleries', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('member_id')->nullable();
             $table->bigInteger('club_id')->nullable();
             $table->string('gallery_name', 50)->nullable();

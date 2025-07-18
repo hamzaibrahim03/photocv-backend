@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('members', function (Blueprint $table) {
-            $table->bigInteger('id', true);
+            $table->id();
             $table->bigInteger('user_id')->nullable();
             $table->string('header_image', 250)->nullable();
             $table->enum('club_privacy', ['public', 'private', 'member_only'])->nullable()->default('public');

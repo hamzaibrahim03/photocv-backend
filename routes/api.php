@@ -20,6 +20,7 @@ use App\Http\Controllers\v1\MemberNoteController;
 use App\Http\Controllers\v1\MemberClassLogController;
 use App\Http\Controllers\v1\MemberInterestBrandController;
 use App\Http\Controllers\v1\PublicClubController;
+use App\Http\Controllers\v1\MemberPracticeLogController;
 
 Route::prefix('v1')->group(function() {
 
@@ -34,6 +35,9 @@ Route::prefix('v1')->group(function() {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 
+    Route::domain('{username}.staging.cameraclub.website')->group(function () {
+        Route::get('/club-public-data', [PublicClubController::class, 'getClubData']);
+    });
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
@@ -68,10 +72,6 @@ Route::prefix('v1')->group(function() {
             
         });
 
-        Route::domain('{username}.staging.cameraclub.website')->group(function () {
-            Route::get('/club-public-data', [PublicClubController::class, 'getClubData']);
-        });
-
         // member routes
         Route::middleware(['auth', 'role:member'])->group(function () {
             Route::post('/assign-club', [MemberController::class, 'assignClub']);
@@ -87,20 +87,32 @@ Route::prefix('v1')->group(function() {
             Route::post('/submit-competition-entry', [CompetitionController::class, 'submitCompetitionEntry']);
 
             //member admin routes
-            Route::get('/member-admin-events', [MemberAdminController::class, 'memberEvents']);
-            Route::get('/member-admin-event/{id}', [MemberAdminController::class, 'memberSingleEvent']);
-            Route::get('/member-admin-competitions', [MemberAdminController::class, 'memberCompetitions']);
-            Route::get('/member-admin-competition/{id}', [MemberAdminController::class, 'memberSingleCompetition']);
             Route::get('/profile/posts/view', [MemberAdminController::class, 'memberProfilePostsView']);
             Route::post('/notices', [NoticeController::class, 'create']);
             Route::put('/notices/{id}', [NoticeController::class, 'update']);
-            Route::get('/member-admin-profile', [MemberAdminController::class, 'memberAdminProfile']);
-            Route::get('/member-admin/profile/portfolio', [MemberAdminController::class, 'memberAdminProfilePortfolio']);
-            Route::get('/member-admin/profile/learning', [MemberAdminController::class, 'memberAdminProfileLearning']);
-            
-            Route::apiResource('member-admin/profile/notes', MemberNoteController::class);
-            Route::apiResource('member-admin/profile/class-logs', MemberClassLogController::class);
-            Route::apiResource('member-admin/profile/interests-brands', MemberInterestBrandController::class);
+
+
+            Route::prefix('member-admin')->group(function () {
+
+                Route::get('/events', [MemberAdminController::class, 'memberEvents']);
+                Route::get('/event/{id}', [MemberAdminController::class, 'memberSingleEvent']);
+
+                Route::get('/competitions', [MemberAdminController::class, 'memberCompetitions']);
+                Route::get('/competition/{id}', [MemberAdminController::class, 'memberSingleCompetition']);
+
+                Route::get('/profile', [MemberAdminController::class, 'memberAdminProfile']);
+                Route::get('/profile/portfolio', [MemberAdminController::class, 'memberAdminProfilePortfolio']);
+                Route::get('/profile/learning', [MemberAdminController::class, 'memberAdminProfileLearning']);
+
+                Route::apiResource('profile/notes', MemberNoteController::class);
+                Route::apiResource('profile/class-logs', MemberClassLogController::class);
+                Route::apiResource('profile/interests-brands', MemberInterestBrandController::class);
+
+                Route::get('practice-logs', [MemberPracticeLogController::class, 'index']);
+                Route::post('practice-logs', [MemberPracticeLogController::class, 'store']);
+                Route::delete('practice-logs/{id}', [MemberPracticeLogController::class, 'destroy']);
+
+            });
             
         });
 

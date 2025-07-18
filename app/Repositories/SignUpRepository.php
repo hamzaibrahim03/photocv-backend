@@ -59,11 +59,29 @@ class SignUpRepository implements SignUpRepositoryInterface
 
         // Create MemberBrands record
         if (!empty($data['member_brands'])) {
-            MemberBrand::create([
-                'member_id' => $member->id ?? null,
-                'interest' => $data['member_brands']['interest'] ?? [],
-                'brands' => $data['member_brands']['brands'] ?? [],
-            ]);
+            $memberId = $member->id ?? null;
+
+            // Loop through interests
+            if (!empty($data['member_brands']['interest'])) {
+                foreach ($data['member_brands']['interest'] as $interest) {
+                    MemberBrand::create([
+                        'member_id' => $memberId,
+                        'interest' => $interest,
+                        'brands' => null,
+                    ]);
+                }
+            }
+
+            // Loop through brands
+            if (!empty($data['member_brands']['brands'])) {
+                foreach ($data['member_brands']['brands'] as $brand) {
+                    MemberBrand::create([
+                        'member_id' => $memberId,
+                        'interest' => null,
+                        'brands' => $brand,
+                    ]);
+                }
+            }
         }
 
         // Create MemberContact record
