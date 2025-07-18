@@ -33,26 +33,6 @@ class MemberPracticeLogService
     }
 
     /**
-     * Method to show single note
-     * @param mixed $data
-     */
-    public function show($id)
-    {
-        return $this->memberPracticeLogRepository->show($id);
-    }
-
-    /**
-     * Method to update note
-     * @param mixed $data
-     * @param mixed $id
-     * @return void
-     */
-    public function update($data, $id)
-    {
-        return $this->memberPracticeLogRepository->update($data, $id);
-    }
-
-    /**
      * Method to delete note
      * @param mixed $id
      * @return void

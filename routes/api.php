@@ -31,7 +31,6 @@ Route::prefix('v1')->group(function() {
 
     Route::post('login', [AuthController::class, 'login']);
 
-
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 

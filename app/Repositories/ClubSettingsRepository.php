@@ -11,16 +11,14 @@ use App\Http\Responses\ClubSettingResponse;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
-    public function all( )
+    public function all( $userId = null )
     {
         try {
-            $club = Club::where('user_id', auth()->id())->first();
+            $club = Club::where('user_id', $userId ?? auth()->id())->first();
 
             if (!$club) {
                 return ClubSettingResponse::error('No club found for the current user.', 404);
             }
-
-            $clubSettings = ClubSetting::first();
 
             $totalMemberCount = User::whereHas('clubs', function ($query) use ($club) {
                 $query->where('club_id', $club->id);
@@ -37,8 +35,12 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
                 : null;
 
+            $contactData = User::where('id', $userId ?? auth()->id())->first();
+            $club['phone'] = $contactData->phone;
+            $club['address'] = $contactData->address;
+
             return ClubSettingResponse::success('Settings retrieved successfully.', [
-                'settings' => $clubSettings,
+                'settings' => $club,
                 'total_members' => $totalMemberCount,
                 'upcoming_event_days_count' => $upcoming,
             ]);
@@ -55,23 +57,37 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
     public function save(array $data, $logo = null, $clubBanner = null, $id = null)
     {
         try {
+            // Extract only phone and address for the user update
+            $user = auth()->user();
+
             if ($logo) {
                 $data['logo'] = $logo->store('club_logos', 'public');
             }
+
             if ($clubBanner) {
                 $data['club_banner'] = $clubBanner->store('club_banners', 'public');
             }
-    
-            // Store or update club settings
-            $clubSetting = ClubSetting::updateOrCreate(
-                ['id' => $id],
+
+            // Update user's phone and address if provided
+            $user->update([
+                'phone' => $data['phone'] ?? $user->phone,
+                'address' => $data['address'] ?? $user->address,
+            ]);
+
+            // Remove user-specific fields from data before saving to Club
+            unset($data['phone'], $data['address']);
+
+            // Update or create club settings
+            $clubSetting = Club::updateOrCreate(
+                ['id' => $user->club->id],
                 $data
             );
-    
+
             return ClubSettingResponse::success('Club Settings Saved Successfully.', $clubSetting, 201);
         } catch (\Exception $e) {
             $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
             return ClubSettingResponse::error($e->getMessage(), $statusCode);
         }
+
     }
 }

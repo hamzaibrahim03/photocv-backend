@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
 use App\Models\MemberPracticeLog;
+use Illuminate\Support\Facades\Storage;
 
 class MemberPracticeLogRepository implements MemberPracticeLogRepositoryInterface
 {
@@ -68,45 +69,6 @@ class MemberPracticeLogRepository implements MemberPracticeLogRepositoryInterfac
     }
 
     /**
-     * Method to show single note
-     * @param mixed $id
-     * @return mixed|\Illuminate\Http\JsonResponse
-     */
-    public function show($id)
-    {
-        try {
-            $note = MemberNote::with('member')
-            ->where('id', $id)
-            ->where('member_id', auth()->user()->id)
-            ->firstOrFail();
-            return MemberResponse::success('Note retrieved successfully.', $note);
-        } catch (\Exception $e) {
-            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
-    }
-
-    /**
-     * Method to update note
-     * @param mixed $data
-     * @param mixed $id
-     * @return void
-     */
-    public function update($data, $id)
-    {
-        try {
-            $note = MemberNote::where('id', $id)
-            ->where('member_id', auth()->user()->id)
-            ->firstOrFail();
-
-            $note->update(array_intersect_key($data, array_flip(['title', 'description', 'type'])));
-
-            return MemberResponse::success('Note updated successfully.', $note);
-        } catch (\Exception $e) {
-            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
-    }
-
-    /**
      * Method to delete note
      * @param mixed $id
      * @return void
@@ -114,13 +76,14 @@ class MemberPracticeLogRepository implements MemberPracticeLogRepositoryInterfac
     public function delete($id)
     {
         try {
-            $note = MemberNote::where('id', $id)
-            ->where('member_id', auth()->user()->id)
-            ->firstOrFail();
+            $log = MemberPracticeLog::where('id', $id)
+                ->where('member_id', auth()->id())
+                ->firstOrFail();
 
-            $note->delete();
+            Storage::disk('public')->delete($log->file);
+            $log->delete();
 
-            return MemberResponse::success('Note deleted successfully.', $note);
+            return MemberResponse::success('Data deleted successfully.', $log);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
