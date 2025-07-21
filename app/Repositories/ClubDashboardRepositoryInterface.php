@@ -13,4 +13,5 @@ interface ClubDashboardRepositoryInterface
     public function getLatestMembers(int $clubId, int $limit = 3);
     public function getMembersGallerries(int $clubId, int $limit = 10);
     public function getCurrentMonthActivities(int $clubId);
+    public function getRecentResults(int $clubId);
 }

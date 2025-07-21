@@ -242,12 +242,18 @@ class MemberRepository implements MemberRepositoryInterface
      */
     public function createGallery($data) {
         try {
-            $data['member_id'] = auth()->user()->id;
+            $user = auth()->user();
+            $data['member_id'] = $user->id;
+            $clubExists = $user->clubs->contains('id', $data['club_id']);
 
-            // Create the gallery
-            $createdGallery = MemberGallery::create($data);
+            if($clubExists){
+                // Create the gallery
+                $createdGallery = MemberGallery::create($data);
 
-            return MemberResponse::success('Gallery created successfully.', $createdGallery, 201);
+                return MemberResponse::success('Gallery created successfully.', $createdGallery, 201);
+            } else {
+                return MemberResponse::error('You do not belong to this club.', 403);
+            }
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
@@ -267,6 +273,7 @@ class MemberRepository implements MemberRepositoryInterface
             $titles = $data['title'] ?? [];
             $descriptions = $data['description'] ?? [];
             $isActive = isset($data['is_active']) ? (bool) $data['is_active'] : true;
+            $userId = auth()->user()->id;
 
             foreach ($images as $index => $image) {
                 // Store the image
@@ -279,9 +286,9 @@ class MemberRepository implements MemberRepositoryInterface
                     'description' => $descriptions[$index] ?? null,
                     'image'       => $path,
                     'is_active'   => $isActive,
+                    'uploaded_by' => $userId
                 ]);
             }
-
 
             return MemberResponse::success('Images uploaded successfully.');
         } catch (\Exception $e) {
@@ -311,6 +318,9 @@ class MemberRepository implements MemberRepositoryInterface
                     break;
                 case 'news':
                     $recordExists = ClubNews::where('id', $data['record_id'])->exists();
+                    break;
+                case 'photo':
+                    $recordExists = MemberPhoto::where('id', $data['record_id'])->exists();
                     break;
             }
 
@@ -342,30 +352,48 @@ class MemberRepository implements MemberRepositoryInterface
                 ->withCount(['galleries']) // gallery count
                 ->with([
                     'galleries.photos' => function ($query) {
-                        $query->where('is_active', true);
+                        $query->where('is_active', true)
+                            ->with(['comments' => function ($q) {
+                                $q->where('is_published', true);
+                            }]);
                     },
                 ])
                 ->get();
 
-            // Add average image count per gallery for each member
             $members->each(function ($member) {
                 $totalPhotos = 0;
+                $totalComments = 0;
+                $totalLikes = 0;
+
                 $totalGalleries = $member->galleries->count();
 
                 foreach ($member->galleries as $gallery) {
-                    $totalPhotos += $gallery->photos->count();
+                    foreach ($gallery->photos as $photo) {
+                        $totalPhotos++;
+
+                        foreach ($photo->comments as $comment) {
+                            if ($comment->comment_type === 'comment') {
+                                $totalComments++;
+                            } elseif ($comment->comment_type === 'liking') {
+                                $totalLikes++;
+                            }
+                        }
+                    }
                 }
 
+                $member->gallery_total_photos = $totalPhotos;
+                $member->gallery_total_comments = $totalComments;
+                $member->gallery_total_likes = $totalLikes;
                 $member->gallery_average_photos = $totalGalleries > 0
                     ? round($totalPhotos / $totalGalleries, 2)
                     : 0;
             });
 
-            return MemberResponse::success('Club members with galleries and photos retrieved successfully.', $members);
-        } catch (\Exception $e) {
-            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
+            return MemberResponse::success('Club members with galleries retrieved successfully.', $members);
 
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), (int) ($e->getCode() ?: 500));
+        }
     }
 
     /**
@@ -376,42 +404,87 @@ class MemberRepository implements MemberRepositoryInterface
     public function memberGalleryDetails($memberId)
     {
         try {
-            // Fetch the User model instance
             $member = User::findOrFail($memberId);
 
-            // Load member's galleries and active photos
             $member->load([
                 'galleries' => function ($query) {
                     $query->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
-                            $photoQuery->where('is_active', true);
+                            $photoQuery->where('is_active', true)
+                                ->with([
+                                    'comments' => function ($q) {
+                                        $q->where('is_published', true)->orderBy('created_at', 'desc');
+                                    },
+                                    'comments.user:id,username'
+                                ]);
                         }]);
                 }
             ]);
 
-            // Calculate gallery and photo stats
             $galleryCount = $member->galleries->count();
-            $totalPhotos = $member->galleries->sum(function ($gallery) {
-                return $gallery->photos->count();
+            $totalPhotos = $member->galleries->sum(fn($gallery) => $gallery->photos->count());
+            $averagePhotos = $galleryCount > 0 ? round($totalPhotos / $galleryCount, 2) : 0;
+
+            $galleriesData = $member->galleries->map(function ($gallery) {
+                $photos = $gallery->photos->map(function ($photo) {
+                    $comments = $photo->comments->where('comment_type', 'comment')->map(function ($comment) {
+                        return [
+                            'id' => $comment->id,
+                            'comment' => $comment->comment,
+                            'posted_by' => $comment->user->username ?? 'Unknown',
+                            'posted_by_id' => $comment->user->id ?? null,
+                            'posted_at' => $comment->created_at->toDateTimeString(),
+                        ];
+                    })->values();
+
+                    $likes = $photo->comments->where('comment_type', 'liking')->map(function ($like) {
+                        return [
+                            'id' => $like->id,
+                            'liked_by' => $like->user->username ?? 'Unknown',
+                            'liked_by_id' => $like->user->id ?? null,
+                            'liked_at' => $like->created_at->toDateTimeString(),
+                        ];
+                    })->values();
+
+                    return [
+                        'photo_id' => $photo->id,
+                        'title' => $photo->title,
+                        'image' => asset('storage/' . $photo->image),
+                        'comments' => $comments,
+                        'likes' => $likes,
+                        'comments_count' => $comments->count(),
+                        'likes_count' => $likes->count(),
+                    ];
+                });
+
+                // Calculate totals for this gallery
+                $totalGalleryPhotos = $photos->count();
+                $totalGalleryComments = $photos->sum(fn($photo) => $photo['comments_count']);
+                $totalGalleryLikes = $photos->sum(fn($photo) => $photo['likes_count']);
+
+                return [
+                    'gallery_id' => $gallery->id,
+                    'gallery_name' => $gallery->gallery_name,
+                    'total_photos' => $totalGalleryPhotos,
+                    'total_comments' => $totalGalleryComments,
+                    'total_likes' => $totalGalleryLikes,
+                    'photos' => $photos,
+                ];
             });
 
-            $averagePhotos = $galleryCount > 0
-                ? round($totalPhotos / $galleryCount, 2)
-                : 0;
-
-            // Prepare response
             $data = [
-                'member' => $member,
+                'member' => $member->only(['id', 'username', 'first_name', 'last_name', 'profile_image', 'email']),
                 'gallery_count' => $galleryCount,
                 'total_photos' => $totalPhotos,
                 'average_photos_per_gallery' => $averagePhotos,
-                // 'galleries' => $member->galleries,
+                'galleries' => $galleriesData,
             ];
 
             return MemberResponse::success('Member galleries retrieved successfully.', $data);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
+
     }
 
     /**

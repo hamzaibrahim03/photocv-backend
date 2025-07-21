@@ -13,12 +13,15 @@ return new class extends Migration
     {
         Schema::create('member_galleries', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('member_id')->nullable();
-            $table->bigInteger('club_id')->nullable();
+            $table->unsignedBigInteger('member_id');
+            $table->unsignedBigInteger('club_id');
             $table->string('gallery_name', 50)->nullable();
             $table->boolean('is_active')->nullable()->default(false);
             $table->timestamps();
             $table->softDeletes();
+
+            $table->foreign('member_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('club_id')->references('id')->on('clubs')->onDelete('cascade');
         });
     }
 

@@ -9,6 +9,7 @@ use App\Repositories\EventRepository;
 use App\Repositories\CompetitionRepository;
 use App\Repositories\ClubNewsRepository;
 use App\Repositories\ClubSettingsRepository;
+use App\Repositories\ClubGalleryRepository;
 use App\Models\User;
 use App\Models\MemberPhoto;
 use App\Models\MemberAward;
@@ -21,6 +22,7 @@ class PublicClubController extends Controller
     protected CompetitionRepository $competitionRepo;
     protected ClubNewsRepository $clubNewsRepo;
     protected ClubSettingsRepository $clubSettingRepo;
+    protected ClubGalleryRepository $clubGalleryRepo;
 
     public function __construct(
         ClubDashboardRepository $clubDashboardRepo,
@@ -28,12 +30,14 @@ class PublicClubController extends Controller
         CompetitionRepository $competitionRepo,
         ClubNewsRepository $clubNewsRepo,
         ClubSettingsRepository $clubSettingRepo,
+        ClubGalleryRepository $clubGalleryRepo,
     ) {
         $this->clubDashboardRepo = $clubDashboardRepo;
         $this->eventRepo = $eventRepo;
         $this->competitionRepo = $competitionRepo;
         $this->clubNewsRepo = $clubNewsRepo;
         $this->clubSettingRepo = $clubSettingRepo;
+        $this->clubGalleryRepo = $clubGalleryRepo;
     }
 
     public function getClubData(Request $request)
@@ -60,11 +64,12 @@ class PublicClubController extends Controller
             'message' => 'Data retreived successfully',
             'data' => [
                 'user' => $user,
-                'clubGalleries' => MemberAward::with([
-                        'photo.gallery' => function ($query) {
-                            $query->with('member.clubs');
-                        }
-                    ])->get(),
+                'clubGalleries' => $this->clubGalleryRepo->getClubGalleries($user->id),
+                // 'clubGalleries' => MemberAward::with([
+                //         'photo.gallery' => function ($query) {
+                //             $query->with('member.clubs');
+                //         }
+                //     ])->get(),
                 'memberGalleries' => $this->clubDashboardRepo->getMembersGallerries($clubId),
                 'latestMembers' => $this->clubDashboardRepo->getLatestMembers($clubId),
                 'upcomingEvents' => $this->eventRepo->getUpcomingEvents($clubId),

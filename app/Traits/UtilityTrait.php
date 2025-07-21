@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\MemberNotice;
 use App\Models\MemberNote;
 use App\Models\MemberBrand;
+use App\Models\MemberGallery;
 use App\Models\MemberPracticeLog;
 use Carbon\Carbon;
 use App\Models\Competition;

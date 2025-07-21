@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class EventImage
@@ -27,6 +28,7 @@ class EventImage extends Model
 {
 	use SoftDeletes;
 	protected $table = 'event_images';
+	protected $appends = ['image_url'];
 	public $incrementing = false;
 
 	protected $casts = [
@@ -41,6 +43,15 @@ class EventImage extends Model
 		'image',
 		'created_by'
 	];
+
+	// Accessor to return full image URL
+    public function getImageUrlAttribute()
+    {
+        if ($this->image) {
+            return url('storage/' . ltrim($this->image, '/'));
+        }
+        return null;
+    }
 
 	public function event()
     {

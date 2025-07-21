@@ -28,6 +28,7 @@ class GalleryRequest extends FormRequest
             return [
                 'gallery_name' => 'required|string|max:255',
                 'is_active'    => 'required|boolean',
+                'club_id'      => 'required|integer|exists:clubs,id',
             ];
         }
 

@@ -21,6 +21,7 @@ use App\Http\Controllers\v1\MemberClassLogController;
 use App\Http\Controllers\v1\MemberInterestBrandController;
 use App\Http\Controllers\v1\PublicClubController;
 use App\Http\Controllers\v1\MemberPracticeLogController;
+use App\Http\Controllers\v1\ClubGalleryController;
 
 Route::prefix('v1')->group(function() {
 
@@ -68,6 +69,8 @@ Route::prefix('v1')->group(function() {
             Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
 
             Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);
+
+            Route::apiResource('club-gallery', ClubGalleryController::class);
             
         });
 

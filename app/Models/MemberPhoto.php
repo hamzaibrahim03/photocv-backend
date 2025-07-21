@@ -48,7 +48,8 @@ class MemberPhoto extends Model
 		'description',
 		'is_active',
 		'club_admin_notes',
-		'allow_cc'
+		'allow_cc',
+		'uploaded_by',
 	];
 
 	public function gallery()
@@ -68,6 +69,16 @@ class MemberPhoto extends Model
 		return $this->image
 			? URL::to('storage/' . $this->image)
 			: null;
+	}
+
+	public function uploadedBy()
+    {
+        return $this->belongsTo(User::class, 'uploaded_by');
+    }
+
+	public function comments()
+	{
+		return $this->hasMany(Comment::class, 'record_id')->where('record_type', 'photo');
 	}
 
 }
