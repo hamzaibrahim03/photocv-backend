@@ -48,6 +48,7 @@ class User extends Authenticatable
 {
 	use SoftDeletes, HasRoles, HasApiTokens;
 	protected $table = 'users';
+	protected $appends = ['profile_image_url'];
 
 	protected $casts = [
 		'approval_date' => 'datetime',
@@ -84,6 +85,14 @@ class User extends Authenticatable
 		'updated_by',
 		'deleted_by'
 	];
+
+	public function getProfileImageUrlAttribute()
+	{
+		if ($this->profile_image) {
+			return url('storage/' . ltrim($this->profile_image, '/'));
+		}
+	}
+
 
 	public function clubs()
 	{

@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * Class Event
@@ -43,7 +44,7 @@ class Event extends Model
 	use SoftDeletes;
 	protected $table = 'events';
 	protected $appends = ['featured_image_url'];
-	protected $hidden = ['featured_image'];
+	// protected $hidden = ['featured_image'];
 
 	protected $casts = [
 		'event_date' => 'datetime',
@@ -98,9 +99,17 @@ class Event extends Model
 
 	public function getFeaturedImageUrlAttribute()
 	{
-		return $this->featured_image
-			? asset('storage/' . $this->featured_image)
-			: null;
+		if (!$this->featured_image) {
+			return null;
+		}
+
+		// If already a full URL, return as is
+		if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
+			return $this->featured_image;
+		}
+
+		// Otherwise, prepend storage path
+		return asset('storage/' . $this->featured_image);
 	}
 
 }

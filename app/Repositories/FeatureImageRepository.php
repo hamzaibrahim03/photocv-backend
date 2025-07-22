@@ -27,7 +27,7 @@ class FeatureImageRepository implements FeatureImageRepositoryInterface
 
             $model = $modelClass::findOrFail($data['model_id']);
 
-            $path = $data['featured_image']->store('featured_images');
+            $path = $data['featured_image']->store('featured_images', 'public');
 
             // Save path (relative) in the model
             $model->featured_image = $path;

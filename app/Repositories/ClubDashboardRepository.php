@@ -30,12 +30,12 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
 
     public function getLatestEvents(int $clubId, int $limit = 3)
     {
-        $events = Event::where('club_id', $clubId)
+        $events = Event::with('images')->where('club_id', $clubId)
             ->orderBy('event_date', 'desc')
             ->limit($limit)
             ->get();
 
-        $upcoming = Event::where('club_id', $clubId)
+        $upcoming = Event::with('images')->where('club_id', $clubId)
             ->whereDate('event_date', '>=', now())
             ->orderBy('event_date', 'asc')
             ->limit($limit)
@@ -44,7 +44,6 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
                 $remainingDays = Carbon::now()->startOfDay()->diffInDays(Carbon::parse($event->event_date)->startOfDay(), false);
                 return ['remaining_days' => $remainingDays];
             });
-
 
         return [
             'events' => $events,
