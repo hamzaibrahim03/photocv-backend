@@ -61,7 +61,7 @@ class MemberPhoto extends Model
 	{
 		return $this->hasMany(Comment::class, 'record_id')
 			->where('record_type', 'photo')
-			->where('comment_type', 'like');
+			->where('comment_type', 'liking');
 	}
 
 	public function getImageUrlAttribute()
@@ -78,7 +78,10 @@ class MemberPhoto extends Model
 
 	public function comments()
 	{
-		return $this->hasMany(Comment::class, 'record_id')->where('record_type', 'photo');
+		return $this->hasMany(Comment::class, 'record_id')
+			->where('record_type', 'photo')
+			->where('comment_type', 'comment')
+			->whereNotNull('comment'); // Ensure it's a real comment
 	}
 
 }

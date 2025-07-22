@@ -58,6 +58,17 @@ class PublicClubController extends Controller
             ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
             : Carbon::now()->endOfMonth();
 
+        // Fetch only photos that have comments or likes
+        $photos = MemberPhoto::with([
+            'uploadedBy:id,username,email',
+            'comments.user:id,username,email',
+            'likes.user:id,username,email'
+        ])
+        ->whereHas('comments') // Only photos that have comments
+        ->orWhereHas('likes')  // Or have likes
+        ->latest()
+        ->get();
+
 
         return response()->json([
             'success' => true,
@@ -70,33 +81,45 @@ class PublicClubController extends Controller
                 //             $query->with('member.clubs');
                 //         }
                 //     ])->get(),
-                'memberGalleries' => $this->clubDashboardRepo->getMembersGallerries($clubId),
-                'latestMembers' => $this->clubDashboardRepo->getLatestMembers($clubId),
                 'upcomingEvents' => $this->eventRepo->getUpcomingEvents($clubId),
                 'upcomingCompetitions' => $this->competitionRepo->getUpcomingCompetitions($clubId),
                 'calendar' => $this->competitionRepo->getCalenderCompetitionData($clubId, $startOfMonth, $endOfMonth),
-                'recentComments' => $user->comments()
-                    ->latest()
-                    ->get()
-                    ->map(function ($comment) {
-                        $related = match ($comment->record_type) {
-                            'event'  => $comment->event,
-                            'page'   => $comment->page,
-                            'notice' => $comment->memberNotice,
-                            'news'   => $comment->clubNews,
-                            default  => null,
-                        };
-
-                        $comment->related_record_name = optional($related)->title ?? optional($related)->name ?? null;
-
-                        return $comment;
-                    }),
-                'recentLikes' => MemberPhoto::whereHas('likes')
-                    ->whereHas('gallery', function ($query) use ($user) {
-                        $query->where('member_id', $user->id);
-                    })
-                    ->latest()
-                    ->get(),
+                'memberGalleries' => $this->clubDashboardRepo->getMembersGallerries($clubId),
+                'latestMembers' => $this->clubDashboardRepo->getLatestMembers($clubId),
+                'latestInteractions' => $photos->map(function ($photo) {
+                    return [
+                        'id' => $photo->id,
+                        'title' => $photo->title,
+                        'image_url' => $photo->image_url,
+                        'description' => $photo->description,
+                        'uploaded_by' => [
+                            'id' => $photo->uploadedBy?->id,
+                            'username' => $photo->uploadedBy?->username,
+                            'email' => $photo->uploadedBy?->email,
+                        ],
+                        'comments' => $photo->comments->map(function ($comment) {
+                            return [
+                                'id' => $comment->id,
+                                'comment' => $comment->comment,
+                                'interacted_by' => [
+                                    'id' => $comment->user?->id,
+                                    'username' => $comment->user?->username,
+                                ],
+                                'created_at' => $comment->created_at,
+                            ];
+                        }),
+                        'likes' => $photo->likes->map(function ($like) {
+                            return [
+                                'id' => $like->id,
+                                'interacted_by' => [
+                                    'id' => $like->user?->id,
+                                    'username' => $like->user?->username,
+                                ],
+                                'created_at' => $like->created_at,
+                            ];
+                        }),
+                    ];
+                }),
                 'clubNews' => $this->clubNewsRepo->getClubNews($clubId),
                 'clubSettings' => $this->clubSettingRepo->all($user->id),
             ]
