@@ -38,7 +38,19 @@ class SignUpRepository implements SignUpRepositoryInterface
 
         if (!empty($data['club'])) {
             $clubData = $data['club'];
-            $clubData['user_id'] = $user->id; // Link user to club
+            $clubData['user_id'] = $user->id;
+
+            // Handle about_img
+            if ($data['about_img']) {
+                $aboutImg = $data['about_img'];
+                $clubData['about_img'] = $aboutImg->store('uploads/clubs/about', 'public');
+            }
+
+            // Handle footer_img
+            if ($data['footer_img']) {
+                $footerImg = $data['footer_img'];
+                $clubData['footer_img'] = $footerImg->store('uploads/clubs/footer', 'public');
+            }
 
             Club::create($clubData);
         }

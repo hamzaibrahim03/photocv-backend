@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class Club
@@ -56,6 +57,14 @@ class Club extends Model
 	use SoftDeletes;
 	protected $table = 'clubs';
 
+	protected $appends = [
+		'about_img_url',
+		'footer_img_url',
+		'logo_url',
+		'cover_image_url',
+	];
+
+
 	protected $casts = [
 		'user_id' => 'int',
 		'created_by' => 'int',
@@ -75,6 +84,10 @@ class Club extends Model
 		'font',
 		'background_color',
 		'header_text',
+		'about_title',
+		'about_description',
+		'about_img',
+		'footer_img',
 		'footer_text',
 		'logo',
 		'cover_image',
@@ -128,4 +141,23 @@ class Club extends Model
 		return null;
 	}
 
+	public function getAboutImgUrlAttribute()
+	{
+		return $this->about_img ? asset('storage/' . $this->about_img) : null;
+	}
+
+	public function getFooterImgUrlAttribute()
+	{
+		return $this->footer_img ? asset('storage/' . $this->footer_img) : null;
+	}
+
+	public function getLogoUrlAttribute()
+	{
+		return $this->logo ? asset('storage/' . $this->logo) : null;
+	}
+
+	public function getCoverImageUrlAttribute()
+	{
+		return $this->cover_image ? asset('storage/' . $this->cover_image) : null;
+	}
 }

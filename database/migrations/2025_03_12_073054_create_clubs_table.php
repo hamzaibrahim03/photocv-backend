@@ -24,7 +24,11 @@ return new class extends Migration
             $table->string('font', 100)->nullable();
             $table->string('background_color', 10)->nullable();
             $table->text('header_text')->nullable();
+            $table->text('about_title')->nullable();
+            $table->text('about_description')->nullable();
+            $table->string('about_img')->nullable();
             $table->text('footer_text')->nullable();
+            $table->string('footer_img')->nullable();
             $table->string('logo', 250)->nullable();
             $table->string('cover_image', 250)->nullable();
             $table->enum('registration', ['open', 'invite', 'manual_approval'])->nullable()->default('open');

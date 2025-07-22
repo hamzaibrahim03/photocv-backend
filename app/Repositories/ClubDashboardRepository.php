@@ -180,14 +180,14 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
         return MemberAward::with([
             'photo.gallery.member',
             'photo.uploadedBy',
-            'photo.comments' => function ($query) {
+            'photo.commentsOrLikes' => function ($query) {
                 $query->where('is_published', true)->with('user');
             }
         ])->get()->map(function ($award) use ($clubId) {
             $photo = $award->photo;
             $gallery = $photo->gallery;
 
-            $comments = $photo->comments->where('comment_type', 'comment')->map(function ($comment) {
+            $comments = $photo->commentsOrLikes->where('comment_type', 'comment')->map(function ($comment) {
                 return [
                     'id' => $comment->id,
                     'comment' => $comment->comment,
@@ -197,7 +197,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
                 ];
             })->values();
 
-            $likes = $photo->comments->where('comment_type', 'liking')->map(function ($like) {
+            $likes = $photo->commentsOrLikes->where('comment_type', 'liking')->map(function ($like) {
                 return [
                     'id' => $like->id,
                     'liked_by' => $like->user->username ?? 'Unknown',
@@ -209,6 +209,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
             return [
                 'award_id' => $award->id,
                 'photo_id' => $photo->id ?? null,
+                'award_standing' => $award->award_standing ?? null,
                 'photo_title' => $photo->title ?? null,
                 'image' => $photo->image_url ?? null,
                 'gallery_name' => $gallery->gallery_name ?? null,

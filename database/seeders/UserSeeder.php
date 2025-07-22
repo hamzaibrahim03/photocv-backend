@@ -73,6 +73,9 @@ class UserSeeder extends Seeder
                 'competitions'        => 'enabled',
                 'reminders'           => 'all',
                 'home_page_blocks'    => 'all',
+                'about_title'         => 'About title',
+                'about_description'   => 'About Description',
+                'footer_text'         => 'Footer Description',
             ]
         );
     }

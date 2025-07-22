@@ -121,6 +121,7 @@ class PublicClubController extends Controller
                     ];
                 }),
                 'clubNews' => $this->clubNewsRepo->getClubNews($clubId),
+                'latestReseults' => $this->clubDashboardRepo->getRecentResults($clubId),
                 'clubSettings' => $this->clubSettingRepo->all($user->id),
             ]
         ], 200);

@@ -84,4 +84,9 @@ class MemberPhoto extends Model
 			->whereNotNull('comment'); // Ensure it's a real comment
 	}
 
+	public function commentsOrLikes()
+	{
+		return $this->hasMany(Comment::class, 'record_id')->where('record_type', 'photo');
+	}
+
 }
