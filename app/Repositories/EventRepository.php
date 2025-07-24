@@ -215,10 +215,11 @@ class EventRepository implements EventRepositoryInterface
             ->get();
 
         // Upcoming event (closest future event)
-        $upcomingEvent = $this->getUpcomingEvents($clubId);
+        $upcomingEvents = $this->getUpcomingEvents($clubId);
 
-        $upcoming = $upcomingEvent
-            ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
+        $firstEvent = $upcomingEvents->first();
+        $upcoming = $firstEvent
+            ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($firstEvent->event_date)->startOfDay(), false)]
             : null;
 
         // Total event count
