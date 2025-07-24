@@ -3,14 +3,17 @@
 namespace App\Services;
 
 use App\Repositories\ClubDashboardRepositoryInterface;
+use App\Repositories\ClubGalleryRepository;
 
 class ClubDashboardService
 {
     protected $clubDashboardRepository;
+    protected ClubGalleryRepository $clubGalleryRepo;
 
-    public function __construct(ClubDashboardRepositoryInterface $clubDashboardRepository)
+    public function __construct(ClubDashboardRepositoryInterface $clubDashboardRepository, ClubGalleryRepository $clubGalleryRepo,)
     {
         $this->clubDashboardRepository = $clubDashboardRepository;
+        $this->clubGalleryRepo = $clubGalleryRepo;
     }
 
     public function getDashboardData(int $clubId)
@@ -28,7 +31,7 @@ class ClubDashboardService
             'club_news' => $this->clubDashboardRepository->getLatestClubNews($clubId),
             'latest_members' => $latestMembersData['members'],
             'member_galleries' => $this->clubDashboardRepository->getMembersGallerries($clubId),
-            'club_galleries' => $this->clubDashboardRepository->getMembersGallerries($clubId),
+            'clubGalleries' => $this->clubGalleryRepo->getClubGalleries(auth()->user()->id),
             'total_members_count' => $latestMembersData['total_count'],
             'current_month_activities' => $this->clubDashboardRepository->getCurrentMonthActivities($clubId),
             'recent_results' => $this->clubDashboardRepository->getRecentResults($clubId),
