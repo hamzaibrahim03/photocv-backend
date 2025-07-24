@@ -77,6 +77,18 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
             // Remove user-specific fields from data before saving to Club
             unset($data['phone'], $data['address']);
 
+            // Handle about_img
+            if ($data['about_img']) {
+                $aboutImg = $data['about_img'];
+                $data['about_img'] = $aboutImg->store('uploads/clubs/about', 'public');
+            }
+
+            // Handle footer_img
+            if ($data['footer_img']) {
+                $footerImg = $data['footer_img'];
+                $data['footer_img'] = $footerImg->store('uploads/clubs/footer', 'public');
+            }
+
             // Update or create club settings
             $clubSetting = Club::updateOrCreate(
                 ['id' => $user->club->id],
