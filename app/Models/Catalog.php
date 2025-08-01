@@ -9,6 +9,7 @@ namespace App\Models;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Str;
 
 /**
  * Class Catalog
@@ -27,12 +28,28 @@ class Catalog extends Model
 {
 	use SoftDeletes;
 	protected $table = 'catalog';
+	protected $appends = ['icon_url'];
 
 	protected $fillable = [
 		'name',
 		'catalog_type',
 		'icon'
 	];
+
+	public function getIconUrlAttribute()
+	{
+		if (!$this->icon) {
+			return null;
+		}
+
+		// If already a full URL, return it as-is
+		if (Str::startsWith($this->icon, ['http://', 'https://'])) {
+			return $this->icon;
+		}
+
+		// Otherwise, prepend the public storage path
+		return asset('storage/catalog_icons/' . $this->icon);
+	}
 
 	public function pages()
 	{

@@ -125,4 +125,34 @@ class Competition extends Model
 			: null;
 	}
 
+	public function competitionType()
+    {
+        return $this->belongsTo(Catalog::class, 'competition_type_id', 'id');
+    }
+
+    public function judgingType()
+    {
+        return $this->belongsTo(Catalog::class, 'judging_type_id', 'id');
+    }
+
+	public function resultMethod()
+    {
+        return $this->belongsTo(Catalog::class, 'result_method_id', 'id');
+    }
+
+	public function votingMethod()
+    {
+        return $this->belongsTo(Catalog::class, 'voting_method_id', 'id');
+    }
+
+	public function competitionTheme()
+    {
+        return $this->belongsTo(Catalog::class, 'theme_id', 'id');
+    }
+
+	public function competitionCategory()
+    {
+        return $this->belongsTo(Catalog::class, 'category_id', 'id');
+    }
+
 }

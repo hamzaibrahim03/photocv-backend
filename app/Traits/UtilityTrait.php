@@ -46,7 +46,7 @@ trait UtilityTrait
 
     public function getAllEventData($request)
     {
-        $query = Event::with(['images', 'comments']);
+        $query = Event::with(['eventType', 'eventKind', 'images', 'comments']);
 
         $club = Club::where('user_id', auth()->id())->first();
         if ($club) {
@@ -199,7 +199,7 @@ trait UtilityTrait
 
     public function getAllNoticeData($request)
     {
-        $query = MemberNotice::with(['files', 'comments', 'club', 'member']);
+        $query = MemberNotice::with([ 'noticeType', 'files', 'comments', 'club', 'member',]);
 
         $club = Club::where('user_id', auth()->id())->first();
         $userId = auth()->id();

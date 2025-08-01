@@ -21,7 +21,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     {
         try {
             $clubId = auth()->user()->club->id;
-            $query = Competition::where('club_id', $clubId); // filters competitions by user's club
+            $query = Competition::where('club_id', $clubId)->with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme']);
             $competitions = $this->getAllIndexData($request, $query, 'name');
             return CompetitionResponse::success('Competitions retrieved successfully.', $competitions);
         } catch (\Exception $e) {
@@ -33,7 +33,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function show( $id )
     {
         try {
-            $competition = Competition::findOrFail($id);
+            $competition = Competition::with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme'])->findOrFail($id);
 
             if (!$competition) {
                 return CompetitionResponse::error('Competition not found.', 404);

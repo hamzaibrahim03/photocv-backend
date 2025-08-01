@@ -99,4 +99,9 @@ class MemberNotice extends Model
 	{
 		return $this->belongsTo(User::class, 'user_id');
 	}
+
+	public function noticeType()
+    {
+        return $this->belongsTo(Catalog::class, 'notice_type_id', 'id');
+    }
 }
