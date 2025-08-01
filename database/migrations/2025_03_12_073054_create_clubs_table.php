@@ -36,6 +36,8 @@ return new class extends Migration
             $table->enum('comments', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->enum('likes', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->enum('news', ['enabled', 'disabled'])->nullable()->default('disabled');
+            $table->enum('website_sections', ['Enable/Disable News', 'Events', 'Galleries', 'Competitions']);
+            $table->enum('comment_preference', ['All', 'Fewer', 'Fewest']);
             $table->enum('events', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->enum('galleries', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->enum('competitions', ['enabled', 'disabled'])->nullable()->default('disabled');
@@ -44,10 +46,14 @@ return new class extends Migration
             $table->string('fb_link', 250)->nullable();
             $table->string('insta_link', 250)->nullable();
             $table->string('flickr_link', 250)->nullable();
-            $table->text('privacy_policy')->nullable()->comment('GDPR and privacy management');
-            $table->text('user_consent_cookie')->nullable();
-            $table->text('data_collection_preference')->nullable();
-            $table->enum('content_moderation_reporting', ['enabled', 'disabled'])->nullable()->default('disabled');
+            $table->string('gdpr_privacy_policy_management')->nullable();
+            $table->boolean('cookies')->default(false);
+            $table->text('cookies_description')->nullable();
+            $table->boolean('data_collection_preferences')->default(false);
+            $table->text('data_collection_preferences_description')->nullable();
+            $table->boolean('allow_reporting')->default(false);
+            $table->text('allow_reporting_description')->nullable();
+            // $table->enum('content_moderation_reporting', ['enabled', 'disabled'])->nullable()->default('disabled');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->integer('deleted_by')->nullable();
