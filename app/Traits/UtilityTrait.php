@@ -55,6 +55,10 @@ trait UtilityTrait
             return DataTables::of(collect([]))->make(true);
         }
 
+        if ($request->has('event_type_id') && $request->event_type_id != '') {
+            $query->where('event_type_id', $request->event_type_id);
+        }
+
         if ($request->has('search_term') && $request->search_term != '') {
             $query->where(function ($q) use ($request) {
                 $q->where('name', 'LIKE', '%' . $request->search_term . '%');
@@ -78,6 +82,7 @@ trait UtilityTrait
             ->rawColumns(['action'])
             ->make(true);
     }
+
 
     public function getAllMemberInterestsBrands($request, $memberId)
     {
@@ -146,37 +151,74 @@ trait UtilityTrait
 
     public function getAllMemberNotes($request, $memberId)
     {
-        $query = MemberNote::where('member_id', $memberId)->get();
+        $query = MemberNote::where('member_id', $memberId);
 
+        // Search filter
         if ($request->has('search_term') && $request->search_term != '') {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'LIKE', '%' . $request->search_term . '%');
+            $search = $request->search_term;
+            $query->where(function ($q) use ($search) {
+                $q->where('title', 'LIKE', '%' . $search . '%')
+                ->orWhere('description', 'LIKE', '%' . $search . '%')
+                ->orWhere('tags', 'LIKE', '%' . $search . '%')
+                ->orWhere('location', 'LIKE', '%' . $search . '%');
             });
         }
 
+        // Filter by notice_type_id
+        if ($request->has('notice_type_id') && $request->notice_type_id != '') {
+            $query->where('notice_type_id', $request->notice_type_id);
+        }
+
+        // Filter by poll
+        if ($request->has('poll') && $request->poll != '') {
+            $query->where('poll', $request->poll);
+        }
+
+        // Filter by urgency_importance
+        if ($request->has('urgency_importance') && $request->urgency_importance != '') {
+            $query->where('urgency_importance', $request->urgency_importance);
+        }
+
+        // Filter by comment_allowed
+        if ($request->has('comment_allowed') && $request->comment_allowed != '') {
+            $query->where('comment_allowed', $request->comment_allowed);
+        }
+
+        // Sorting
         if ($request->has('order') && count($request->order)) {
             $column = $request->columns[$request->order[0]['column']]['data'];
             $direction = $request->order[0]['dir'];
             $query->orderBy($column, $direction);
+        } else {
+            $query->orderBy('created_at', 'desc'); // Default sort
         }
 
         return DataTables::of($query)
             ->addIndexColumn()
-            ->addColumn('action', function ($event) {
-                return '<a href="' . route('events.show', $event->id) . '" class="btn btn-sm btn-primary">View</a>';
+            ->addColumn('action', function ($note) {
+                return '<a href="' . route('member-notes.show', $note->id) . '" class="btn btn-sm btn-primary">View</a>';
             })
-            ->editColumn('featured_image', function ($event) {
-                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
+            ->editColumn('featured_image', function ($note) {
+                return $note->featured_image ? asset('storage/' . $note->featured_image) : null;
             })
             ->rawColumns(['action'])
             ->make(true);
     }
+
 
     public function getAllIndexData($request, $query, $search)
     {
         // Apply search filter
         if ($request->has('search_term') && $request->search_term != '') {
             $query->where($search, 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        if ($request->has('page_type_id') && $request->page_type_id != '') {
+            $query->where('page_type_id', $request->page_type_id);
+        }
+
+        if ($request->has('news_type_id') && $request->news_type_id != '') {
+            $query->where('news_type_id', $request->news_type_id);
         }
 
         // Sorting
@@ -468,6 +510,48 @@ trait UtilityTrait
             'recentCompetitions' => $recentCompetitions,
             'recentSubmissions' => $recentSubmissions,
         ]);
+    }
+
+    public function getAllCompetitionsData($request, $query, $search)
+    {
+        // Apply search filter
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where($search, 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        // Apply filters
+        if ($request->has('print_vs_digital') && $request->print_vs_digital != '') {
+            $query->where('print_vs_digital', $request->print_vs_digital);
+        }
+
+        if ($request->has('color_vs_mono') && $request->color_vs_mono != '') {
+            $query->where('color_vs_mono', $request->color_vs_mono);
+        }
+
+        if ($request->has('competition_type_id') && $request->competition_type_id != '') {
+            $query->where('competition_type_id', $request->competition_type_id);
+        }
+
+        if ($request->has('allowed_image_formats') && $request->allowed_image_formats != '') {
+            $query->where('allowed_image_formats', 'LIKE', '%' . $request->allowed_image_formats . '%');
+        }
+
+        // Sorting
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('action', function ($event) {
+                return '<a href="'.route('events.show', $event->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->editColumn('featured_image', function ($event) {
+                return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
+            })
+            ->make(true);
     }
 
 }
