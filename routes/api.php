@@ -90,9 +90,7 @@ Route::prefix('v1')->group(function() {
 
             //member admin routes
             Route::get('/profile/posts/view', [MemberAdminController::class, 'memberProfilePostsView']);
-            Route::post('/notices', [NoticeController::class, 'create']);
-            Route::put('/notices/{id}', [NoticeController::class, 'update']);
-
+            Route::apiResource('member-notice', NoticeController::class)->only(['store', 'update']);
 
             Route::prefix('member-admin')->group(function () {
 
