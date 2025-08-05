@@ -9,6 +9,7 @@ use App\Models\Comment;
 use App\Models\MemberNotice;
 use App\Models\MemberNote;
 use App\Models\MemberBrand;
+use App\Models\MemberAward;
 use App\Models\User;
 use App\Models\MemberPracticeLog;
 use Carbon\Carbon;
@@ -598,6 +599,12 @@ trait UtilityTrait
                 }
             }
             return $likes;
+        })
+
+        ->addColumn('award_winning_photos', function ($member) {
+            return MemberAward::whereHas('photo.gallery', function ($query) use ($member) {
+                $query->where('uploaded_by', $member->id);
+            })->count();
         })
 
         // ->addColumn('comments_preview', function ($member) {
