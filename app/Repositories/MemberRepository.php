@@ -44,65 +44,60 @@ class MemberRepository implements MemberRepositoryInterface
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show( $id )
+    public function show($id)
     {
         try {
             $member = User::findOrFail($id);
 
-            // Load galleries with active photos
+            // Load galleries with active photos and their comments
             $member->load([
                 'galleries' => function ($query) {
                     $query->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
-                            $photoQuery->where('is_active', true);
+                            $photoQuery->where('is_active', true)
+                                ->with(['comments' => function ($q) {
+                                    $q->where('is_published', true);
+                                }]);
                         }]);
                 },
                 'competitionMembers.competition',
                 'competitionMembers.entries'
             ]);
 
-            // Load recent comments with related record titles
-            $recentComments = $member->comments()
-                ->latest()
-                ->get()
-                ->map(function ($comment) {
-                    $related = match ($comment->record_type) {
-                        'event'  => $comment->event,
-                        'page'   => $comment->page,
-                        'notice' => $comment->memberNotice,
-                        'news'   => $comment->clubNews,
-                        default  => null,
-                    };
+            // --- Calculate gallery stats (same as membersGalleries) ---
+            $totalPhotos = 0;
+            $totalComments = 0;
+            $totalLikes = 0;
+            $totalGalleries = $member->galleries->count();
 
-                    $comment->related_record_name = optional($related)->title ?? optional($related)->name ?? null;
+            foreach ($member->galleries as $gallery) {
+                foreach ($gallery->photos as $photo) {
+                    $totalPhotos++;
 
-                    return $comment;
-                });
+                    foreach ($photo->comments as $comment) {
+                        if ($comment->comment_type === 'comment') {
+                            $totalComments++;
+                        } elseif ($comment->comment_type === 'liking') {
+                            $totalLikes++;
+                        }
+                    }
+                }
+            }
 
-            // Load recent awarded photos from member_awards → member_photos
-            $recentAwards = $member->memberAwards()
-                ->with('photo')
-                ->latest('award_date')
-                ->get();
-
-            // Get recent liked photos (photos owned by this member that received likes)
-            $recentLikedPhotos = MemberPhoto::whereHas('likes')
-                ->whereHas('gallery', function ($query) use ($member) {
-                    $query->where('member_id', $member->id);
-                })
-                ->latest()
-                ->get();
-
-            // Attach comments to member
-            $member->recent_comments = $recentComments;
-            $member->recent_awards = $recentAwards;
-            $member->recent_liked_photos = $recentLikedPhotos;
+            $member->gallery_total_photos = $totalPhotos;
+            $member->gallery_total_comments = $totalComments;
+            $member->gallery_total_likes = $totalLikes;
+            $member->gallery_average_photos = $totalGalleries > 0
+                ? round($totalPhotos / $totalGalleries, 2)
+                : 0;
 
             return MemberResponse::success('Member retrieved successfully.', $member);
+
         } catch (\Exception $e) {
-            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+            return MemberResponse::error($e->getMessage(), (int) ($e->getCode() ?: 500));
         }
     }
+
 
     /**
      * Create a new member.
