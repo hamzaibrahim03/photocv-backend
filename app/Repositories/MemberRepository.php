@@ -28,15 +28,16 @@ class MemberRepository implements MemberRepositoryInterface
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function all( $request )
+    public function all($request)
     {
         try {
-            $members = $this->getAllIndexData($request, User::role('member')->with(['galleries.photos']), 'username');
-            return MemberResponse::success( 'Members retrieved successfully.', $members );
+            $members = $this->getAllMemberIndexData($request);
+            return MemberResponse::success('Members retrieved successfully.', $members);
         } catch (\Exception $e) {
-            return MemberResponse::error( $e->getMessage(), $e->getCode() ?: 500 );
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     /**
      * Show a specific member by ID.
@@ -64,7 +65,6 @@ class MemberRepository implements MemberRepositoryInterface
                 'competitionMembers.entries'
             ]);
 
-            // --- Calculate gallery stats (same as membersGalleries) ---
             $totalPhotos = 0;
             $totalComments = 0;
             $totalLikes = 0;

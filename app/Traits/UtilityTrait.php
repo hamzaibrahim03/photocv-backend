@@ -9,7 +9,7 @@ use App\Models\Comment;
 use App\Models\MemberNotice;
 use App\Models\MemberNote;
 use App\Models\MemberBrand;
-use App\Models\MemberGallery;
+use App\Models\User;
 use App\Models\MemberPracticeLog;
 use Carbon\Carbon;
 use App\Models\Competition;
@@ -552,6 +552,73 @@ trait UtilityTrait
                 return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
             })
             ->make(true);
+    }
+
+    public function getAllMemberIndexData($request)
+    {
+        $query = User::role('member')->with([
+        'galleries' => function ($query) {
+            $query->where('is_active', true)
+                ->with(['photos' => function ($photoQuery) {
+                    $photoQuery->where('is_active', true)
+                        ->with(['comments' => function ($q) {
+                            $q->where('is_published', true);
+                        }]);
+                }]);
+        }
+    ]);
+
+    // Search
+    if ($request->filled('search_term')) {
+        $query->where('username', 'like', '%' . $request->search_term . '%');
+    }
+
+    return DataTables::of($query)
+        ->addIndexColumn()
+
+        ->addColumn('gallery_total_photos', function ($member) {
+            return $member->galleries->sum(function ($gallery) {
+                return $gallery->photos->count();
+            });
+        })
+
+        ->addColumn('gallery_total_comments', function ($member) {
+            return $member->galleries->sum(function ($gallery) {
+                return $gallery->photos->sum(function ($photo) {
+                    return $photo->comments->count();
+                });
+            });
+        })
+
+        ->addColumn('gallery_total_likes', function ($member) {
+            $likes = 0;
+            foreach ($member->galleries as $gallery) {
+                foreach ($gallery->photos as $photo) {
+                    $likes += $photo->comments->where('comment_type', 'liking')->count();
+                }
+            }
+            return $likes;
+        })
+
+        // ->addColumn('comments_preview', function ($member) {
+        //     $comments = [];
+
+        //     foreach ($member->galleries as $gallery) {
+        //         foreach ($gallery->photos as $photo) {
+        //             foreach ($photo->comments as $comment) {
+        //                 if ($comment->comment_type === 'comment') {
+        //                     $comments[] = $comment->comment;
+        //                     if (count($comments) >= 3) break 3;
+        //                 }
+        //             }
+        //         }
+        //     }
+
+        //     return implode('<br>', $comments);
+        // })
+
+        // ->rawColumns(['comments_preview'])
+        ->make(true);
     }
 
 }
