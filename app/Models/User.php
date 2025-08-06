@@ -104,6 +104,11 @@ class User extends Authenticatable
 		return $this->hasOne(Club::class);
 	}
 
+	public function clubSetting()
+	{
+		return $this->hasOneThrough(ClubSetting::class, Club::class);
+	}
+
 	public function member()
 	{
 		return $this->hasOne(Member::class);

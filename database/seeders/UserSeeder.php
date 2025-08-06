@@ -6,6 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\User;
 use App\Models\Club;
+use App\Models\ClubSetting;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
 
@@ -58,24 +59,29 @@ class UserSeeder extends Seeder
 
         // Create Club for John if not already exists
         $club = Club::firstOrCreate(
-            ['user_id' => $john->id], // assuming 'user_id' is the foreign key in clubs table
+            ['user_id' => $john->id],
             [
-                'club_name'           => 'My First Club',
-                'tag_line'            => 'Anyone can join',
-                'domain_type'         => 'custom',
-                'registration'        => 'open',
-                'directory_visibility'=> 'visible',
-                'comments'            => 'enabled',
-                'likes'               => 'enabled',
-                'news'                => 'enabled',
-                'events'              => 'enabled',
-                'galleries'           => 'enabled',
-                'competitions'        => 'enabled',
-                'reminders'           => 'all',
-                'home_page_blocks'    => 'all',
-                'about_title'         => 'About title',
-                'about_description'   => 'About Description',
-                'footer_text'         => 'Footer Description',
+                'club_name'    => 'My First Club',
+                'tag_line'     => 'Anyone can join',
+                'domain_type'  => 'custom',
+                'domain_name'  => 'myfirstclub.com',
+                'created_by'   => $john->id,
+            ]
+        );
+
+        // Create Club Settings for John's club
+        ClubSetting::firstOrCreate(
+            ['club_id' => $club->id],
+            [
+                'registration'         => 'open',
+                'directory_visibility' => 'visible',
+                'comments'             => 'enabled',
+                'likes'                => 'enabled',
+                'website_sections'     => 'News', // Use one of the enum values, or customize logic
+                'reminders'            => 'all',
+                'header_title'         => 'About title',
+                'header_description'   => 'About Description',
+                'footer_text'          => 'Footer Description',
             ]
         );
     }

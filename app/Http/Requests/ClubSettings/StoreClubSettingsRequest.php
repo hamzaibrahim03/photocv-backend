@@ -14,30 +14,52 @@ class StoreClubSettingsRequest extends FormRequest
     {
         return [
             'club_name' => 'required|string|max:255',
-            'club_tagline' => 'nullable|string|max:255',
+            'tag_line' => 'nullable|string|max:255',
             'about' => 'nullable|string',
-            'contact_details' => 'nullable|string',
-            'domain_type' => 'required|in:Custom,Subdomain',
+            'contact_details' => 'nullable|string|max:255',
+            'domain_type' => 'required|in:custom,subdomain',
             'domain_name' => 'nullable|string|max:255',
+
             'timezone' => 'required|string',
             'date' => 'required|date',
             'club_privacy' => 'required|in:Public,Members Only,Private',
-            'typography_fonts' => 'nullable|string',
-            'specific_colors' => 'nullable|string',
-            'header_customization' => 'nullable|string',
-            'footer_customization' => 'nullable|string',
+
+            'theme_colors' => 'nullable|string',
+            'text_color' => 'nullable|string|max:10',
+            'primary_color' => 'nullable|string|max:10',
+            'background_color' => 'nullable|string|max:10',
+            'secondary_color' => 'nullable|string|max:10',
+            'accent_color' => 'nullable|string|max:10',
+
+            'typography' => 'nullable|string',
+            'fonts' => 'nullable|string',
+
+            'header_title' => 'nullable|string',
+            'header_description' => 'nullable|string',
+            'footer_text' => 'nullable|string',
+
             'logo' => 'nullable|image|max:2048',
             'club_banner' => 'nullable|image|max:2048',
-            'registration_access_control' => 'required|in:Open,Invite Only,Manual Approval',
-            'members_directory_visibility' => 'required|in:Visible,Club Only',
-            'comments_enabled' => 'boolean',
-            'likes_enabled' => 'boolean',
-            'website_sections' => 'nullable|in:Enable/Disable News,Events,Galleries,Competitions',
-            'homepage_content_blocks' => 'required|in:All,Fewer,Fewest',
-            'reminders' => 'required|in:All,Some,None',
-            'facebook_link' => 'nullable|url',
-            'instagram_link' => 'nullable|url',
+            'footer_img' => 'nullable|image|max:2048',
+            'header_img' => 'nullable|image|max:2048',
+            'cover_image' => 'nullable|image|max:2048',
+
+            'registration' => 'required|in:open,invite,manual_approval',
+            'directory_visibility' => 'required|in:visible,club_only',
+            'comments' => 'required|in:enabled,disabled',
+            'likes' => 'required|in:enabled,disabled',
+
+            'website_sections' => 'nullable|in:News,Events,Galleries,Competitions',
+            'comment_preference' => 'required|in:All,Fewer,Fewest',
+            'reminders' => 'required|in:all,some,none',
+
+            'fb_link_option' => 'boolean',
+            'fb_link' => 'nullable|url',
+            'insta_link_option' => 'boolean',
+            'insta_link' => 'nullable|url',
+            'flicker_link_option' => 'boolean',
             'flickr_link' => 'nullable|url',
+
             'gdpr_privacy_policy_management' => 'nullable|string',
             'cookies' => 'boolean',
             'cookies_description' => 'nullable|string',
@@ -47,4 +69,5 @@ class StoreClubSettingsRequest extends FormRequest
             'allow_reporting_description' => 'nullable|string',
         ];
     }
+
 }

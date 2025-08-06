@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\User;
 use App\Models\Club;
+use App\Models\ClubSetting;
 use Spatie\Permission\Models\Role;
 use App\Models\Member;
 use App\Models\MemberBrand;
@@ -41,18 +42,42 @@ class SignUpRepository implements SignUpRepositoryInterface
             $clubData['user_id'] = $user->id;
 
             // Handle about_img
-            if ($data['about_img']) {
+            if (!empty($data['about_img'])) {
                 $aboutImg = $data['about_img'];
                 $clubData['about_img'] = $aboutImg->store('uploads/clubs/about', 'public');
             }
 
             // Handle footer_img
-            if ($data['footer_img']) {
+            if (!empty($data['footer_img'])) {
                 $footerImg = $data['footer_img'];
                 $clubData['footer_img'] = $footerImg->store('uploads/clubs/footer', 'public');
             }
 
-            Club::create($clubData);
+            // Extract ClubSetting fields before creating Club
+            $clubSettingFields = [
+                'registration',
+                'directory_visibility',
+                'comments',
+                'likes',
+                'reminders',
+            ];
+
+            $clubSettingData = [];
+            foreach ($clubSettingFields as $field) {
+                if (isset($clubData[$field])) {
+                    $clubSettingData[$field] = $clubData[$field];
+                    unset($clubData[$field]); // remove from clubData
+                }
+            }
+
+            // Create club
+            $club = Club::create($clubData);
+
+            // Create club settings if any were provided
+            if (!empty($clubSettingData)) {
+                $clubSettingData['club_id'] = $club->id;
+                ClubSetting::create($clubSettingData);
+            }
         }
 
         // Create Member record

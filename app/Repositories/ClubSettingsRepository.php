@@ -11,21 +11,29 @@ use App\Http\Responses\ClubSettingResponse;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
-    public function all( $userId = null )
+    public function all($userId = null)
     {
         try {
-            $club = Club::where('user_id', $userId ?? auth()->id())->first();
+            $user = User::find($userId ?? auth()->id());
+
+            if (!$user) {
+                return ClubSettingResponse::error('User not found.', 404);
+            }
+
+            $club = $user->club;
 
             if (!$club) {
                 return ClubSettingResponse::error('No club found for the current user.', 404);
             }
 
+            $clubSetting = $club->setting;
+
+            // Total members in the club
             $totalMemberCount = User::whereHas('clubs', function ($query) use ($club) {
                 $query->where('club_id', $club->id);
-            })
-            ->count();
+            })->count();
 
-            // Upcoming event (closest future event)
+            // Upcoming event
             $upcomingEvent = Event::where('club_id', $club->id)
                 ->whereDate('event_date', '>=', now())
                 ->orderBy('event_date', 'asc')
@@ -35,12 +43,15 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
                 : null;
 
-            $contactData = User::where('id', $userId ?? auth()->id())->first();
-            $club['phone'] = $contactData->phone;
-            $club['address'] = $contactData->address;
-
             return ClubSettingResponse::success('Settings retrieved successfully.', [
-                'settings' => $club,
+                'club' => array_merge(
+                    $club->toArray(),
+                    [
+                        'phone' => $user->phone,
+                        'address' => $user->address,
+                    ]
+                ),
+                'settings' => $clubSetting,
                 'total_members' => $totalMemberCount,
                 'upcoming_event_days_count' => $upcoming,
             ]);
@@ -51,55 +62,82 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
         }
     }
 
+
     /**
      * Store or update club settings.
      */
     public function save(array $data, $logo = null, $clubBanner = null, $id = null)
     {
         try {
-            // Extract only phone and address for the user update
             $user = auth()->user();
+            $club = $user->club;
 
+            if (!$club) {
+                return ClubSettingResponse::error('User has no associated club.', 404);
+            }
+
+            // Handle logo
             if ($logo) {
                 $data['logo'] = $logo->store('club_logos', 'public');
             }
 
+            // Handle club banner
             if ($clubBanner) {
                 $data['club_banner'] = $clubBanner->store('club_banners', 'public');
             }
 
-            // Update user's phone and address if provided
+            // Update user's phone and address
             $user->update([
                 'phone' => $data['phone'] ?? $user->phone,
                 'address' => $data['address'] ?? $user->address,
             ]);
 
-            // Remove user-specific fields from data before saving to Club
             unset($data['phone'], $data['address']);
 
-            // Handle about_img
-            if ($data['about_img']) {
-                $aboutImg = $data['about_img'];
-                $data['about_img'] = $aboutImg->store('uploads/clubs/about', 'public');
+            if (!empty($data['footer_img'])) {
+                $data['footer_img'] = $data['footer_img']->store('uploads/clubs/footer', 'public');
             }
 
-            // Handle footer_img
-            if ($data['footer_img']) {
-                $footerImg = $data['footer_img'];
-                $data['footer_img'] = $footerImg->store('uploads/clubs/footer', 'public');
+            if (!empty($data['header_img'])) {
+                $data['header_img'] = $data['header_img']->store('uploads/clubs/header', 'public');
             }
 
-            // Update or create club settings
-            $clubSetting = Club::updateOrCreate(
-                ['id' => $user->club->id],
-                $data
-            );
+            if (!empty($data['cover_image'])) {
+                $data['cover_image'] = $data['cover_image']->store('uploads/clubs/cover', 'public');
+            }
+
+            // Separate Club vs ClubSetting fields
+            $clubFields = [
+                'club_name', 'tag_line', 'about', 'contact_details',
+                'domain_type', 'domain_name',
+            ];
+
+            $clubData = array_filter($data, fn($key) => in_array($key, $clubFields), ARRAY_FILTER_USE_KEY);
+            $settingData = array_diff_key($data, $clubData);
+
+            // Update Club
+            $club->update($clubData);
+
+            // Update ClubSetting where club_id = $club->id
+            $clubSetting = ClubSetting::where('club_id', $club->id)->first();
+            if ($clubSetting) {
+                $clubSetting->update($settingData);
+            } else {
+                $settingData['club_id'] = $club->id;
+                $clubSetting = ClubSetting::create($settingData);
+            }
 
             return ClubSettingResponse::success('Club Settings Saved Successfully.', $clubSetting, 201);
+
         } catch (\Exception $e) {
-            $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600) ? $e->getCode() : 500;
+            $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600)
+                ? $e->getCode()
+                : 500;
+
             return ClubSettingResponse::error($e->getMessage(), $statusCode);
         }
-
     }
+
+
+
 }
