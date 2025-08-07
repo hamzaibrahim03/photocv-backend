@@ -6,7 +6,7 @@ use App\Models\ClubSetting;
 use Carbon\Carbon;
 use App\Models\User;
 use App\Models\Event;
-use App\Models\Club;
+use App\Models\ClubSeason;
 use App\Http\Responses\ClubSettingResponse;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
@@ -52,6 +52,7 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                     ]
                 ),
                 'settings' => $clubSetting,
+                'seasons' => $club->seasons,
                 'total_members' => $totalMemberCount,
                 'upcoming_event_days_count' => $upcoming,
             ]);
@@ -125,6 +126,21 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
             } else {
                 $settingData['club_id'] = $club->id;
                 $clubSetting = ClubSetting::create($settingData);
+            }
+
+            // Handle seasons
+            if (!empty($data['seasons']) && is_array($data['seasons'])) {
+                ClubSeason::where('club_id', $club->id)->delete();
+
+                foreach ($data['seasons'] as $season) {
+                    ClubSeason::create([
+                        'club_id'    => $club->id,
+                        'name'       => $season['name'] ?? null,
+                        'status'     => $season['status'] ?? 'inactive',
+                        'start_date' => $season['start_date'] ?? null,
+                        'end_date'   => $season['end_date'] ?? null,
+                    ]);
+                }
             }
 
             return ClubSettingResponse::success('Club Settings Saved Successfully.', $clubSetting, 201);

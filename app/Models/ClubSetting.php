@@ -9,6 +9,12 @@ class ClubSetting extends Model
     use HasFactory;
 
     protected $table = 'club_settings';
+
+    protected $hidden = [
+		'id',
+		'club_id',
+	];
+
     protected $appends = [
 		'header_img_url',
 		'footer_img_url',

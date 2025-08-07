@@ -57,6 +57,17 @@ class Club extends Model
 	use SoftDeletes;
 	protected $table = 'clubs';
 
+	protected $hidden = [
+		'id',
+		'user_id',
+		'created_at',
+		'updated_at',
+		'created_by',
+		'updated_by',
+		'deleted_by',
+		'deleted_at'
+	];
+
 	protected $casts = [
 		'user_id' => 'int',
 		'created_by' => 'int',
@@ -108,5 +119,10 @@ class Club extends Model
 	public function setting()
 	{
 		return $this->hasOne(ClubSetting::class);
+	}
+
+	public function seasons()
+	{
+		return $this->hasMany(ClubSeason::class);
 	}
 }
