@@ -138,6 +138,4 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
         }
     }
 
-
-
 }

@@ -44,7 +44,7 @@ return new class extends Migration {
             $table->string('fb_link', 250)->nullable();
             $table->boolean('insta_link_option')->default(false);
             $table->string('insta_link', 250)->nullable();
-            $table->boolean('flicker_link_option')->default(false);
+            $table->boolean('flickr_link_option')->default(false);
             $table->string('flickr_link', 250)->nullable();
 
             $table->string('gdpr_privacy_policy_management')->nullable();

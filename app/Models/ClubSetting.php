@@ -47,7 +47,7 @@ class ClubSetting extends Model
         'fb_link',
         'insta_link_option',
         'insta_link',
-        'flicker_link_option',
+        'flickr_link_option',
         'flickr_link',
         'gdpr_privacy_policy_management',
         'cookies',

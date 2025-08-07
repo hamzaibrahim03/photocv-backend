@@ -57,7 +57,7 @@ class StoreClubSettingsRequest extends FormRequest
             'fb_link' => 'nullable|url',
             'insta_link_option' => 'boolean',
             'insta_link' => 'nullable|url',
-            'flicker_link_option' => 'boolean',
+            'flickr_link_option' => 'boolean',
             'flickr_link' => 'nullable|url',
 
             'gdpr_privacy_policy_management' => 'nullable|string',
