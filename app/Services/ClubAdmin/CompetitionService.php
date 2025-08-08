@@ -1,10 +1,7 @@
 <?php
-namespace App\Services;
+namespace App\Services\ClubAdmin;
 
-use App\Repositories\CompetitionRepositoryInterface;
-use App\Models\Competition;
-use Illuminate\Database\Eloquent\Collection;
-use Yajra\DataTables\DataTables;
+use App\Repositories\ClubAdmin\CompetitionRepositoryInterface;
 
 class CompetitionService
 {
@@ -44,12 +41,8 @@ class CompetitionService
         return $this->competitionRepository->getCompetitionExtras( $request );
     }
 
-    public function joinCompetition( $data )
+    public function getCompetitionResults()
     {
-        return $this->competitionRepository->joinCompetition( $data );
-    }
-
-    public function submitCompetitionEntry($data){
-        return $this->competitionRepository->submitCompetitionEntry($data);
+        return $this->competitionRepository->getCompetitionResults();
     }
 }

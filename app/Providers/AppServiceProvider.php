@@ -27,8 +27,14 @@ use App\Repositories\CatalogRepository;
 use App\Repositories\EventRepositoryInterface;
 use App\Repositories\EventRepository;
 
-use App\Repositories\CompetitionRepositoryInterface;
-use App\Repositories\CompetitionRepository;
+use App\Repositories\ClubAdmin\CompetitionRepositoryInterface;
+use App\Repositories\ClubAdmin\CompetitionRepository;
+
+use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
+use App\Repositories\ClubAdmin\CompetitionResultRepository;
+
+use App\Repositories\Member\MemberCompetitionRepositoryInterface;
+use App\Repositories\Member\MemberCompetitionRepository;
 
 use App\Repositories\NoticeRepositoryInterface;
 use App\Repositories\NoticeRepository;
@@ -85,7 +91,11 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->bind(CatalogRepositoryInterface::class, CatalogRepository::class);
         $this->app->bind(EventRepositoryInterface::class, EventRepository::class);
+
         $this->app->bind(CompetitionRepositoryInterface::class, CompetitionRepository::class);
+        $this->app->bind(MemberCompetitionRepositoryInterface::class, MemberCompetitionRepository::class);
+        $this->app->bind(CompetitionResultRepositoryInterface::class, CompetitionResultRepository::class);
+
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);
         $this->app->bind(ClubNewsRepositoryInterface::class, ClubNewsRepository::class);

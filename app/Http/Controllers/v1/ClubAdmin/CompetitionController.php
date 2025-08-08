@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\v1;
+namespace App\Http\Controllers\v1\ClubAdmin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\CompetitionService;
+use App\Services\ClubAdmin\CompetitionService;
 use App\Http\Requests\Competition\StoreCompetitionRequest;
-use App\Http\Requests\Competition\CompetitionRequest;
 
 class CompetitionController extends Controller
 {
@@ -45,13 +44,4 @@ class CompetitionController extends Controller
         return $this->competitionService->getCompetitionExtras( $request );
     }
 
-    public function joinCompetition(CompetitionRequest $request)
-    {
-        return $this->competitionService->joinCompetition($request->validated());
-    }
-
-    public function submitCompetitionEntry(CompetitionRequest $request)
-    {
-        return $this->competitionService->submitCompetitionEntry($request->validated());
-    }
 }

@@ -1,12 +1,11 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\ClubAdmin;
 
 use App\Models\Event;
 use App\Models\Club;
 use App\Models\User;
 use App\Models\Competition;
-use App\Models\CompetitionMember;
 use Carbon\Carbon;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\CompetitionResponse;
@@ -230,77 +229,38 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ->first();
     }
 
-    public function joinCompetition($data)
+    public function getCompetitionResults()
     {
-        $response = null;
-
-        try {
-            $user = auth()->user();
-            $competition = Competition::findOrFail($data['comp_id']);
-            $clubIds = $user->clubs->pluck('id')->toArray();
-
-            // Ensure the competition belongs to one of the user's clubs
-            if (!in_array($competition->club_id, $clubIds)) {
-                $response = CompetitionResponse::error('Unauthorized to join this competition.', 403);
-            } else {
-                // Check if the user has already joined this competition
-                $existingEntry = CompetitionMember::where('comp_id', $competition->id)
-                    ->where('member_id', $user->id)
-                    ->first();
-
-                if ($existingEntry) {
-                    $response = CompetitionResponse::error('You have already joined this competition.', 400);
-                } else {
-                    // Create a new entry for the user in the competition
-                    $entry = new CompetitionMember();
-                    $entry->comp_id = $competition->id;
-                    $entry->member_id = $user->id;
-                    $entry->save();
-
-                    $response = CompetitionResponse::success('Successfully joined the competition.', $entry, 201);
-                }
+        return Competition::with([
+            'competitionMembers.entries' => function ($q) {
+                $q->select('id', 'member_comp_id', 'entry_image');
             }
-        } catch (\Exception $e) {
-            $response = CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
-
-        return $response;
-    }
-    
-    public function submitCompetitionEntry($data)
-    {
-        $response = null;
-
-        try {
-            $user = auth()->user();
-            $competitionMember = CompetitionMember::findOrFail($data['member_comp_id']);
-
-            // Ensure the competition member belongs to the user
-            if ($competitionMember->member_id !== $user->id) {
-                return CompetitionResponse::error('Unauthorized to submit entry for this competition.', 403);
+        ])
+        ->withCount([
+            'competitionMembers as total_images' => function ($query) {
+                $query->join('competition_members_entries as cme', 'competition_members.id', '=', 'cme.member_comp_id');
             }
+        ])
+        ->get()
+        ->map(function ($competition) {
+            // Flatten all entries to get image URLs
+            $images = $competition->competitionMembers
+                ->flatMap(function ($member) {
+                    return $member->entries->map(function ($entry) {
+                        return asset('storage/' . $entry->entry_image);
+                    });
+                })
+                ->values()
+                ->toArray();
 
-            // Create a new entry
-            $entry = new CompetitionMembersEntry();
-            $entry->member_comp_id = $competitionMember->id;
-            $entry->entry_type = $data['entry_type'];
-            
-            // Handle file upload
-            if (isset($data['entry_image']) && $data['entry_image']->isValid()) {
-                $path = $data['entry_image']->store('competition_entries', 'public');
-                $entry->entry_image = $path;
-            } else {
-                return CompetitionResponse::error('Invalid or missing entry image.', 400);
-            }
-
-            $entry->save();
-
-            $response = CompetitionResponse::success('Competition entry submitted successfully.', $entry, 201);
-        } catch (\Exception $e) {
-            $response = CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
-
-        return $response;
+            return [
+                'id' => $competition->id,
+                'name' => $competition->name,
+                'description' => $competition->description,
+                'total_images' => $competition->total_images,
+                'images' => $images,
+            ];
+        });
     }
 
 }

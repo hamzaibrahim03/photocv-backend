@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Models\Competition;
 use App\Models\CompetitionMembersEntry;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Responses\CompetitionResponse;
 
 trait UtilityTrait
 {
@@ -83,7 +84,6 @@ trait UtilityTrait
             ->rawColumns(['action'])
             ->make(true);
     }
-
 
     public function getAllMemberInterestsBrands($request, $memberId)
     {
@@ -206,6 +206,114 @@ trait UtilityTrait
             ->make(true);
     }
 
+    public function getAllCompetitionResults($request, $query)
+    {
+        // Search filter
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where('name', 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        // Filter by competition type
+        if ($request->has('competition_type_id') && $request->competition_type_id != '') {
+            $query->where('competition_type_id', $request->competition_type_id);
+        }
+
+        // Sorting
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        // Eager load relationships
+        $query->with([
+            'competitionMembers.entries' => function ($q) {
+                $q->select('id', 'member_comp_id', 'entry_image');
+            }
+        ])
+        ->withCount([
+            'competitionMembers as total_images' => function ($q) {
+                $q->join('competition_members_entries as cme', 'competition_members.id', '=', 'cme.member_comp_id');
+            }
+        ]);
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('featured_image', function ($competition) {
+                return $competition->featured_image
+                    ? asset('storage/' . $competition->featured_image)
+                    : null;
+            })
+            ->addColumn('images', function ($competition) {
+                return $competition->competitionMembers
+                    ->flatMap(function ($member) {
+                        return $member->entries->map(function ($entry) {
+                            return asset('storage/' . $entry->entry_image);
+                        });
+                    })
+                    ->values()
+                    ->toArray();
+            })
+            ->addColumn('action', function ($competition) {
+                return '<a href="'.route('competitions.show', $competition->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->make(true);
+    }
+
+    public function getCompetitionEntryData($request, $query, $searchField = 'name')
+    {
+        // Apply search filter
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where($searchField, 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        // Filter by competition type
+        if ($request->has('competition_type_id') && $request->competition_type_id != '') {
+            $query->where('competition_type_id', $request->competition_type_id);
+        }
+
+        // Sorting
+        if ($request->has('order') && count($request->order)) {
+            $column = $request->columns[$request->order[0]['column']]['data'];
+            $direction = $request->order[0]['dir'];
+            $query->orderBy($column, $direction);
+        }
+
+        // Eager load relationships
+        $query->with([
+            'competitionMembers.entries' => function ($q) {
+                $q->select('id', 'member_comp_id', 'entry_image');
+            }
+        ])
+        ->withCount([
+            'competitionMembers as total_images' => function ($q) {
+                $q->join('competition_members_entries as cme', 'competition_members.id', '=', 'cme.member_comp_id');
+            }
+        ]);
+
+        // DataTables output
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->editColumn('featured_image', function ($competition) {
+                return $competition->featured_image
+                    ? asset('storage/' . $competition->featured_image)
+                    : null;
+            })
+            ->addColumn('images', function ($competition) {
+                return $competition->competitionMembers
+                    ->flatMap(function ($member) {
+                        return $member->entries->map(function ($entry) {
+                            return asset('storage/' . $entry->entry_image);
+                        });
+                    })
+                    ->values()
+                    ->toArray();
+            })
+            ->addColumn('action', function ($competition) {
+                return '<a href="'.route('competitions.show', $competition->id).'" class="btn btn-sm btn-primary">View</a>';
+            })
+            ->make(true);
+    }
 
     public function getAllIndexData($request, $query, $search)
     {

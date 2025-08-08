@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\ClubAdmin;
 
 interface CompetitionRepositoryInterface
 {
@@ -10,6 +10,6 @@ interface CompetitionRepositoryInterface
     public function update($id, array $data);
     public function delete($id);
     public function getCompetitionExtras($request);
-    public function joinCompetition($data);
-    public function submitCompetitionEntry($data);
+    public function getCompetitionResults();
+    
 }

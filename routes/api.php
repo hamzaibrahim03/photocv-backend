@@ -7,7 +7,9 @@ use App\Http\Controllers\v1\SignUpController;
 use App\Http\Controllers\v1\AuthController;
 use App\Http\Controllers\v1\CatalogController;
 use App\Http\Controllers\v1\EventController;
-use App\Http\Controllers\v1\CompetitionController;
+use App\Http\Controllers\v1\ClubAdmin\CompetitionController;
+use App\Http\Controllers\v1\ClubAdmin\CompetitionResultController;
+use App\Http\Controllers\v1\Member\MemberCompetitionController;
 use App\Http\Controllers\v1\NoticeController;
 use App\Http\Controllers\v1\ClubNewsController;
 use App\Http\Controllers\v1\PagesController;
@@ -52,6 +54,8 @@ Route::prefix('v1')->group(function() {
             Route::apiResource('competitions', CompetitionController::class);
             Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
 
+            Route::apiResource('/competition-results', CompetitionResultController::class);
+
             Route::apiResource('notices', NoticeController::class);
             Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);
 
@@ -85,8 +89,9 @@ Route::prefix('v1')->group(function() {
             Route::put('/profile/update', [MemberController::class, 'profileUpdate']);
 
             //competition routes
-            Route::post('/join-competition', [CompetitionController::class, 'joinCompetition']);
-            Route::post('/submit-competition-entry', [CompetitionController::class, 'submitCompetitionEntry']);
+            Route::post('/join-competition', [MemberCompetitionController::class, 'joinCompetition']);
+            Route::get('/get-joined-competition', [MemberCompetitionController::class, 'joinedCompetition']);
+            Route::post('/submit-competition-entry', [MemberCompetitionController::class, 'submitCompetitionEntry']);
 
             //member admin routes
             Route::get('/profile/posts/view', [MemberAdminController::class, 'memberProfilePostsView']);

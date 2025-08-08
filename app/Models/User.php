@@ -144,6 +144,15 @@ class User extends Authenticatable
 		return $this->hasMany(MemberNote::class, 'member_id');
 	}
 
+	public function joinedCompetitions()
+	{
+		return $this->belongsToMany(Competition::class, 'competition_members', 'member_id', 'comp_id')
+			->withPivot('id')
+			->withTimestamps();
+	}
+
+
+
 	// public function likedPhotos()
 	// {
 	// 	return MemberPhoto::whereHas('likes')
