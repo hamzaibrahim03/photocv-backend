@@ -54,7 +54,7 @@ class Competition extends Model
 	use SoftDeletes;
 	protected $table = 'competitions';
 	protected $appends = ['featured_image_url'];
-	protected $hidden = ['featured_image'];
+	// protected $hidden = ['featured_image'];
 
 	protected $casts = [
 		'competition_type_id' => 'int',

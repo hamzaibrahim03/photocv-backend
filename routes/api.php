@@ -5,25 +5,25 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\v1\SignUpController;
 use App\Http\Controllers\v1\AuthController;
-use App\Http\Controllers\v1\CatalogController;
-use App\Http\Controllers\v1\EventController;
+use App\Http\Controllers\v1\ClubAdmin\CatalogController;
+use App\Http\Controllers\v1\ClubAdmin\EventController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionResultController;
 use App\Http\Controllers\v1\Member\MemberCompetitionController;
 use App\Http\Controllers\v1\NoticeController;
-use App\Http\Controllers\v1\ClubNewsController;
-use App\Http\Controllers\v1\PagesController;
-use App\Http\Controllers\v1\ClubSettingsController;
+use App\Http\Controllers\v1\ClubAdmin\ClubNewsController;
+use App\Http\Controllers\v1\ClubAdmin\PagesController;
+use App\Http\Controllers\v1\ClubAdmin\ClubSettingsController;
 use App\Http\Controllers\v1\MemberController;
-use App\Http\Controllers\v1\ClubDashboardController;
-use App\Http\Controllers\v1\FeaturedImageController;
-use App\Http\Controllers\v1\MemberAdminController;
-use App\Http\Controllers\v1\MemberNoteController;
-use App\Http\Controllers\v1\MemberClassLogController;
-use App\Http\Controllers\v1\MemberInterestBrandController;
+use App\Http\Controllers\v1\ClubAdmin\ClubDashboardController;
+use App\Http\Controllers\v1\ClubAdmin\FeaturedImageController;
+use App\Http\Controllers\v1\Member\MemberAdminController;
+use App\Http\Controllers\v1\Member\MemberNoteController;
+use App\Http\Controllers\v1\Member\MemberClassLogController;
+use App\Http\Controllers\v1\Member\MemberInterestBrandController;
 use App\Http\Controllers\v1\PublicClubController;
-use App\Http\Controllers\v1\MemberPracticeLogController;
-use App\Http\Controllers\v1\ClubGalleryController;
+use App\Http\Controllers\v1\Member\MemberPracticeLogController;
+use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 
 Route::prefix('v1')->group(function() {
 

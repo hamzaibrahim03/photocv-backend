@@ -21,11 +21,11 @@ use App\Repositories\SignUpRepository;
 use App\Repositories\AuthRepositoryInterface;
 use App\Repositories\AuthRepository;
 
-use App\Repositories\CatalogRepositoryInterface;
-use App\Repositories\CatalogRepository;
+use App\Repositories\ClubAdmin\CatalogRepositoryInterface;
+use App\Repositories\ClubAdmin\CatalogRepository;
 
-use App\Repositories\EventRepositoryInterface;
-use App\Repositories\EventRepository;
+use App\Repositories\ClubAdmin\EventRepositoryInterface;
+use App\Repositories\ClubAdmin\EventRepository;
 
 use App\Repositories\ClubAdmin\CompetitionRepositoryInterface;
 use App\Repositories\ClubAdmin\CompetitionRepository;
@@ -39,41 +39,41 @@ use App\Repositories\Member\MemberCompetitionRepository;
 use App\Repositories\NoticeRepositoryInterface;
 use App\Repositories\NoticeRepository;
 
-use App\Repositories\ClubNewsRepositoryInterface;
-use App\Repositories\ClubNewsRepository;
+use App\Repositories\ClubAdmin\ClubNewsRepositoryInterface;
+use App\Repositories\ClubAdmin\ClubNewsRepository;
 
-use App\Repositories\PagesRepositoryInterface;
-use App\Repositories\PagesRepository;
+use App\Repositories\ClubAdmin\PagesRepositoryInterface;
+use App\Repositories\ClubAdmin\PagesRepository;
 
-use App\Repositories\ClubSettingsRepositoryInterface;
-use App\Repositories\ClubSettingsRepository;
+use App\Repositories\ClubAdmin\ClubSettingsRepositoryInterface;
+use App\Repositories\ClubAdmin\ClubSettingsRepository;
 
 use App\Repositories\MemberRepositoryInterface;
 use App\Repositories\MemberRepository;
 
-use App\Repositories\MemberNoteRepositoryInterface;
-use App\Repositories\MemberNoteRepository;
+use App\Repositories\Member\MemberNoteRepositoryInterface;
+use App\Repositories\Member\MemberNoteRepository;
 
-use App\Repositories\MemberClassLogRepositoryInterface;
-use App\Repositories\MemberClassLogRepository;
+use App\Repositories\Member\MemberClassLogRepositoryInterface;
+use App\Repositories\Member\MemberClassLogRepository;
 
-use App\Repositories\ClubDashboardRepositoryInterface;
-use App\Repositories\ClubDashboardRepository;
+use App\Repositories\ClubAdmin\ClubDashboardRepositoryInterface;
+use App\Repositories\ClubAdmin\ClubDashboardRepository;
 
-use App\Repositories\FeatureImageRepositoryInterface;
-use App\Repositories\FeatureImageRepository;
+use App\Repositories\ClubAdmin\FeatureImageRepositoryInterface;
+use App\Repositories\ClubAdmin\FeatureImageRepository;
 
-use App\Repositories\MemberAdminRepositoryInterface;
-use App\Repositories\MemberAdminRepository;
+use App\Repositories\Member\MemberAdminRepositoryInterface;
+use App\Repositories\Member\MemberAdminRepository;
 
-use App\Repositories\MemberInterestBrandRepositoryInterface;
-use App\Repositories\MemberInterestBrandRepository;
+use App\Repositories\Member\MemberInterestBrandRepositoryInterface;
+use App\Repositories\Member\MemberInterestBrandRepository;
 
-use App\Repositories\MemberPracticeLogRepositoryInterface;
-use App\Repositories\MemberPracticeLogRepository;
+use App\Repositories\Member\MemberPracticeLogRepositoryInterface;
+use App\Repositories\Member\MemberPracticeLogRepository;
 
-use App\Repositories\ClubGalleryRepositoryInterface;
-use App\Repositories\ClubGalleryRepository;
+use App\Repositories\ClubAdmin\ClubGalleryRepositoryInterface;
+use App\Repositories\ClubAdmin\ClubGalleryRepository;
 
 
 class AppServiceProvider extends ServiceProvider

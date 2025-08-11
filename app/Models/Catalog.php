@@ -30,6 +30,8 @@ class Catalog extends Model
 	protected $table = 'catalog';
 	protected $appends = ['icon_url'];
 
+	protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
+
 	protected $fillable = [
 		'name',
 		'catalog_type',
