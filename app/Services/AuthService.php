@@ -4,10 +4,6 @@ namespace App\Services;
 
 use App\Repositories\AuthRepositoryInterface;
 use App\Models\User;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Database\Eloquent\Collection;
-use App\Events\LoginEvent ;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Mail;

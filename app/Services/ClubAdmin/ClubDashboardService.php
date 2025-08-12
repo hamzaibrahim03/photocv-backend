@@ -3,7 +3,7 @@
 namespace App\Services\ClubAdmin;
 
 use App\Repositories\ClubAdmin\ClubDashboardRepositoryInterface;
-use App\Repositories\ClubGalleryRepository;
+use App\Repositories\ClubAdmin\ClubGalleryRepository;
 
 class ClubDashboardService
 {

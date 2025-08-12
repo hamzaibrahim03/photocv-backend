@@ -2,9 +2,6 @@
 namespace App\Services;
 
 use App\Repositories\MemberRepositoryInterface;
-use App\Models\User;
-use Illuminate\Database\Eloquent\Collection;
-use Yajra\DataTables\DataTables;
 
 class MemberService
 {

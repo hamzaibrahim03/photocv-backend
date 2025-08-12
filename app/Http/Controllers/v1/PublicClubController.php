@@ -4,15 +4,14 @@ namespace App\Http\Controllers\v1;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Repositories\ClubDashboardRepository;
-use App\Repositories\EventRepository;
-use App\Repositories\CompetitionRepository;
-use App\Repositories\ClubNewsRepository;
-use App\Repositories\ClubSettingsRepository;
-use App\Repositories\ClubGalleryRepository;
+use App\Repositories\ClubAdmin\ClubDashboardRepository;
+use App\Repositories\ClubAdmin\EventRepository;
+use App\Repositories\ClubAdmin\CompetitionRepository;
+use App\Repositories\ClubAdmin\ClubNewsRepository;
+use App\Repositories\ClubAdmin\ClubSettingsRepository;
+use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Models\User;
 use App\Models\MemberPhoto;
-use App\Models\MemberAward;
 use Carbon\Carbon;
 
 class PublicClubController extends Controller
