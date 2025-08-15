@@ -37,6 +37,7 @@ class StoreClubSettingsRequest extends FormRequest
             'header_title' => 'nullable|string',
             'header_description' => 'nullable|string',
             'footer_text' => 'nullable|string',
+            'footer_description' => 'nullable|string',
 
             'logo' => 'nullable|image|max:2048',
             'club_banner' => 'nullable|image|max:2048',

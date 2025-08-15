@@ -40,6 +40,7 @@ class ClubSetting extends Model
         'header_img',
         'footer_text',
         'footer_img',
+        'footer_description',
         'logo',
         'cover_image',
         'registration',

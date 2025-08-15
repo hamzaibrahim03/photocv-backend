@@ -226,7 +226,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         return Competition::where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
             ->orderBy('start_date', 'asc')
-            ->first();
+            ->get();
     }
 
     public function getCompetitionResults()
