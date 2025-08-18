@@ -11,7 +11,7 @@ use App\Repositories\ClubAdmin\ClubNewsRepository;
 use App\Repositories\ClubAdmin\ClubSettingsRepository;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Models\User;
-use App\Models\MemberPhoto;
+use App\Models\Photo;
 use Carbon\Carbon;
 
 class PublicClubController extends Controller
@@ -58,7 +58,7 @@ class PublicClubController extends Controller
             : Carbon::now()->endOfMonth();
 
         // Fetch only photos that have comments or likes
-        $photos = MemberPhoto::with([
+        $photos = Photo::with([
             'uploadedBy:id,username,email',
             'comments.user:id,username,email',
             'likes.user:id,username,email'

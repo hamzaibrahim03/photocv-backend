@@ -2,8 +2,7 @@
 
 namespace App\Repositories\ClubAdmin;
 
-use App\Models\MemberGallery;
-use App\Models\User;
+use App\Models\Gallery;
 use App\Http\Responses\MemberResponse;
 use App\Traits\UtilityTrait;
 
@@ -20,7 +19,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
     public function getClubGalleries($clubAdminId)
     {
         try {
-            $galleries = MemberGallery::with([
+            $galleries = Gallery::with([
                 'photos' => function ($q) {
                     $q->whereNull('deleted_at')->with([
                         'uploadedBy',
@@ -89,7 +88,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
     public function getClubGallery($galleryId)
     {
         try {
-            $gallery = MemberGallery::with([
+            $gallery = Gallery::with([
                 'photos' => function ($q) {
                     $q->whereNull('deleted_at')->with([
                         'uploadedBy',
@@ -160,9 +159,10 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
 
             if($user->club){
                 $data['club_id'] = $user->club->id;
+                $data['type'] = 'club';
 
                 // Create the gallery
-                $createdGallery = MemberGallery::create($data);
+                $createdGallery = Gallery::create($data);
 
                 return MemberResponse::success('Gallery created successfully.', $createdGallery, 201);
             } else {

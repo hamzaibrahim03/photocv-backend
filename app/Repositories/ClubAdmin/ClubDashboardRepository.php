@@ -95,7 +95,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
             $query->where('club_id', $clubId);
         })
         ->orderBy('created_at', 'desc')
-        ->limit($limit)
+        // ->limit($limit)
         ->get();
 
         $totalCount = User::whereHas('clubs', function ($query) use ($clubId) {

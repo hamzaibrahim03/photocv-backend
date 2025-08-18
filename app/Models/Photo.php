@@ -12,8 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\URL;
 
 /**
- * Class MemberPhoto
- * 
+ * Class Photo
+ *
  * @property int $id
  * @property int|null $gallery_id
  * @property string|null $title
@@ -28,10 +28,10 @@ use Illuminate\Support\Facades\URL;
  *
  * @package App\Models
  */
-class MemberPhoto extends Model
+class Photo extends Model
 {
 	use SoftDeletes;
-	protected $table = 'member_photos';
+	protected $table = 'photos';
 	protected $appends = ['image_url'];
 	protected $hidden = ['image'];
 
@@ -54,7 +54,7 @@ class MemberPhoto extends Model
 
 	public function gallery()
 	{
-		return $this->belongsTo(MemberGallery::class, 'gallery_id');
+		return $this->belongsTo(Gallery::class, 'gallery_id');
 	}
 
 	public function likes()

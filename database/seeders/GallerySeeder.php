@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\MemberGallery;
+use App\Models\Gallery;
 use Illuminate\Database\Seeder;
 
-class MemberGallerySeeder extends Seeder
+class GallerySeeder extends Seeder
 {
     public function run(): void
     {
@@ -16,9 +16,10 @@ class MemberGallerySeeder extends Seeder
         ];
 
         foreach ($galleries as $gallery) {
-            MemberGallery::create([
+            Gallery::create([
                 'member_id'    => 4,
                 'club_id'      => 1,
+                'type'         => 'club',
                 'gallery_name' => $gallery['gallery_name'],
                 'is_active'    => true,
             ]);

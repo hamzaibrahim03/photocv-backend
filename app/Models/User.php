@@ -116,7 +116,7 @@ class User extends Authenticatable
 
 	public function galleries()
 	{
-		return $this->hasMany(MemberGallery::class, 'member_id');
+		return $this->hasMany(Gallery::class, 'member_id');
 	}
 
 	public function comments()
@@ -155,7 +155,7 @@ class User extends Authenticatable
 
 	// public function likedPhotos()
 	// {
-	// 	return MemberPhoto::whereHas('likes')
+	// 	return Photo::whereHas('likes')
 	// 		->whereHas('gallery', function ($q) {
 	// 			$q->where('member_id', $this->id);
 	// 		});

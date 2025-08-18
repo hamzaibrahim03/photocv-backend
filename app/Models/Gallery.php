@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
- * Class MemberGallery
- * 
+ * Class Gallery
+ *
  * @property int $id
  * @property int|null $member_id
  * @property int|null $club_id
@@ -24,10 +24,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @package App\Models
  */
-class MemberGallery extends Model
+class Gallery extends Model
 {
 	use SoftDeletes;
-	protected $table = 'member_galleries';
+	protected $table = 'galleries';
 
 	protected $casts = [
 		'member_id' => 'int',
@@ -38,13 +38,14 @@ class MemberGallery extends Model
 	protected $fillable = [
 		'member_id',
 		'club_id',
+		'type',
 		'gallery_name',
 		'is_active'
 	];
 
 	public function photos()
 	{
-		return $this->hasMany(MemberPhoto::class, 'gallery_id');
+		return $this->hasMany(Photo::class, 'gallery_id');
 	}
 
 	public function member()

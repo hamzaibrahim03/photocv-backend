@@ -22,7 +22,7 @@ class DatabaseSeeder extends Seeder
         NewsSeeder::class,
         PageSeeder::class,
         NoticeSeeder::class,
-        MemberGallerySeeder::class,
+        GallerySeeder::class,
         MemberSeeder::class,
         CommentsSeeder::class,
       ]);

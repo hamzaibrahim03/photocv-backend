@@ -11,10 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('member_galleries', function (Blueprint $table) {
+        Schema::create('galleries', function (Blueprint $table) {
             $table->id();
             $table->unsignedBigInteger('member_id');
             $table->unsignedBigInteger('club_id');
+            $table->enum('type', ['club','member'])->default('member');
             $table->string('gallery_name', 50)->nullable();
             $table->boolean('is_active')->nullable()->default(false);
             $table->timestamps();
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('member_galleries');
+        Schema::dropIfExists('galleries');
     }
 };

@@ -34,7 +34,7 @@ class GalleryRequest extends FormRequest
 
         if ($route === 'uploadGalleryImages') {
             return [
-                'gallery_id'    => 'required|integer|exists:member_galleries,id',
+                'gallery_id'    => 'required|integer|exists:galleries,id',
                 'gallery_name'  => 'required|string|max:255',
                 'is_active'     => 'required|boolean',
                 'images'        => 'required|array|min:1',

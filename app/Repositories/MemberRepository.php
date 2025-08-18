@@ -7,8 +7,8 @@ use App\Models\User;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
 use Illuminate\Support\Str;
-use App\Models\MemberGallery;
-use App\Models\MemberPhoto;
+use App\Models\Gallery;
+use App\Models\Photo;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\MemberCreatedMail;
 use Illuminate\Support\Facades\Storage;
@@ -243,7 +243,7 @@ class MemberRepository implements MemberRepositoryInterface
 
             if($clubExists){
                 // Create the gallery
-                $createdGallery = MemberGallery::create($data);
+                $createdGallery = Gallery::create($data);
 
                 return MemberResponse::success('Gallery created successfully.', $createdGallery, 201);
             } else {
@@ -275,7 +275,7 @@ class MemberRepository implements MemberRepositoryInterface
                 $path = $image->store('member-galleries', 'public');
 
                 // Create entry in member_photos
-                MemberPhoto::create([
+                Photo::create([
                     'gallery_id'  => $galleryId,
                     'title'       => $titles[$index] ?? null,
                     'description' => $descriptions[$index] ?? null,
@@ -315,7 +315,7 @@ class MemberRepository implements MemberRepositoryInterface
                     $recordExists = ClubNews::where('id', $data['record_id'])->exists();
                     break;
                 case 'photo':
-                    $recordExists = MemberPhoto::where('id', $data['record_id'])->exists();
+                    $recordExists = Photo::where('id', $data['record_id'])->exists();
                     break;
             }
 

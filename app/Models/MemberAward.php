@@ -44,7 +44,7 @@ class MemberAward extends Model
 
 	public function photo()
 	{
-		return $this->belongsTo(MemberPhoto::class, 'photo_id');
+		return $this->belongsTo(Photo::class, 'photo_id');
 	}
 
 }
