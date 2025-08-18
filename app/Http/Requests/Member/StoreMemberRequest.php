@@ -36,19 +36,36 @@ class StoreMemberRequest extends FormRequest
             ];
         }
 
+        if ($route === 'update') {
+            return [
+                'title'         => 'required|string|max:255',
+                'full_name'    => 'sometimes|string|max:255',
+                'email'        => 'sometimes|email|unique:users,email,' . $this->route('id'),
+                'about'        => 'sometimes|string',
+                'phone'        => 'sometimes|string|max:20',
+                'profile_image'=> 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'role_id'      => 'sometimes|exists:roles,id',
+
+                // social media validation
+                'member_social_media'                     => 'nullable|array',
+                'member_social_media.*.social_media_name' => 'required_with:member_social_media|string|max:100',
+                'member_social_media.*.social_link'       => 'required_with:member_social_media|url|max:255',
+            ];
+        }
+
         return [
-            'first_name'    => 'required|string|max:255',
-            'last_name'     => 'required|string|max:255',
+            'title'    => 'required|string|max:255',
+            'full_name'    => 'required|string|max:255',
             'email'         => 'required|email|unique:users,email',
             'about'         => 'nullable|string',
-            'address'       => 'nullable|string',
-            'city'          => 'nullable|string|max:255',
-            'postcode'      => 'nullable|string|max:10',
-            'country'       => 'nullable|string|max:100',
             'phone'         => 'nullable|string|max:20',
-            'bio'           => 'nullable|string',
-            'status'        => 'nullable|in:approved,pending,rejected',
             'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'role_id'       => 'required',
+            
+            // social media validation
+            'member_social_media'                     => 'nullable|array',
+            'member_social_media.*.social_media_name' => 'required_with:member_social_media|string|max:100',
+            'member_social_media.*.social_link'       => 'required_with:member_social_media|url|max:255',
         ];
     }
 }

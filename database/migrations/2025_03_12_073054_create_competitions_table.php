@@ -41,6 +41,12 @@ return new class extends Migration
             $table->boolean('cc_allowed')->nullable()->default(false);
             $table->boolean('auto_certificate')->nullable()->default(false);
             $table->boolean('allow_judges_feedback')->nullable()->default(false);
+            $table->boolean('photographer_name')->nullable()->default(false);
+            $table->boolean('comments')->nullable()->default(false);
+            $table->boolean('scores')->nullable()->default(false);
+            $table->boolean('position')->nullable()->default(false);
+            $table->boolean('reels')->nullable()->default(false);
+            $table->boolean('arrows')->nullable()->default(false);
             $table->bigInteger('created_by')->nullable();
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();

@@ -56,7 +56,7 @@ class MemberController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(UpdateMemberRequest $request, $id)
+    public function update(StoreMemberRequest $request, $id)
     {
         return $this->memberService->updateMember( $id, $request->except('profile_image'), $request->file('profile_image') );
     }

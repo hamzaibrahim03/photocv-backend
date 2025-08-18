@@ -25,11 +25,19 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  */
 class MemberSocialLink extends Model
 {
-	use SoftDeletes;
+	// use SoftDeletes;
 	protected $table = 'member_social_links';
 
 	protected $casts = [
 		'member_id' => 'int'
+	];
+
+	protected $hidden = [
+		'id',
+		'member_id',
+		'created_at',
+		'updated_at',
+		'deleted_at',
 	];
 
 	protected $fillable = [
@@ -37,4 +45,9 @@ class MemberSocialLink extends Model
 		'social_media_name',
 		'social_link'
 	];
+
+	public function member()
+	{
+		return $this->belongsTo(User::class, 'member_id');
+	}
 }

@@ -58,13 +58,19 @@ class User extends Authenticatable
 	];
 
 	protected $hidden = [
-		'password'
+		'password',
+		'updated_at',
+		'updated_by',
+		'created_at',
+		'deleted_by',
+		'deleted_at',
 	];
 
 	protected $fillable = [
 		'username',
 		'first_name',
 		'last_name',
+		'title',
 		'tag_line',
 		'domain_name',
 		'about',
@@ -151,6 +157,25 @@ class User extends Authenticatable
 			->withTimestamps();
 	}
 
+	public function createdMembers()
+	{
+		return $this->hasMany(User::class, 'created_by');
+	}
+
+	public function createdBy()
+	{
+		return $this->belongsTo(User::class, 'created_by');
+	}
+
+	public function socialLinks()
+	{
+		return $this->hasMany(MemberSocialLink::class, 'member_id')->whereNull('deleted_at');
+	}
+
+	public function judgedCompetitions()
+	{
+		return $this->belongsToMany(Competition::class, 'competition_judges');
+	}
 
 
 	// public function likedPhotos()

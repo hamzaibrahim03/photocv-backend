@@ -17,6 +17,8 @@ use App\Models\Page;
 use App\Models\MemberNotice;
 use App\Models\ClubNews;
 use App\Models\Event;
+use Spatie\Permission\Models\Role;
+use App\Models\MemberSocialLink;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -48,7 +50,7 @@ class MemberRepository implements MemberRepositoryInterface
     public function show($id)
     {
         try {
-            $member = User::findOrFail($id);
+            $member = User::with(['createdBy', 'socialLinks'])->findOrFail($id);
 
             // Load galleries with active photos and their comments
             $member->load([
@@ -115,13 +117,32 @@ class MemberRepository implements MemberRepositoryInterface
                 $data['profile_image'] = $file->store('profile_images', 'public');
             }
 
-            $usernameBase = Str::slug($data['first_name'] . $data['last_name'], '');
+            $nameParts = preg_split('/\s+/', trim($data['full_name']), 2);
+            $data['first_name'] = $nameParts[0] ?? null;
+            $data['last_name']  = $nameParts[1] ?? null;
+
+            $usernameBase = Str::slug($data['full_name'], '');
             $data['username'] = $this->generateUniqueUsername($usernameBase);
 
+            $data['created_by'] = auth()->id();
+
             $member = User::create($data);
-            $member->assignRole('member');
+            $role = Role::find($data['role_id']);
+            if ($role) {
+                $member->assignRole($role);
+            }
 
             // Mail::to($data['email'])->send(new MemberCreatedMail($data['email'], $randomPassword));
+
+            if (!empty($data['member_social_media'])) {
+                foreach ($data['member_social_media'] as $social) {
+                    MemberSocialLink::create([
+                        'member_id' => $member->id ?? null,
+                        'social_media_name' => $social['social_media_name'],
+                        'social_link' => $social['social_link'],
+                    ]);
+                }
+            }
 
             return MemberResponse::success('Member created successfully.', $member, 201);
         } catch (\Exception $e) {
@@ -154,6 +175,10 @@ class MemberRepository implements MemberRepositoryInterface
                 }
                 $data['profile_image'] = $file->store('profile_images', 'public');
             }
+
+            $nameParts = preg_split('/\s+/', trim($data['full_name']), 2);
+            $data['first_name'] = $nameParts[0] ?? null;
+            $data['last_name']  = $nameParts[1] ?? null;
     
             // Update username only if it's changed and ensure uniqueness
             // if (!empty($data['first_name']) || !empty($data['last_name'])) {
@@ -165,6 +190,20 @@ class MemberRepository implements MemberRepositoryInterface
     
             // Update member details
             $member->update($data);
+
+            if (!empty($data['member_social_media'])) {
+                // Delete old links
+                MemberSocialLink::where('member_id', $member->id)->delete();
+
+                // Insert new ones
+                foreach ($data['member_social_media'] as $social) {
+                    MemberSocialLink::create([
+                        'member_id' => $member->id,
+                        'social_media_name' => $social['social_media_name'],
+                        'social_link' => $social['social_link'],
+                    ]);
+                }
+            }
     
             return MemberResponse::success('Member updated successfully.', $member);
         } catch (\Exception $e) {

@@ -665,16 +665,18 @@ trait UtilityTrait
 
     public function getAllMemberIndexData($request)
     {
-        $query = User::role('member')->with([
-        'galleries' => function ($query) {
-            $query->where('is_active', true)
-                ->with(['photos' => function ($photoQuery) {
-                    $photoQuery->where('is_active', true)
-                        ->with(['comments' => function ($q) {
-                            $q->where('is_published', true);
-                        }]);
-                }]);
-        }
+        $query = User::with(['roles', 'socialLinks'])
+        ->where('created_by', auth()->id())
+        ->with([
+            'galleries' => function ($query) {
+                $query->where('is_active', true)
+                    ->with(['photos' => function ($photoQuery) {
+                        $photoQuery->where('is_active', true)
+                            ->with(['comments' => function ($q) {
+                                $q->where('is_published', true);
+                            }]);
+                    }]);
+            }
     ]);
 
     // Search

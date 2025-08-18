@@ -24,6 +24,7 @@ use App\Http\Controllers\v1\Member\MemberInterestBrandController;
 use App\Http\Controllers\v1\PublicClubController;
 use App\Http\Controllers\v1\Member\MemberPracticeLogController;
 use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
+use App\Http\Controllers\v1\ClubAdmin\RoleController;
 
 Route::prefix('v1')->group(function() {
 
@@ -43,6 +44,7 @@ Route::prefix('v1')->group(function() {
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
+        Route::get('/roles', [RoleController::class, 'index']);
 
         // club admin routes
         Route::middleware(['auth', 'role:club_admin'])->group(function () {

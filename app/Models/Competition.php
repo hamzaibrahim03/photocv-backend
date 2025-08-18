@@ -108,6 +108,12 @@ class Competition extends Model
 		'cc_allowed',
 		'auto_certificate',
 		'allow_judges_feedback',
+		'photographer_name',
+        'comments',
+        'scores',
+        'position',
+        'reels',
+        'arrows',
 		'created_by',
 		'updated_by',
 		'deleted_by'
@@ -154,5 +160,11 @@ class Competition extends Model
     {
         return $this->belongsTo(Catalog::class, 'category_id', 'id');
     }
+
+	public function judges()
+	{
+		return $this->belongsToMany(User::class, 'competition_judges')
+					->using(CompetitionJudge::class);
+	}
 
 }
