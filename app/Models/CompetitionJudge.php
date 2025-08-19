@@ -14,5 +14,7 @@ class CompetitionJudge extends Pivot
     protected $fillable = [
         'competition_id',
         'user_id',
+        'role',
+        'assigned_at',
     ];
 }

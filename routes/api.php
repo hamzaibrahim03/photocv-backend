@@ -25,6 +25,8 @@ use App\Http\Controllers\v1\PublicClubController;
 use App\Http\Controllers\v1\Member\MemberPracticeLogController;
 use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
+use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
+use App\Http\Controllers\v1\JudgeController;
 
 Route::prefix('v1')->group(function() {
 
@@ -46,6 +48,9 @@ Route::prefix('v1')->group(function() {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/roles', [RoleController::class, 'index']);
 
+        Route::get('/judge/{competitionId}/entries', [JudgeController::class, 'getEntriesWithScores']);
+        Route::post('/judge/entry/{entryId}/score', [JudgeController::class, 'saveScore']);
+
         // club admin routes
         Route::middleware(['auth', 'role:club_admin'])->group(function () {
             Route::apiResource('catalogs', CatalogController::class);
@@ -55,8 +60,11 @@ Route::prefix('v1')->group(function() {
 
             Route::apiResource('competitions', CompetitionController::class);
             Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
+            Route::get('/competition-global-settings', [CompetitionGlobalSettingController::class, 'index']);
+            Route::post('/competition-global-settings', [CompetitionGlobalSettingController::class, 'store']);
 
             Route::apiResource('/competition-results', CompetitionResultController::class);
+            Route::post('/competition-results/{competitionId}/publish', [CompetitionResultController::class, 'publishResults']);
 
             Route::apiResource('notices', NoticeController::class);
             Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);

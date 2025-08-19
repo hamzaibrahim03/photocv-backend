@@ -5,6 +5,8 @@ namespace App\Repositories\ClubAdmin;
 use App\Models\Competition;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\CompetitionResponse;
+use Illuminate\Support\Facades\DB;
+use App\Models\CompetitionMembersEntry;
 
 class CompetitionResultRepository implements CompetitionResultRepositoryInterface
 {
@@ -27,7 +29,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
             ]);
 
             // If user is a club admin, filter by their club
-            if ($user->hasRole('club_admin')) { // adjust this check as per your roles setup
+            if ($user->hasRole('club_admin')) {
                 $clubId = $user->club->id ?? null;
                 if ($clubId) {
                     $query->where('club_id', $clubId);
@@ -57,7 +59,8 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 'resultMethod',
                 'votingMethod',
                 'competitionCategory',
-                'competitionTheme'
+                'competitionTheme',
+                'judges'
             ])->where('id', $id);
 
             if ($user->hasRole('club_admin')) {
@@ -77,5 +80,35 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
+    public function assignPositionsAndPublish($data, $competitionId)
+    {
+        DB::beginTransaction();
+        try {
+            foreach ($data['entries'] as $entryData) {
+                $entry = CompetitionMembersEntry::where('id', $entryData['entry_id'])
+                    ->whereHas('competitionMember', function ($q) use ($competitionId) {
+                        $q->where('comp_id', $competitionId);
+                    })
+                    ->first();
+
+                if ($entry) {
+                    // If total_score comes from payload use it, otherwise recalc from judge scores
+                    $totalScore = $entryData['total_score'] ?? $entry->scores()->sum('score');
+
+                    $entry->update([
+                        'position'     => $entryData['position'] ?? null,
+                        'total_score'  => $totalScore,
+                        'is_published' => $data['is_published'] ?? false,
+                    ]);
+                }
+            }
+
+            DB::commit();
+            return CompetitionResponse::success('Results successfully updated and published.');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
 
 }

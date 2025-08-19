@@ -27,6 +27,7 @@ class CompetitionMembersEntry extends Model
 {
 	use SoftDeletes;
 	protected $table = 'competition_members_entries';
+	protected $appends = ['entry_image_url'];
 
 	protected $casts = [
 		'member_comp_id' => 'int'
@@ -35,12 +36,28 @@ class CompetitionMembersEntry extends Model
 	protected $fillable = [
 		'member_comp_id',
 		'entry_type',
-		'entry_image'
+		'entry_image_title',
+		'entry_image',
+		'position',
+		'total_score',
+    	'is_published',
 	];
 
 	public function competitionMember()
 	{
 		return $this->belongsTo(CompetitionMember::class, 'member_comp_id');
+	}
+
+	public function getEntryImageUrlAttribute()
+	{
+		if ($this->entry_image) {
+			return url('storage/' . ltrim($this->entry_image, '/'));
+		}
+	}
+
+	public function scores()
+	{
+		return $this->hasMany(CompetitionEntryScore::class, 'entry_id');
 	}
 
 }

@@ -174,7 +174,9 @@ class User extends Authenticatable
 
 	public function judgedCompetitions()
 	{
-		return $this->belongsToMany(Competition::class, 'competition_judges');
+		return $this->belongsToMany(Competition::class, 'competition_judges')
+					->using(CompetitionJudge::class)
+					->withTimestamps();
 	}
 
 

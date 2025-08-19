@@ -228,8 +228,12 @@ trait UtilityTrait
         // Eager load relationships
         $query->with([
             'competitionMembers.entries' => function ($q) {
-                $q->select('id', 'member_comp_id', 'entry_image');
-            }
+                $q->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type');
+            },
+            'competitionMembers.entries.scores' => function ($q) {
+                $q->with('judge:id,first_name,last_name,email') // bring judge info
+                ->select('id', 'entry_id', 'judge_id', 'score', 'comment');
+            },
         ])
         ->withCount([
             'competitionMembers as total_images' => function ($q) {
@@ -248,7 +252,19 @@ trait UtilityTrait
                 return $competition->competitionMembers
                     ->flatMap(function ($member) {
                         return $member->entries->map(function ($entry) {
-                            return asset('storage/' . $entry->entry_image);
+                            return [
+                                'entry_image'   => asset('storage/' . $entry->entry_image),
+                                'entry_title'   => $entry->entry_image_title,
+                                'entry_type'    => $entry->entry_type,
+                                'scores'        => $entry->scores->map(function ($score) {
+                                    return [
+                                        'id'      => $score->id,
+                                        'score'   => $score->score,
+                                        'comment' => $score->comment,
+                                        'judge'   => $score->judge
+                                    ];
+                                })
+                            ];
                         });
                     })
                     ->values()
@@ -259,6 +275,7 @@ trait UtilityTrait
             })
             ->make(true);
     }
+
 
     public function getCompetitionEntryData($request, $query, $searchField = 'name')
     {
@@ -281,9 +298,16 @@ trait UtilityTrait
 
         // Eager load relationships
         $query->with([
-            'competitionMembers.entries' => function ($q) {
-                $q->select('id', 'member_comp_id', 'entry_image');
-            }
+            'competitionMembers' => function ($q) {
+                $q->select('id', 'comp_id', 'member_id');
+            },
+            'competitionMembers.entries',
+            'competitionMembers.entries.scores' => function ($q) {
+                $q->with('judge:id,first_name,last_name,email')
+                // ->where('judge_id', auth()->id())
+                ->select('id', 'entry_id', 'judge_id', 'score', 'comment');
+            },
+            'competitionMembers.member:id,first_name,last_name,email'
         ])
         ->withCount([
             'competitionMembers as total_images' => function ($q) {

@@ -26,6 +26,7 @@ class CompetitionMember extends Model
 {
 	use SoftDeletes;
 	protected $table = 'competition_members';
+	protected $hidden = ['created_at', 'updated_at', 'deleted_at'];
 
 	protected $casts = [
 		'comp_id' => 'int',

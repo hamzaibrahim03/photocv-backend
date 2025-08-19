@@ -15,7 +15,11 @@ return new class extends Migration
             $table->id();
             $table->bigInteger('member_comp_id');
             $table->enum('entry_type', ['print', 'digital'])->nullable();
+            $table->string('entry_image_title', 250)->nullable();
             $table->string('entry_image', 250)->nullable();
+            $table->integer('position')->nullable();
+            $table->decimal('total_score', 8, 2)->default(0);
+            $table->boolean('is_published')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });

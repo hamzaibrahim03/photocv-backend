@@ -53,13 +53,15 @@ class MemberSeeder extends Seeder
 
         foreach ($members as $data) {
             $user = User::create(array_merge($data, [
-                'password' => bcrypt('password'),
+                'password' => bcrypt('secret123'),
             ]));
 
             // Assign to club ID 1
             $user->clubs()->syncWithoutDetaching([
                 1 => ['joined_at' => now()]
             ]);
+
+            $user->assignRole('member');
         }
     }
 }

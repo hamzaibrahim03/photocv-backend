@@ -30,10 +30,21 @@ class CompetitionRequest extends FormRequest
             ];
         }
 
+        if($route === 'publishResults') {
+            return [
+                'entries' => 'required|array',
+                'entries.*.entry_id' => 'required|integer|exists:competition_members_entries,id',
+                'entries.*.position' => 'nullable|integer|min:1',
+                'total_score' => 'nullable',
+                'is_published' => 'boolean'
+            ];
+        }
+
         if( $route === 'submitCompetitionEntry' ) {
             return [
                 'member_comp_id' => 'required|exists:competition_members,id',
                 'entry_type' => 'required|in:print,digital',
+                'entry_image_title' => 'required|string|max:250',
                 'entry_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
         }

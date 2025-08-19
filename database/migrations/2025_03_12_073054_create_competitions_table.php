@@ -47,6 +47,9 @@ return new class extends Migration
             $table->boolean('position')->nullable()->default(false);
             $table->boolean('reels')->nullable()->default(false);
             $table->boolean('arrows')->nullable()->default(false);
+            $table->boolean('comments_and_critique')->nullable()->default(false);
+            $table->boolean('auto_generate_certificates')->nullable()->default(false);
+            $table->boolean('visible_judges_feedback')->nullable()->default(false);
             $table->bigInteger('created_by')->nullable();
             $table->bigInteger('updated_by')->nullable();
             $table->bigInteger('deleted_by')->nullable();

@@ -10,33 +10,58 @@ use Carbon\Carbon;
 use App\Traits\UtilityTrait;
 use App\Http\Responses\CompetitionResponse;
 use App\Models\CompetitionMembersEntry;
+use App\Models\CompetitionGlobalSetting;
 use Illuminate\Support\Facades\Storage;
+use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepository;
 
 class CompetitionRepository implements CompetitionRepositoryInterface
 {
     use UtilityTrait;
 
+    protected $competitionGlobalSettingRepository;
+
+    public function __construct(CompetitionGlobalSettingRepository $competitionGlobalSettingRepository)
+    {
+        $this->competitionGlobalSettingRepository = $competitionGlobalSettingRepository;
+    }
+
     public function all($request)
     {
         try {
             $clubId = auth()->user()->club->id;
-            $query = Competition::where('club_id', $clubId)->with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme']);
-            $competitions = $this->getAllCompetitionsData($request, $query, 'name');
-            return CompetitionResponse::success('Competitions retrieved successfully.', $competitions);
+            $query = Competition::where('club_id', $clubId)->with([
+                'judgingType',
+                'competitionType',
+                'resultMethod',
+                'votingMethod',
+                'competitionCategory',
+                'competitionTheme',
+                'judges',
+            ]);
+
+            $competitionArr = [
+                'competitions' => $this->getAllCompetitionsData($request, $query, 'name'),
+                'globalSettings' => $this->competitionGlobalSettingRepository->getFirst(),
+            ];
+            
+            return CompetitionResponse::success('Competitions retrieved successfully.', $competitionArr);
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
-
     public function show( $id )
     {
         try {
-            $competition = Competition::with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme'])->findOrFail($id);
-
-            if (!$competition) {
-                return CompetitionResponse::error('Competition not found.', 404);
-            }
+            $competition = Competition::with([
+                'judgingType',
+                'competitionType',
+                'resultMethod',
+                'votingMethod',
+                'competitionCategory',
+                'competitionTheme',
+                'judges'
+            ])->findOrFail($id);
 
             // Get logged-in user's club
             $club = Club::where('user_id', auth()->id())->first();
@@ -48,7 +73,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
             // Transform the featured_image to full URL
             $competition->featured_image = $competition->featured_image 
-                ? asset('storage/' . $competition->featured_image) 
+                ? asset('storage/' . $competition->featured_image)
                 : null;
 
             return CompetitionResponse::success('Competition retrieved successfully.', $competition);
@@ -60,13 +85,31 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function create(array $data)
     {
         try {
+            // Attach club_id based on logged in user
             $club = Club::where('user_id', auth()->id())->first();
             if ($club) {
                 $data['club_id'] = $club->id;
             }
 
+            $data['created_by'] = auth()->id();
+
+            // Create competition
             $competition = Competition::create($data);
-            return CompetitionResponse::success('Competition created successfully.', $competition, 201);
+
+            // Attach judges if provided
+            if (!empty($data['judges'])) {
+                $judges = is_array($data['judges'])
+                    ? $data['judges']
+                    : explode(',', $data['judges']);
+
+                $competition->judges()->sync($judges);
+            }
+
+            return CompetitionResponse::success(
+                'Competition created successfully.',
+                $competition->load('judges'),
+                201
+            );
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
@@ -82,8 +125,19 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             if ($club && $competition->club_id !== $club->id) {
                 return CompetitionResponse::error('Unauthorized to update this competition.', 403);
             }
+            
+            $data['updated_by'] = auth()->id();
 
-            $competition->update($data);
+            // Update competition fields except judges
+            $competition->update(collect($data)->except('judges')->toArray());
+
+            // If judges are provided, sync them
+            if (isset($data['judges']) && is_array($data['judges'])) {
+                $competition->judges()->sync($data['judges']);
+            }
+
+            // Reload judges relation for response
+            $competition->load('judges');
 
             return CompetitionResponse::success('Competition updated successfully.', $competition);
         } catch (\Exception $e) {
@@ -226,7 +280,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         return Competition::where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
             ->orderBy('start_date', 'asc')
-            ->get();
+            ->first();
     }
 
     public function getCompetitionResults()

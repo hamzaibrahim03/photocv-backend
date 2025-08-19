@@ -5,6 +5,7 @@ namespace App\Http\Controllers\v1\ClubAdmin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Services\ClubAdmin\CompetitionResultService;
+use App\Http\Requests\Competition\CompetitionRequest;
 
 class CompetitionResultController extends Controller
 {
@@ -23,5 +24,10 @@ class CompetitionResultController extends Controller
     public function show($id, Request $request)
     {
         return $this->competitionResultService->show($id, $request);
+    }
+
+    public function publishResults(CompetitionRequest $request, $competitionId)
+    {
+        return $this->competitionResultService->assignPositionsAndPublish($request->all(), $competitionId);
     }
 }

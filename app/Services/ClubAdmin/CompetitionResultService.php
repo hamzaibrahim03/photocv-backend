@@ -21,4 +21,9 @@ class CompetitionResultService
     {
         return $this->competitionResultRepository->show($id, $request);
     }
+
+    public function assignPositionsAndPublish($data, $competitionId)
+    {
+        return $this->competitionResultRepository->assignPositionsAndPublish($data, $competitionId);
+    }
 }

@@ -114,6 +114,9 @@ class Competition extends Model
         'position',
         'reels',
         'arrows',
+		'comments_and_critique',
+		'auto_generate_certificates',
+		'visible_judges_feedback',
 		'created_by',
 		'updated_by',
 		'deleted_by'
@@ -164,7 +167,8 @@ class Competition extends Model
 	public function judges()
 	{
 		return $this->belongsToMany(User::class, 'competition_judges')
-					->using(CompetitionJudge::class);
+					->using(CompetitionJudge::class)
+					->withTimestamps();
 	}
 
 }
