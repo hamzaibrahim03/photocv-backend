@@ -197,11 +197,10 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
 
     public function getClubNews($clubId)
     {
-        return ClubNews::select('id', 'title', 'created_at', 'featured_image')
-            ->where('club_id', $clubId)
-            ->inRandomOrder()
-            ->take(5)
-            ->get();
+        return ClubNews::where('club_id', $clubId)
+        ->latest()
+        ->take(5)
+        ->get();
     }
 
 }
