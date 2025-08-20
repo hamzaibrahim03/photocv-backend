@@ -30,4 +30,9 @@ class CompetitionResultController extends Controller
     {
         return $this->competitionResultService->assignPositionsAndPublish($request->all(), $competitionId);
     }
+
+    public function recentPublishedResults()
+    {
+        return $this->competitionResultService->getAllPublishedResults();
+    }
 }

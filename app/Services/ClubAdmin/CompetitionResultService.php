@@ -26,4 +26,9 @@ class CompetitionResultService
     {
         return $this->competitionResultRepository->assignPositionsAndPublish($data, $competitionId);
     }
+
+    public function getAllPublishedResults()
+    {
+        return $this->competitionResultRepository->getAllPublishedResults();
+    }
 }

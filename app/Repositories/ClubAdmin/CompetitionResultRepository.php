@@ -84,6 +84,11 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
     {
         DB::beginTransaction();
         try {
+            $clubId = auth()->user()->club->id ?? null;
+            if (!$clubId) {
+                return CompetitionResponse::error('Club not found for this admin.', 404);
+            }
+
             foreach ($data['entries'] as $entryData) {
                 $entry = CompetitionMembersEntry::where('id', $entryData['entry_id'])
                     ->whereHas('competitionMember', function ($q) use ($competitionId) {
@@ -108,6 +113,39 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         } catch (\Exception $e) {
             DB::rollBack();
             throw $e;
+        }
+    }
+
+    public function getAllPublishedResults($clubId = null)
+    {
+        try {
+
+            if(!$clubId) {
+                $clubId = auth()->user()->club->id ?? null;
+            }
+            if (!$clubId) {
+                return CompetitionResponse::error('Club not found for this admin.', 404);
+            }
+            $competitions = Competition::with([
+                'competitionMembers' => function ($q) {
+                    $q->select('id', 'comp_id', 'member_id');
+                },
+                'competitionMembers.member:id,first_name,last_name,email',
+                'competitionMembers.entries' => function ($q) {
+                    $q->where('is_published', true)
+                    ->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type', 'position', 'total_score', 'is_published');
+                }
+            ])
+            ->where('club_id', $clubId)
+            ->whereHas('competitionMembers.entries', function ($q) {
+                $q->where('is_published', true);
+            })
+            ->get();
+
+            return CompetitionResponse::success('Club published results fetched successfully.', $competitions);
+
+        } catch (\Exception $e) {
+            return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 

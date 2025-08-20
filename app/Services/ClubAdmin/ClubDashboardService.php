@@ -3,17 +3,20 @@
 namespace App\Services\ClubAdmin;
 
 use App\Repositories\ClubAdmin\ClubDashboardRepositoryInterface;
+use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
 
 class ClubDashboardService
 {
     protected $clubDashboardRepository;
+    protected $competitionResultRepository;
     protected ClubGalleryRepository $clubGalleryRepo;
 
-    public function __construct(ClubDashboardRepositoryInterface $clubDashboardRepository, ClubGalleryRepository $clubGalleryRepo,)
+    public function __construct(ClubDashboardRepositoryInterface $clubDashboardRepository, ClubGalleryRepository $clubGalleryRepo, CompetitionResultRepositoryInterface $competitionResultRepository)
     {
         $this->clubDashboardRepository = $clubDashboardRepository;
         $this->clubGalleryRepo = $clubGalleryRepo;
+        $this->competitionResultRepository = $competitionResultRepository;
     }
 
     public function getDashboardData(int $clubId)
@@ -34,7 +37,8 @@ class ClubDashboardService
             'clubGalleries' => $this->clubGalleryRepo->getClubGalleries(auth()->user()->id),
             'total_members_count' => $latestMembersData['total_count'],
             'current_month_activities' => $this->clubDashboardRepository->getCurrentMonthActivities($clubId),
-            'recent_results' => $this->clubDashboardRepository->getRecentResults($clubId),
+            // 'recent_results' => $this->clubDashboardRepository->getRecentResults($clubId),
+            'recent_results' => $this->competitionResultRepository->getAllPublishedResults($clubId),
         ];
     }
 }

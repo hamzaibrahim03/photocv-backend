@@ -14,7 +14,6 @@ use App\Repositories\PermissionRepository;
 use App\Repositories\UserRepositoryInterface;
 use App\Repositories\UserRepository;
 
-
 use App\Repositories\SignUpRepositoryInterface;
 use App\Repositories\SignUpRepository;
 
@@ -80,7 +79,6 @@ use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepository;
 
 use App\Repositories\CompetitionEntryScoreRepository;
 use App\Repositories\CompetitionEntryScoreRepositoryInterface;
-
 
 class AppServiceProvider extends ServiceProvider
 {

@@ -65,6 +65,7 @@ Route::prefix('v1')->group(function() {
 
             Route::apiResource('/competition-results', CompetitionResultController::class);
             Route::post('/competition-results/{competitionId}/publish', [CompetitionResultController::class, 'publishResults']);
+            Route::get('/competition-results/club/published-results', [CompetitionResultController::class, 'recentPublishedResults']);
 
             Route::apiResource('notices', NoticeController::class);
             Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);

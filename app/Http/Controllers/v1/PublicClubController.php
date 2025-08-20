@@ -10,6 +10,7 @@ use App\Repositories\ClubAdmin\CompetitionRepository;
 use App\Repositories\ClubAdmin\ClubNewsRepository;
 use App\Repositories\ClubAdmin\ClubSettingsRepository;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
+use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
 use App\Models\User;
 use App\Models\Photo;
 use Carbon\Carbon;
@@ -22,6 +23,7 @@ class PublicClubController extends Controller
     protected ClubNewsRepository $clubNewsRepo;
     protected ClubSettingsRepository $clubSettingRepo;
     protected ClubGalleryRepository $clubGalleryRepo;
+    protected $competitionResultRepository;
 
     public function __construct(
         ClubDashboardRepository $clubDashboardRepo,
@@ -30,6 +32,7 @@ class PublicClubController extends Controller
         ClubNewsRepository $clubNewsRepo,
         ClubSettingsRepository $clubSettingRepo,
         ClubGalleryRepository $clubGalleryRepo,
+        CompetitionResultRepositoryInterface $competitionResultRepository
     ) {
         $this->clubDashboardRepo = $clubDashboardRepo;
         $this->eventRepo = $eventRepo;
@@ -37,6 +40,7 @@ class PublicClubController extends Controller
         $this->clubNewsRepo = $clubNewsRepo;
         $this->clubSettingRepo = $clubSettingRepo;
         $this->clubGalleryRepo = $clubGalleryRepo;
+        $this->competitionResultRepository = $competitionResultRepository;
     }
 
     public function getClubData(Request $request)
@@ -120,7 +124,8 @@ class PublicClubController extends Controller
                     ];
                 }),
                 'clubNews' => $this->clubNewsRepo->getClubNews($clubId),
-                'latestReseults' => $this->clubDashboardRepo->getRecentResults($clubId),
+                // 'latestReseults' => $this->clubDashboardRepo->getRecentResults($clubId),
+                'latestReseults' => $this->competitionResultRepository->getAllPublishedResults($clubId),
                 'clubSettings' => $this->clubSettingRepo->all($user->id),
             ]
         ], 200);
