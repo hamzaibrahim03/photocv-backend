@@ -14,7 +14,7 @@ class ClubSettingService
 
     public function showSettings( )
     {
-        return $this->clubSettingRepository->all( );
+        return $this->clubSettingRepository->getAllClubSettings( );
     }
 
     public function saveClubSettings(array $data, $logo, $clubBanner, $id)

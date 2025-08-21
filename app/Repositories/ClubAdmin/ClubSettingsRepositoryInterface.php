@@ -4,6 +4,6 @@ namespace App\Repositories\ClubAdmin;
 
 interface ClubSettingsRepositoryInterface
 {
-    public function all( );
+    public function getAllClubSettings( );
     public function save(array $data, $logo, $clubBanner, $id);
 }

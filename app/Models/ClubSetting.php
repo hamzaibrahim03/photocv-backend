@@ -90,4 +90,9 @@ class ClubSetting extends Model
     {
         return $this->belongsTo(Club::class);
     }
+
+    public function coverImages()
+    {
+        return $this->hasMany(ClubCoverImage::class);
+    }
 }

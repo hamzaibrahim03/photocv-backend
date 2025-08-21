@@ -8,10 +8,11 @@ use App\Models\User;
 use App\Models\Event;
 use App\Models\ClubSeason;
 use App\Http\Responses\ClubSettingResponse;
+use App\Models\ClubCoverImage;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
-    public function all($userId = null)
+    public function getAllClubSettings($userId = null)
     {
         try {
             $user = User::find($userId ?? auth()->id());
@@ -26,7 +27,7 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 return ClubSettingResponse::error('No club found for the current user.', 404);
             }
 
-            $clubSetting = $club->setting;
+            $clubSetting = $club->setting->with('coverImages')->first();
 
             // Total members in the club
             $totalMemberCount = User::whereHas('clubs', function ($query) use ($club) {
@@ -103,10 +104,6 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 $data['header_img'] = $data['header_img']->store('uploads/clubs/header', 'public');
             }
 
-            if (!empty($data['cover_image'])) {
-                $data['cover_image'] = $data['cover_image']->store('uploads/clubs/cover', 'public');
-            }
-
             // Separate Club vs ClubSetting fields
             $clubFields = [
                 'club_name', 'tag_line', 'about', 'contact_details',
@@ -126,6 +123,19 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
             } else {
                 $settingData['club_id'] = $club->id;
                 $clubSetting = ClubSetting::create($settingData);
+            }
+
+            if (!empty($data['cover_images']) && is_array($data['cover_images'])) {
+                // If replacing, delete old ones
+                ClubCoverImage::where('club_setting_id', $clubSetting->id)->delete();
+
+                foreach ($data['cover_images'] as $image) {
+                    $path = $image->store('uploads/clubs/cover', 'public');
+                    ClubCoverImage::create([
+                        'club_setting_id' => $clubSetting->id,
+                        'image_path'      => $path,
+                    ]);
+                }
             }
 
             // Handle seasons
