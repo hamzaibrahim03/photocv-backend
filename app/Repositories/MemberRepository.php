@@ -252,6 +252,114 @@ class MemberRepository implements MemberRepositoryInterface
         return $username;
     }
 
+    public function requestToJoinClub($userId, $clubId)
+    {
+        try {
+            $user = User::findOrFail($userId);
+            $club = Club::findOrFail($clubId);
+
+            // Check if the user has already requested or joined
+            $existing = $user->clubs()->where('club_id', $clubId)->first();
+            if ($existing) {
+                return [
+                    'success' => false,
+                    'message' => 'You have already requested to join this club or are already a member.'
+                ];
+            }
+
+            // Add to pivot table with 'pending' status
+            $user->clubs()->syncWithoutDetaching([
+                $clubId => ['status' => 'pending', 'joined_at' => now()]
+            ]);
+
+            return [
+                'success' => true,
+                'message' => 'Your request to join the club has been submitted successfully.'
+            ];
+        } catch (\Exception $e) {
+            return [
+                'success' => false,
+                'message' => 'Failed to submit request: ' . $e->getMessage()
+            ];
+        }
+    }
+
+    public function getRequestingMember($userId)
+    {
+        try {
+            $club = auth()->user()->club;
+
+            if (!$club) {
+                return MemberResponse::error('You are not assigned to any club.');
+            }
+
+            // Get the specific user who requested to join this club
+            $member = $club->users()
+                        ->where('users.id', $userId)
+                        ->wherePivot('status', 'pending')
+                        ->first();
+
+            if (!$member) {
+                return MemberResponse::error('No pending request found for this member in your club.');
+            }
+
+            // Total pending requests in the club
+            $totalPending = $club->users()->wherePivot('status', 'pending')->count();
+
+            return MemberResponse::success(
+                'Member request retrieved successfully.',
+                [
+                    'member' => $member,
+                    'social_links' => $member->socialLinks->map(function ($link) {
+                        return [
+                            'social_media_name' => $link->social_media_name,
+                            'social_link' => $link->social_link,
+                        ];
+                    }),
+                    'total_pending_requests' => $totalPending
+                ]
+            );
+        } catch (\Exception $e) {
+            return MemberResponse::error('Failed to fetch member request: ' . $e->getMessage());
+        }
+    }
+
+
+    public function getAllPendingRequests()
+    {
+        try {
+            $club = auth()->user()->club;
+
+            if (! $club) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You are not assigned to any club.',
+                    'data' => [],
+                    'total_pending' => 0
+                ], 404);
+            }
+
+            // Get users who requested to join but not yet approved
+            $pendingUsers = $club->users()->wherePivot('status', 'pending')->get();
+            $totalPending = $pendingUsers->count();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Pending requests retrieved successfully.',
+                'data' => $pendingUsers,
+                'total_pending' => $totalPending
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to fetch pending requests: ' . $e->getMessage(),
+                'data' => [],
+                'total_pending' => 0
+            ], 500);
+        }
+    }
+
+
     /**
      * Assign a club to a member.
      *
@@ -264,7 +372,8 @@ class MemberRepository implements MemberRepositoryInterface
         $user = User::findOrFail($userId);
         $club = Club::findOrFail($clubId);
 
-        $user->clubs()->syncWithoutDetaching([$clubId => ['joined_at' => now()]]);
+        $user->clubs()->updateExistingPivot($clubId, ['status' => 'approved', 'joined_at' => now()]);
+        // $user->clubs()->syncWithoutDetaching([$clubId => ['joined_at' => now()]]);
         return true;
     }
 

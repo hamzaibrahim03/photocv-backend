@@ -86,12 +86,16 @@ Route::prefix('v1')->group(function() {
             Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);
 
             Route::apiResource('club-gallery', ClubGalleryController::class);
+
+            Route::get('/member-pending-requests', [MemberController::class, 'pendingRequests']);
+            Route::post('/assign-club', [MemberController::class, 'assignClub']);
+            Route::get('/member-request/{userId}', [MemberController::class, 'getRequestingMember']);
             
         });
 
         // member routes
         Route::middleware(['auth', 'role:member'])->group(function () {
-            Route::post('/assign-club', [MemberController::class, 'assignClub']);
+            Route::post('/join-club', [MemberController::class, 'requestToJoinClub']);
             Route::get('/joined-clubs', [MemberController::class, 'joinedClubs']);
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);

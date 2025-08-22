@@ -72,6 +72,26 @@ class MemberController extends Controller
         return $this->memberService->deleteMember( $id );
     }
 
+    public function requestToJoinClub(Request $request)
+    {
+        $validated = $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'club_id' => 'required|exists:clubs,id',
+        ]);
+
+        return $this->memberService->requestToJoinClub($validated['user_id'], $validated['club_id']);
+    }
+
+    public function pendingRequests()
+    {
+        return $this->memberService->pendingRequests();
+    }
+
+    public function getRequestingMember($userId)
+    {
+        return $this->memberService->getRequestingMember($userId);
+    }
+
     /**
      * Assign a club to a member.
      *

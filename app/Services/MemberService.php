@@ -69,6 +69,21 @@ class MemberService
         return $this->memberRepository->delete($id);
     }
 
+    public function requestToJoinClub($user_id, $club_id)
+    {
+        return $this->memberRepository->requestToJoinClub($user_id, $club_id);
+    }
+
+    public function pendingRequests()
+    {
+        return $this->memberRepository->getAllPendingRequests();
+    }
+
+    public function getRequestingMember($userId)
+    {
+        return $this->memberRepository->getRequestingMember($userId);
+    }
+
     /**
      * Assign a club to a member.
      *

@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id');
             $table->unsignedBigInteger('club_id');
+            $table->string('status')->default('pending');
             $table->timestamp('joined_at')->nullable();
             $table->timestamps();
 
