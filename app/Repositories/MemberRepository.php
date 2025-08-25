@@ -725,4 +725,37 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    public function rejectClubRequest($data)
+    {
+        try {
+            $club = auth()->user()->club;
+
+            if (! $club) {
+                return MemberResponse::error('You are not assigned to any club.');
+            }
+
+            $userId = $data['user_id'];
+
+            // Check if this user actually has a pending request in the club
+            $isPending = $club->users()
+                            ->where('users.id', $userId)
+                            ->wherePivot('status', 'pending')
+                            ->exists();
+
+            if (! $isPending) {
+                return MemberResponse::error('No pending request found for this member in your club.');
+            }
+
+            // Update pivot to rejected
+            $club->users()->updateExistingPivot($userId, [
+                'status' => 'rejected',
+                'rejected_at' => now(), // optional if you add column
+            ]);
+
+            return MemberResponse::success('Member request has been rejected successfully.');
+        } catch (\Exception $e) {
+            return MemberResponse::error('Failed to reject request: ' . $e->getMessage());
+        }
+    }
+
 }

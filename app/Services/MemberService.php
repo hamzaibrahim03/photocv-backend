@@ -145,4 +145,9 @@ class MemberService
     {
         return $this->memberRepository->getJoinedClubs();
     }
+
+    public function rejectClubRequest($data)
+    {
+        return $this->memberRepository->rejectClubRequest($data);
+    }
 }

@@ -90,6 +90,7 @@ Route::prefix('v1')->group(function() {
             Route::get('/member-pending-requests', [MemberController::class, 'pendingRequests']);
             Route::post('/assign-club', [MemberController::class, 'assignClub']);
             Route::get('/member-request/{userId}', [MemberController::class, 'getRequestingMember']);
+            Route::post('/reject-club-request', [MemberController::class, 'rejectClubRequest']);
             
         });
 

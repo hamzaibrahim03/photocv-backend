@@ -176,4 +176,9 @@ class MemberController extends Controller
     {
         return $this->memberService->getJoinedClubs();
     }
+
+    public function rejectClubRequest(Request $request)
+    {
+        return $this->memberService->rejectClubRequest($request->all());
+    }
 }

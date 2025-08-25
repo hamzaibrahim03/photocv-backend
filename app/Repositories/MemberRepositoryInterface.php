@@ -20,4 +20,5 @@ interface MemberRepositoryInterface
     public function memberGalleryDetails($memberId);
     public function profileUpdate($data);
     public function getJoinedClubs();
+    public function rejectClubRequest($data);
 }
