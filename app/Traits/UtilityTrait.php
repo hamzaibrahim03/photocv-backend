@@ -48,7 +48,7 @@ trait UtilityTrait
 
     public function getAllEventData($request)
     {
-        $query = Event::with(['eventType', 'eventKind', 'images', 'comments']);
+        $query = Event::with(['eventType', 'eventTag', 'images', 'comments']);
 
         $club = Club::where('user_id', auth()->id())->first();
         if ($club) {

@@ -23,7 +23,7 @@ class StoreCatalogRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:50',
-            'catalog_type' => 'required|string|in:competition_type,event_type,event_kind,judging_type,competition_theme,competition_catagories,competition_voting_method,competition_result_method',
+            'catalog_type' => 'required|string|in:competition_type,event_type,event_tag,judging_type,competition_theme,competition_catagories,competition_voting_method,competition_result_method',
             'icon' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
         ];
     }

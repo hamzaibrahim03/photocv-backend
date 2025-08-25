@@ -26,7 +26,7 @@ class UpdateEventRequest extends FormRequest
             'event_date' => 'sometimes|required|date',
             'description' => 'nullable|string',
             'event_type_id' => 'sometimes|required|integer|min:1',
-            'event_kind_id' => 'sometimes|required|integer|min:1',
+            'event_tag_id' => 'sometimes|required|integer|min:1',
             'duration' => 'sometimes|required|string|max:20',
             'speaker' => 'sometimes|required|string|max:25',
             'speaker_club' => 'sometimes|required|string|max:50',

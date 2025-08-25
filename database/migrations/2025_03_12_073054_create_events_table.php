@@ -19,7 +19,7 @@ return new class extends Migration
             $table->dateTime('event_date')->nullable();
             $table->text('description')->nullable();
             $table->smallInteger('event_type_id')->nullable();
-            $table->smallInteger('event_kind_id')->nullable();
+            $table->smallInteger('event_tag_id')->nullable();
             $table->string('duration', 20)->nullable()->comment('2 hours, 10 hours, 10 days etc');
             $table->string('speaker', 25)->nullable();
             $table->string('speaker_club', 50)->nullable();

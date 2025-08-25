@@ -39,7 +39,7 @@ class EventRepository implements EventRepositoryInterface
     public function show($id)
     {
         try {
-            $event = Event::with(['eventType', 'eventKind', 'comments'])->findOrFail($id);
+            $event = Event::with(['eventType', 'eventTag', 'comments'])->findOrFail($id);
 
             // Get logged-in user's club
             $club = Club::where('user_id', auth()->id())->first();

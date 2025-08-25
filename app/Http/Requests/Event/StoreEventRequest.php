@@ -26,7 +26,7 @@ class StoreEventRequest extends FormRequest
             'event_date' => 'required|date',
             'description' => 'nullable|string',
             'event_type_id' => 'required|integer|min:1',
-            'event_kind_id' => 'required|integer|min:1',
+            'event_tag_id' => 'required|integer|min:1',
             'duration' => 'required|string|max:20',
             'speaker' => 'required|string|max:25',
             'speaker_club' => 'required|string|max:50',

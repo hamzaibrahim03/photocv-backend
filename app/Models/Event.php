@@ -19,7 +19,7 @@ use Illuminate\Support\Str;
  * @property Carbon|null $event_date
  * @property string|null $description
  * @property int|null $event_type_id
- * @property int|null $event_kind_id
+ * @property int|null $event_tag_id
  * @property string|null $duration
  * @property string|null $speaker
  * @property string|null $speaker_club
@@ -49,7 +49,7 @@ class Event extends Model
 	protected $casts = [
 		'event_date' => 'datetime',
 		'event_type_id' => 'int',
-		'event_kind_id' => 'int',
+		'event_tag_id' => 'int',
 		'enable_dropbox_upload' => 'bool',
 		'created_by' => 'int',
 		'updated_by' => 'int',
@@ -63,7 +63,7 @@ class Event extends Model
 		'event_date',
 		'description',
 		'event_type_id',
-		'event_kind_id',
+		'event_tag_id',
 		'duration',
 		'speaker',
 		'speaker_club',
@@ -117,9 +117,9 @@ class Event extends Model
         return $this->belongsTo(Catalog::class, 'event_type_id', 'id');
     }
 
-    public function eventKind()
+    public function eventTag()
     {
-        return $this->belongsTo(Catalog::class, 'event_kind_id', 'id');
+        return $this->belongsTo(Catalog::class, 'event_tag_id', 'id');
     }
 
 }
