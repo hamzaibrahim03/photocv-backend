@@ -18,8 +18,6 @@ class EventSeeder extends Seeder
                 'name' => 'Annual Photography Meetup',
                 'event_date' => Carbon::now()->addDays(10),
                 'description' => 'A gathering of club photographers to share and learn.',
-                'event_type_id' => 1,
-                'event_tag_id' => 1,
                 'duration' => '2 hours',
                 'speaker' => 'John Doe',
                 'speaker_club' => 'Nature Clickers',
@@ -31,7 +29,9 @@ class EventSeeder extends Seeder
                 'rsvp_detail' => 'Register online',
                 'enable_dropbox_upload' => true,
                 'created_by' => 1,
-                'updated_by' => 1
+                'updated_by' => 1,
+                'event_types' => [1, 2], // multiple types
+                'event_tags'  => [3, 4], // multiple tags
             ],
             [
                 'club_id' => 1,
@@ -39,8 +39,6 @@ class EventSeeder extends Seeder
                 'name' => 'Editing Masterclass',
                 'event_date' => Carbon::now()->addDays(20),
                 'description' => 'Learn photo editing techniques from the pros.',
-                'event_type_id' => 2,
-                'event_tag_id' => 1,
                 'duration' => '3 hours',
                 'speaker' => 'Jane Smith',
                 'speaker_club' => 'Photo Experts',
@@ -52,7 +50,9 @@ class EventSeeder extends Seeder
                 'rsvp_detail' => 'Email RSVP',
                 'enable_dropbox_upload' => false,
                 'created_by' => 1,
-                'updated_by' => 1
+                'updated_by' => 1,
+                'event_types' => [2], // one type
+                'event_tags'  => [5, 6],
             ],
             [
                 'club_id' => 1,
@@ -60,8 +60,6 @@ class EventSeeder extends Seeder
                 'name' => 'Street Photography Walk',
                 'event_date' => Carbon::now()->addDays(30),
                 'description' => 'Explore the city and capture the urban life.',
-                'event_type_id' => 1,
-                'event_tag_id' => 2,
                 'duration' => '1 day',
                 'speaker' => 'Mike Urban',
                 'speaker_club' => 'Urban Clicks',
@@ -73,12 +71,27 @@ class EventSeeder extends Seeder
                 'rsvp_detail' => 'Google Form',
                 'enable_dropbox_upload' => true,
                 'created_by' => 1,
-                'updated_by' => 1
+                'updated_by' => 1,
+                'event_types' => [1],
+                'event_tags'  => [7, 8],
             ]
         ];
 
         foreach ($events as $eventData) {
+            $types = $eventData['event_types'] ?? [];
+            $tags  = $eventData['event_tags'] ?? [];
+
+            unset($eventData['event_types'], $eventData['event_tags']);
+
             $event = Event::create($eventData);
+
+            if (!empty($types)) {
+                $event->types()->sync($types);
+            }
+
+            if (!empty($tags)) {
+                $event->tags()->sync($tags);
+            }
 
             // Add 2 images for each event
             for ($i = 1; $i <= 2; $i++) {

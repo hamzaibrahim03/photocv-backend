@@ -19,7 +19,7 @@ class ClubSetting extends Model
 		'header_img_url',
 		'footer_img_url',
 		'logo_url',
-		'cover_image_url',
+		// 'cover_image_url',
 	];
 
     protected $fillable = [

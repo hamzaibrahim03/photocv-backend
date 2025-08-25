@@ -46,7 +46,7 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 
             return ClubSettingResponse::success('Settings retrieved successfully.', [
                 'club' => array_merge(
-                    $club->toArray(),
+                    collect($club)->except(['setting'])->toArray(),
                     [
                         'phone' => $user->phone,
                         'address' => $user->address,

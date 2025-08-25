@@ -48,7 +48,7 @@ trait UtilityTrait
 
     public function getAllEventData($request)
     {
-        $query = Event::with(['eventType', 'eventTag', 'images', 'comments']);
+        $query = Event::with(['types', 'tags', 'images', 'comments']);
 
         $club = Club::where('user_id', auth()->id())->first();
         if ($club) {
@@ -57,16 +57,19 @@ trait UtilityTrait
             return DataTables::of(collect([]))->make(true);
         }
 
+        // Filter by event type (multi-type)
         if ($request->has('event_type_id') && $request->event_type_id != '') {
-            $query->where('event_type_id', $request->event_type_id);
-        }
-
-        if ($request->has('search_term') && $request->search_term != '') {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'LIKE', '%' . $request->search_term . '%');
+            $query->whereHas('types', function ($q) use ($request) {
+                $q->where('catalog.id', $request->event_type_id);
             });
         }
 
+        // Search
+        if ($request->has('search_term') && $request->search_term != '') {
+            $query->where('name', 'LIKE', '%' . $request->search_term . '%');
+        }
+
+        // Ordering
         if ($request->has('order') && count($request->order)) {
             $column = $request->columns[$request->order[0]['column']]['data'];
             $direction = $request->order[0]['dir'];
@@ -81,7 +84,6 @@ trait UtilityTrait
             ->editColumn('featured_image', function ($event) {
                 return $event->featured_image ? asset('storage/' . $event->featured_image) : null;
             })
-            ->rawColumns(['action'])
             ->make(true);
     }
 

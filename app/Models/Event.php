@@ -112,6 +112,16 @@ class Event extends Model
 		return asset('storage/' . $this->featured_image);
 	}
 
+	public function types()
+    {
+        return $this->belongsToMany(Catalog::class, 'event_event_type', 'event_id', 'event_type_id');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Catalog::class, 'event_event_tag', 'event_id', 'event_tag_id');
+    }
+
 	public function eventType()
     {
         return $this->belongsTo(Catalog::class, 'event_type_id', 'id');

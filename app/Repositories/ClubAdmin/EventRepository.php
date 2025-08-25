@@ -39,28 +39,27 @@ class EventRepository implements EventRepositoryInterface
     public function show($id)
     {
         try {
-            $event = Event::with(['eventType', 'eventTag', 'comments'])->findOrFail($id);
+            $event = Event::with(['types', 'tags', 'comments', 'images'])->findOrFail($id);
 
             // Get logged-in user's club
             $club = Club::where('user_id', auth()->id())->first();
 
-            // Check if the event belongs to the user's club
+            // Check ownership
             if (!$club || $event->club_id !== $club->id) {
                 return EventResponse::error('Unauthorized to view this event.', 403);
             }
 
-            // Transform the featured_image to full URL
-            $event->featured_image = $event->featured_image 
-                ? asset('storage/' . $event->featured_image) 
+            // Featured image full URL
+            $event->featured_image = $event->featured_image
+                ? asset('storage/' . $event->featured_image)
                 : null;
-
-            $event->load('images');
 
             return EventResponse::success('Event retrieved successfully.', $event);
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     /**
      * Create a new event.
@@ -79,10 +78,26 @@ class EventRepository implements EventRepositoryInterface
                 return EventResponse::error('No club found for the current user.', 404);
             }
 
-            // Inject club_id into the data array
+            // Inject club_id
             $data['club_id'] = $club->id;
 
+            // Extract event types & tags
+            $eventTypes = $data['event_types'] ?? [];
+            $eventTags  = $data['event_tags'] ?? [];
+
+            unset($data['event_types'], $data['event_tags']);
+
+            // Create event
             $event = Event::create($data);
+
+            // Attach event types and tags
+            if (!empty($eventTypes)) {
+                $event->types()->sync($eventTypes);
+            }
+
+            if (!empty($eventTags)) {
+                $event->tags()->sync($eventTags);
+            }
 
             // Handle file uploads
             if ($files) {
@@ -98,11 +113,12 @@ class EventRepository implements EventRepositoryInterface
                 }
             }
 
-            return EventResponse::success('Event created successfully.', $event, 201);
+            return EventResponse::success('Event created successfully.', $event->load(['types', 'tags', 'images']), 201);
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     /**
      * Update an existing event.
@@ -123,7 +139,23 @@ class EventRepository implements EventRepositoryInterface
                 return EventResponse::error('Unauthorized access to update event.', 403);
             }
 
+            // Extract event types & tags
+            $eventTypes = $data['event_types'] ?? [];
+            $eventTags  = $data['event_tags'] ?? [];
+
+            unset($data['event_types'], $data['event_tags']);
+
+            // Update base event data
             $event->update($data);
+
+            // Sync event types & tags
+            if (!empty($eventTypes)) {
+                $event->types()->sync($eventTypes);
+            }
+
+            if (!empty($eventTags)) {
+                $event->tags()->sync($eventTags);
+            }
 
             // Handle file uploads
             if ($files) {
@@ -139,11 +171,15 @@ class EventRepository implements EventRepositoryInterface
                 }
             }
 
-            return EventResponse::success('Event updated successfully.', $event);
+            return EventResponse::success(
+                'Event updated successfully.',
+                $event->load(['types', 'tags', 'images'])
+            );
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     /**
      * Delete an event by ID.
