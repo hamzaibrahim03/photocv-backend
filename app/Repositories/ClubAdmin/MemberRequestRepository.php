@@ -4,10 +4,13 @@ namespace App\Repositories\ClubAdmin;
 
 use App\Models\Club;
 use App\Models\User;
+use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
 
 class MemberRequestRepository implements MemberRequestRepositoryInterface
 {
+    use UtilityTrait;
+
     /**
      * Assign a club to a member.
      *
@@ -29,37 +32,13 @@ class MemberRequestRepository implements MemberRequestRepositoryInterface
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getAllPendingRequests()
+    public function getAllPendingRequests($request)
     {
         try {
-            $club = auth()->user()->club;
-
-            if (! $club) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not assigned to any club.',
-                    'data' => [],
-                    'total_pending' => 0
-                ], 404);
-            }
-
-            // Get users who requested to join but not yet approved
-            $pendingUsers = $club->users()->wherePivot('status', 'pending')->get();
-            $totalPending = $pendingUsers->count();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pending requests retrieved successfully.',
-                'data' => $pendingUsers,
-                'total_pending' => $totalPending
-            ]);
+            $members = $this->getAllMemberPendingRequests($request);
+            return MemberResponse::success('Members retrieved successfully.', $members);
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch pending requests: ' . $e->getMessage(),
-                'data' => [],
-                'total_pending' => 0
-            ], 500);
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 

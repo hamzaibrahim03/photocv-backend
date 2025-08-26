@@ -24,9 +24,9 @@ class MemberRequestService
         return $this->memberRequestRepository->assignClubToUser($user_id, $club_id);
     }
 
-    public function pendingRequests()
+    public function pendingRequests($request)
     {
-        return $this->memberRequestRepository->getAllPendingRequests();
+        return $this->memberRequestRepository->getAllPendingRequests($request);
     }
 
     public function getRequestingMember($userId)

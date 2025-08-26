@@ -33,9 +33,9 @@ class MemberRequestController extends Controller
         return response()->json(['message' => 'Club assigned successfully']);
     }
 
-    public function pendingRequests()
+    public function pendingRequests(Request $request)
     {
-        return $this->memberRequestService->pendingRequests();
+        return $this->memberRequestService->pendingRequests($request);
     }
 
     public function getRequestingMember($userId)
