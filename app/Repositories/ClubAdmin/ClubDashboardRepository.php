@@ -51,22 +51,6 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
         ];
     }
 
-    public function getLatestCompetitions(int $clubId, int $limit = 3)
-    {
-        return Competition::where('club_id', $clubId)
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
-    }
-
-    public function getLatestPages(int $clubId, int $limit = 6)
-    {
-        return Page::where('club_id', $clubId)
-            ->orderBy('created_at', 'desc')
-            ->limit($limit)
-            ->get();
-    }
-
     public function getLatestNotices(int $clubId, int $limit = 3)
     {
         return MemberNotice::where('club_id', $clubId)
@@ -89,19 +73,22 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
      * @param int $limit
      * @return array{members: \Illuminate\Database\Eloquent\Collection<int, User>, total_count: int}
      */
-    public function getLatestMembers(int $clubId, int $limit = 3)
+    public function getLatestMembers(int $clubId, int $limit = 6)
     {
-        $members = User::whereHas('clubs', function ($query) use ($clubId) {
-            $query->where('club_id', $clubId);
-        })
-        ->orderBy('created_at', 'desc')
-        // ->limit($limit)
-        ->get();
+        // Base query (only approved members of given club)
+        $baseQuery = User::whereHas('clubs', function ($query) use ($clubId) {
+            $query->where('club_id', $clubId)
+                ->where('status', 'approved');
+        });
 
-        $totalCount = User::whereHas('clubs', function ($query) use ($clubId) {
-                $query->where('club_id', $clubId);
-            })
-            ->count();
+        // Get latest members
+        $members = (clone $baseQuery)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Get total count
+        $totalCount = (clone $baseQuery)->count();
 
         return [
             'members' => $members,

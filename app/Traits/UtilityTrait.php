@@ -691,8 +691,12 @@ trait UtilityTrait
 
     public function getAllMemberIndexData($request)
     {
+        $clubId = auth()->user()->club->id;
         $query = User::with(['roles', 'socialLinks'])
-        ->where('created_by', auth()->id())
+        ->whereHas('clubs', function ($query) use ($clubId) {
+            $query->where('club_id', $clubId)
+                  ->where('status', 'approved');
+        })
         ->with([
             'galleries' => function ($query) {
                 $query->where('is_active', true)
@@ -703,7 +707,7 @@ trait UtilityTrait
                             }]);
                     }]);
             }
-    ]);
+        ]);
 
     // Search
     if ($request->filled('search_term')) {

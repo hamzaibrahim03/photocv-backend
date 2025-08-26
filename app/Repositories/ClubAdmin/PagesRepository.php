@@ -13,6 +13,14 @@ class PagesRepository implements PagesRepositoryInterface
 {
     use UtilityTrait;
 
+    public function getLatestPagesByLimit(int $clubId, int $limit = 6)
+    {
+        return Page::where('club_id', $clubId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
     public function all( $request )
     {
         try {

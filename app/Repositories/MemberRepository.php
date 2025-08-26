@@ -19,6 +19,7 @@ use App\Models\ClubNews;
 use App\Models\Event;
 use Spatie\Permission\Models\Role;
 use App\Models\MemberSocialLink;
+use App\Models\ClubUser;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -132,6 +133,14 @@ class MemberRepository implements MemberRepositoryInterface
                 $member->assignRole($role);
             }
 
+            // Add member to club with approved status
+            ClubUser::create([
+                'user_id' => $member->id,
+                'club_id' => auth()->user()->club->id,
+                'status'  => 'approved',
+                'joined_at' => now(),
+            ]);
+
             // Mail::to($data['email'])->send(new MemberCreatedMail($data['email'], $randomPassword));
 
             if (!empty($data['member_social_media'])) {
@@ -222,16 +231,25 @@ class MemberRepository implements MemberRepositoryInterface
         try {
             $member = User::findOrFail($id);
 
+            // Optional: check if member exists (already handled by findOrFail)
             if (!$member) {
                 return MemberResponse::error('Member not found or already deleted.', 404);
             }
 
+            $member->clubs()->detach();
+
+            // Optional: remove social links
+            $member->socialLinks()->delete();
+
+            // Delete the member (soft delete if your model uses SoftDeletes)
             $member->delete();
+
             return MemberResponse::success('Member deleted successfully.');
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     /**
      * Ensure unique username for the member.

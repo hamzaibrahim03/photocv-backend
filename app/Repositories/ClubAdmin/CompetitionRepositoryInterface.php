@@ -11,5 +11,5 @@ interface CompetitionRepositoryInterface
     public function delete($id);
     public function getCompetitionExtras($request);
     public function getCompetitionResults();
-    
+    public function getLatestCompetitionsByLimit(int $clubId, int $limit = 3);
 }

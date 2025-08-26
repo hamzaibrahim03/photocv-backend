@@ -317,4 +317,12 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         });
     }
 
+    public function getLatestCompetitionsByLimit(int $clubId, int $limit = 3)
+    {
+        return Competition::where('club_id', $clubId)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
 }

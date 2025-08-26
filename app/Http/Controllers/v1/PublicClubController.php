@@ -79,13 +79,8 @@ class PublicClubController extends Controller
             'data' => [
                 'user' => $user,
                 'clubGalleries' => $this->clubGalleryRepo->getClubGalleries($user->id),
-                // 'clubGalleries' => MemberAward::with([
-                //         'photo.gallery' => function ($query) {
-                //             $query->with('member.clubs');
-                //         }
-                //     ])->get(),
                 'upcomingEvents' => $this->eventRepo->getUpcomingEvents($clubId),
-                'upcomingCompetitions' => $this->competitionRepo->getUpcomingCompetitions($clubId),
+                'upcomingCompetitions' => $this->competitionRepo->getLatestCompetitionsByLimit($clubId),
                 'calendar' => $this->competitionRepo->getCalenderCompetitionData($clubId, $startOfMonth, $endOfMonth),
                 'memberGalleries' => $this->clubDashboardRepo->getMembersGallerries($clubId),
                 'latestMembers' => $this->clubDashboardRepo->getLatestMembers($clubId),
