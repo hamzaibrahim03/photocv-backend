@@ -2,7 +2,8 @@
 
 namespace App\Repositories\Member;
 
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\CompetitionDataTableTrait;
+use App\Traits\DataTables\EventDataTableTrait;
 use App\Http\Responses\EventResponse;
 use App\Http\Responses\MemberResponse;
 use App\Models\Competition;
@@ -18,13 +19,12 @@ use App\Models\MemberBrand;
 
 class MemberAdminRepository implements MemberAdminRepositoryInterface
 {
-    use UtilityTrait;
+    use CompetitionDataTableTrait, EventDataTableTrait;
 
     /**
      * Get all members with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function allEvents( $request )
     {
@@ -124,7 +124,6 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
 
     /**
      * Method to get all competitions for member admin with additional information
-     * @return void
      */
     public function allCompetitions($request)
     {
@@ -235,7 +234,6 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
 
     /**
      * Method to get notices and gallery information
-     * @return void
      */
     public function getMemberNotices()
     {

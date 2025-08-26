@@ -6,13 +6,13 @@ use App\Models\Competition;
 use App\Models\Club;
 use App\Models\Event;
 use App\Models\EventImage;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\EventDataTableTrait;
 use Carbon\Carbon;
 use App\Http\Responses\EventResponse;
 
 class EventRepository implements EventRepositoryInterface
 {
-    use UtilityTrait;
+    use EventDataTableTrait;
 
     /**
      * Get all event data with pagination and filtering.

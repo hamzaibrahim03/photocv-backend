@@ -4,12 +4,12 @@ namespace App\Repositories\ClubAdmin;
 
 use App\Models\Club;
 use App\Models\User;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\MemberDataTableTrait;
 use App\Http\Responses\MemberResponse;
 
 class MemberRequestRepository implements MemberRequestRepositoryInterface
 {
-    use UtilityTrait;
+    use MemberDataTableTrait;
 
     /**
      * Assign a club to a member.
@@ -113,7 +113,7 @@ class MemberRequestRepository implements MemberRequestRepositoryInterface
             // Update pivot to rejected
             $club->users()->updateExistingPivot($userId, [
                 'status' => 'rejected',
-                'rejected_at' => now(), // optional if you add column
+                'rejected_at' => now(),
             ]);
 
             return MemberResponse::success('Member request has been rejected successfully.');

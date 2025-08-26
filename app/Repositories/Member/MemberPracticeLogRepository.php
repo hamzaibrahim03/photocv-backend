@@ -2,20 +2,19 @@
 
 namespace App\Repositories\Member;
 
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\MemberDataTableTrait;
 use App\Http\Responses\MemberResponse;
 use App\Models\MemberPracticeLog;
 use Illuminate\Support\Facades\Storage;
 
 class MemberPracticeLogRepository implements MemberPracticeLogRepositoryInterface
 {
-    use UtilityTrait;
+    use MemberDataTableTrait;
 
     /**
      * Get all members with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function index( $request )
     {
@@ -71,7 +70,6 @@ class MemberPracticeLogRepository implements MemberPracticeLogRepositoryInterfac
     /**
      * Method to delete note
      * @param mixed $id
-     * @return void
      */
     public function delete($id)
     {

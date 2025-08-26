@@ -5,18 +5,18 @@ namespace App\Repositories;
 use App\Models\Club;
 use App\Models\MemberNotice;
 use App\Models\MemberNoticeFile;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\NoticeDataTableTrait;
 use App\Http\Responses\NoticeResponse;
 use Carbon\Carbon;
 
 class NoticeRepository implements NoticeRepositoryInterface
 {
-    use UtilityTrait;
+    use NoticeDataTableTrait;
 
     public function all( $request )
     {
         try {
-            $notices = $this->getAllNoticeData($request);
+            $notices = $this->getAllNotices($request);
             return NoticeResponse::success('Notices retrieved successfully.', $notices);
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);

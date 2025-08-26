@@ -2,19 +2,18 @@
 
 namespace App\Repositories\Member;
 
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\MemberDataTableTrait;
 use App\Http\Responses\MemberResponse;
 use App\Models\MemberBrand;
 
 class MemberInterestBrandRepository implements MemberInterestBrandRepositoryInterface
 {
-    use UtilityTrait;
+    use MemberDataTableTrait;
 
     /**
      * Get all data with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function index( $request )
     {
@@ -82,7 +81,6 @@ class MemberInterestBrandRepository implements MemberInterestBrandRepositoryInte
      * Method to update data
      * @param mixed $data
      * @param mixed $id
-     * @return void
      */
     public function update($data, $id)
     {
@@ -125,7 +123,6 @@ class MemberInterestBrandRepository implements MemberInterestBrandRepositoryInte
     /**
      * Method to delete data
      * @param mixed $id
-     * @return void
      */
     public function delete($id)
     {

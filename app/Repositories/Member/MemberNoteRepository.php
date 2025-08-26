@@ -2,19 +2,18 @@
 
 namespace App\Repositories\Member;
 
-use App\Traits\UtilityTrait;
 use App\Http\Responses\MemberResponse;
+use App\Traits\DataTables\NoticeDataTableTrait;
 use App\Models\MemberNote;
 
 class MemberNoteRepository implements MemberNoteRepositoryInterface
 {
-    use UtilityTrait;
+    use NoticeDataTableTrait;
 
     /**
      * Get all members with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function index( $request )
     {
@@ -64,7 +63,6 @@ class MemberNoteRepository implements MemberNoteRepositoryInterface
      * Method to update note
      * @param mixed $data
      * @param mixed $id
-     * @return void
      */
     public function update($data, $id)
     {
@@ -84,7 +82,6 @@ class MemberNoteRepository implements MemberNoteRepositoryInterface
     /**
      * Method to delete note
      * @param mixed $id
-     * @return void
      */
     public function delete($id)
     {

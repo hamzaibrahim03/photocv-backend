@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use App\Models\Club;
 use App\Models\User;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\MemberDataTableTrait;
 use App\Http\Responses\MemberResponse;
 use Illuminate\Support\Str;
 use App\Models\Gallery;
@@ -23,13 +23,12 @@ use App\Models\ClubUser;
 
 class MemberRepository implements MemberRepositoryInterface
 {
-    use UtilityTrait;
+    use MemberDataTableTrait;
 
     /**
      * Get all members with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
     public function all($request)
     {
@@ -46,7 +45,6 @@ class MemberRepository implements MemberRepositoryInterface
      * Show a specific member by ID.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function show($id)
     {
@@ -107,7 +105,6 @@ class MemberRepository implements MemberRepositoryInterface
      *
      * @param  array  $data
      * @param  mixed  $file
-     * @return \Illuminate\Http\Response
      */
     public function create(array $data, $file = null)
     {
@@ -165,7 +162,6 @@ class MemberRepository implements MemberRepositoryInterface
      * @param  int  $id
      * @param  array  $data
      * @param  mixed  $file
-     * @return \Illuminate\Http\Response
      */
     public function update($id, array $data, $file = null)
     {
@@ -224,7 +220,6 @@ class MemberRepository implements MemberRepositoryInterface
      * Delete a member by ID.
      *
      * @param  int  $id
-     * @return \Illuminate\Http\Response
      */
     public function delete($id)
     {

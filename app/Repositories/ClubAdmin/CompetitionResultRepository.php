@@ -3,14 +3,14 @@
 namespace App\Repositories\ClubAdmin;
 
 use App\Models\Competition;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\CompetitionDataTableTrait;
 use App\Http\Responses\CompetitionResponse;
 use Illuminate\Support\Facades\DB;
 use App\Models\CompetitionMembersEntry;
 
 class CompetitionResultRepository implements CompetitionResultRepositoryInterface
 {
-    use UtilityTrait;
+    use CompetitionDataTableTrait;
 
     public function index($request)
     {

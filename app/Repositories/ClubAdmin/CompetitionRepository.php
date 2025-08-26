@@ -7,7 +7,7 @@ use App\Models\Club;
 use App\Models\User;
 use App\Models\Competition;
 use Carbon\Carbon;
-use App\Traits\UtilityTrait;
+use App\Traits\DataTables\CompetitionDataTableTrait;
 use App\Http\Responses\CompetitionResponse;
 use App\Models\CompetitionMembersEntry;
 use App\Models\CompetitionGlobalSetting;
@@ -16,7 +16,7 @@ use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepository;
 
 class CompetitionRepository implements CompetitionRepositoryInterface
 {
-    use UtilityTrait;
+    use CompetitionDataTableTrait;
 
     protected $competitionGlobalSettingRepository;
 
