@@ -17,6 +17,7 @@ use App\Models\Competition;
 use App\Models\CompetitionMembersEntry;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Responses\CompetitionResponse;
+use App\Models\Gallery;
 
 trait UtilityTrait
 {
@@ -773,44 +774,39 @@ trait UtilityTrait
         $club = auth()->user()->club;
 
         $query = $club->users()
+            ->select('users.*')
             ->wherePivot('status', 'pending')
-            ->with(['roles', 'socialLinks']); // eager load if needed
+            ->with(['socialLinks']);
 
-        // 🔎 Optional search
         if ($request->filled('search_term')) {
             $query->where(function ($q) use ($request) {
                 $q->where('username', 'like', '%' . $request->search_term . '%')
-                  ->orWhere('email', 'like', '%' . $request->search_term . '%')
-                  ->orWhere('first_name', 'like', '%' . $request->search_term . '%')
-                    ->orWhere('last_name', 'like', '%' . $request->search_term . '%')
-                    ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$request->search_term}%"]);
+                ->orWhere('email', 'like', '%' . $request->search_term . '%')
+                ->orWhere('first_name', 'like', '%' . $request->search_term . '%')
+                ->orWhere('last_name', 'like', '%' . $request->search_term . '%')
+                ->orWhereRaw("CONCAT(first_name, ' ', last_name) LIKE ?", ["%{$request->search_term}%"]);
             });
         }
 
+        $totalGalleries = Gallery::whereHas('member.clubs', function ($query) use ($club) {
+                $query->where('club_id', $club->id)
+                    ->where('status', 'approved');
+            })
+            ->where('is_active', true)
+            ->count();
+
         return DataTables::of($query)
             ->addIndexColumn()
-
-            ->addColumn('role', function ($user) {
-                return $user->roles->pluck('name')->implode(', ');
-            })
-
-            ->addColumn('social_links', function ($user) {
-                return $user->socialLinks->pluck('link')->implode('<br>');
-            })
-
-            ->addColumn('gallery_count', function ($user) {
-                return $user->galleries->count();
-            })
-
             ->addColumn('actions', function ($user) {
                 return '
                     <button class="btn btn-success btn-sm approve-request" data-id="'.$user->id.'">Approve</button>
                     <button class="btn btn-danger btn-sm reject-request" data-id="'.$user->id.'">Reject</button>
                 ';
             })
-
-            ->rawColumns(['social_links', 'actions']) // allow HTML
+            ->with('total_galleries', $totalGalleries)
+            ->rawColumns(['social_links', 'actions'])
             ->make(true);
     }
+
 
 }

@@ -74,12 +74,7 @@ class MemberRequestRepository implements MemberRequestRepositoryInterface
                 'Member request retrieved successfully.',
                 [
                     'member' => $member,
-                    'social_links' => $member->socialLinks->map(function ($link) {
-                        return [
-                            'social_media_name' => $link->social_media_name,
-                            'social_link' => $link->social_link,
-                        ];
-                    }),
+                    'social_links' => $member->socialLinks,
                     'total_pending_requests' => $totalPending
                 ]
             );
