@@ -320,7 +320,8 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function getLatestCompetitionsByLimit(int $clubId, int $limit = 3)
     {
         return Competition::where('club_id', $clubId)
-            ->orderBy('created_at', 'desc')
+            ->whereDate('start_date', '>=', now())
+            ->orderBy('start_date', 'asc')
             ->limit($limit)
             ->get();
     }

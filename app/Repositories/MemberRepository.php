@@ -302,99 +302,6 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
-    public function getRequestingMember($userId)
-    {
-        try {
-            $club = auth()->user()->club;
-
-            if (!$club) {
-                return MemberResponse::error('You are not assigned to any club.');
-            }
-
-            // Get the specific user who requested to join this club
-            $member = $club->users()
-                        ->where('users.id', $userId)
-                        ->wherePivot('status', 'pending')
-                        ->first();
-
-            if (!$member) {
-                return MemberResponse::error('No pending request found for this member in your club.');
-            }
-
-            // Total pending requests in the club
-            $totalPending = $club->users()->wherePivot('status', 'pending')->count();
-
-            return MemberResponse::success(
-                'Member request retrieved successfully.',
-                [
-                    'member' => $member,
-                    'social_links' => $member->socialLinks->map(function ($link) {
-                        return [
-                            'social_media_name' => $link->social_media_name,
-                            'social_link' => $link->social_link,
-                        ];
-                    }),
-                    'total_pending_requests' => $totalPending
-                ]
-            );
-        } catch (\Exception $e) {
-            return MemberResponse::error('Failed to fetch member request: ' . $e->getMessage());
-        }
-    }
-
-
-    public function getAllPendingRequests()
-    {
-        try {
-            $club = auth()->user()->club;
-
-            if (! $club) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'You are not assigned to any club.',
-                    'data' => [],
-                    'total_pending' => 0
-                ], 404);
-            }
-
-            // Get users who requested to join but not yet approved
-            $pendingUsers = $club->users()->wherePivot('status', 'pending')->get();
-            $totalPending = $pendingUsers->count();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Pending requests retrieved successfully.',
-                'data' => $pendingUsers,
-                'total_pending' => $totalPending
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Failed to fetch pending requests: ' . $e->getMessage(),
-                'data' => [],
-                'total_pending' => 0
-            ], 500);
-        }
-    }
-
-
-    /**
-     * Assign a club to a member.
-     *
-     * @param  int  $userId
-     * @param  int  $clubId
-     * @return bool
-     */
-    public function assignClubToUser($userId, $clubId)
-    {
-        $user = User::findOrFail($userId);
-        $club = Club::findOrFail($clubId);
-
-        $user->clubs()->updateExistingPivot($clubId, ['status' => 'approved', 'joined_at' => now()]);
-        // $user->clubs()->syncWithoutDetaching([$clubId => ['joined_at' => now()]]);
-        return true;
-    }
-
     /**
      * Create a new gallery for the member.
      *
@@ -740,39 +647,6 @@ class MemberRepository implements MemberRepositoryInterface
             return MemberResponse::success('Member clubs retrieved successfully.', $clubs);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
-    }
-
-    public function rejectClubRequest($data)
-    {
-        try {
-            $club = auth()->user()->club;
-
-            if (! $club) {
-                return MemberResponse::error('You are not assigned to any club.');
-            }
-
-            $userId = $data['user_id'];
-
-            // Check if this user actually has a pending request in the club
-            $isPending = $club->users()
-                            ->where('users.id', $userId)
-                            ->wherePivot('status', 'pending')
-                            ->exists();
-
-            if (! $isPending) {
-                return MemberResponse::error('No pending request found for this member in your club.');
-            }
-
-            // Update pivot to rejected
-            $club->users()->updateExistingPivot($userId, [
-                'status' => 'rejected',
-                'rejected_at' => now(), // optional if you add column
-            ]);
-
-            return MemberResponse::success('Member request has been rejected successfully.');
-        } catch (\Exception $e) {
-            return MemberResponse::error('Failed to reject request: ' . $e->getMessage());
         }
     }
 

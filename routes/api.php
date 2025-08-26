@@ -15,6 +15,7 @@ use App\Http\Controllers\v1\ClubAdmin\ClubNewsController;
 use App\Http\Controllers\v1\ClubAdmin\PagesController;
 use App\Http\Controllers\v1\ClubAdmin\ClubSettingsController;
 use App\Http\Controllers\v1\MemberController;
+use App\Http\Controllers\v1\ClubAdmin\MemberRequestController;
 use App\Http\Controllers\v1\ClubAdmin\ClubDashboardController;
 use App\Http\Controllers\v1\ClubAdmin\FeaturedImageController;
 use App\Http\Controllers\v1\Member\MemberAdminController;
@@ -87,10 +88,10 @@ Route::prefix('v1')->group(function() {
 
             Route::apiResource('club-gallery', ClubGalleryController::class);
 
-            Route::get('/member-pending-requests', [MemberController::class, 'pendingRequests']);
-            Route::post('/assign-club', [MemberController::class, 'assignClub']);
-            Route::get('/member-request/{userId}', [MemberController::class, 'getRequestingMember']);
-            Route::post('/reject-club-request', [MemberController::class, 'rejectClubRequest']);
+            Route::get('/member-pending-requests', [MemberRequestController::class, 'pendingRequests']);
+            Route::post('/assign-club', [MemberRequestController::class, 'assignClub']);
+            Route::get('/member-request/{userId}', [MemberRequestController::class, 'getRequestingMember']);
+            Route::post('/reject-club-request', [MemberRequestController::class, 'rejectClubRequest']);
             
         });
 

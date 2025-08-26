@@ -74,28 +74,6 @@ class MemberService
         return $this->memberRepository->requestToJoinClub($user_id, $club_id);
     }
 
-    public function pendingRequests()
-    {
-        return $this->memberRepository->getAllPendingRequests();
-    }
-
-    public function getRequestingMember($userId)
-    {
-        return $this->memberRepository->getRequestingMember($userId);
-    }
-
-    /**
-     * Assign a club to a member.
-     *
-     * @param  int  $user_id
-     * @param  int  $club_id
-     * @return \Illuminate\Http\Response
-     */
-    public function assignMember( $user_id, $club_id )
-    {
-        return $this->memberRepository->assignClubToUser($user_id, $club_id);
-    }
-
     /**
      * Create a new gallery for the member.
      *
@@ -146,8 +124,4 @@ class MemberService
         return $this->memberRepository->getJoinedClubs();
     }
 
-    public function rejectClubRequest($data)
-    {
-        return $this->memberRepository->rejectClubRequest($data);
-    }
 }

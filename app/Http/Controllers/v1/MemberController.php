@@ -82,34 +82,6 @@ class MemberController extends Controller
         return $this->memberService->requestToJoinClub($validated['user_id'], $validated['club_id']);
     }
 
-    public function pendingRequests()
-    {
-        return $this->memberService->pendingRequests();
-    }
-
-    public function getRequestingMember($userId)
-    {
-        return $this->memberService->getRequestingMember($userId);
-    }
-
-    /**
-     * Assign a club to a member.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function assignClub(Request $request)
-    {
-        $validated = $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'club_id' => 'required|exists:clubs,id',
-        ]);
-
-        $this->memberService->assignMember($validated['user_id'], $validated['club_id']);
-
-        return response()->json(['message' => 'Club assigned successfully']);
-    }
-
     /**
      * Create a new gallery for a member.
      *
@@ -177,8 +149,4 @@ class MemberController extends Controller
         return $this->memberService->getJoinedClubs();
     }
 
-    public function rejectClubRequest(Request $request)
-    {
-        return $this->memberService->rejectClubRequest($request->all());
-    }
 }
