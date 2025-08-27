@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Services;
+namespace App\Services\Judge;
 
-use App\Repositories\CompetitionEntryScoreRepositoryInterface;
+use App\Repositories\Judge\CompetitionEntryScoreRepositoryInterface;
 
 class CompetitionEntryScoreService
 {

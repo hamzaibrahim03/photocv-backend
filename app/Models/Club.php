@@ -125,4 +125,10 @@ class Club extends Model
 	{
 		return $this->hasMany(ClubSeason::class);
 	}
+
+	public function upcomingCompetitions()
+	{
+		return $this->hasMany(Competition::class, 'club_id')
+			->where('start_date', '>', now());
+	}
 }

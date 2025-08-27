@@ -179,7 +179,48 @@ class User extends Authenticatable
 					->withTimestamps();
 	}
 
+	public function photos()
+	{
+		return $this->hasMany(Photo::class, 'uploaded_by');
+	}
 
+	public function totalPhotosPosted()
+	{
+		return $this->photos()->count();
+	}
+
+	public function upcomingCompetitions()
+	{
+		return $this->hasManyThrough(
+			Competition::class,
+			ClubUser::class,
+			'user_id',   // FK on club_user table
+			'club_id',   // FK on competitions table
+			'id',        // local key on users table
+			'club_id'    // local key on club_user table
+		)->where('start_date', '>', now())
+		->orderBy('start_date', 'asc');
+	}
+
+	public function totalLikesReceived()
+	{
+		return Comment::where('comment_type', 'liking')
+			->where('record_type', 'photo')
+			->whereIn('record_id', $this->photos()->pluck('id'))
+			->where('interacted_by', '!=', $this->id) // exclude self-likes
+			->count();
+	}
+
+	public function receivedCommentsCount()
+	{
+		return Comment::where('comment_type', 'comment')
+			->where('record_type', 'photo')
+			->whereIn('record_id', $this->photos()->pluck('id'))
+			->where('interacted_by', '!=', $this->id) // exclude self-comments
+			->count();
+	}
+
+	
 	// public function likedPhotos()
 	// {
 	// 	return Photo::whereHas('likes')

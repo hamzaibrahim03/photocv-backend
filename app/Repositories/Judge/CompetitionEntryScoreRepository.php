@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Repositories;
+namespace App\Repositories\Judge;
 
 use App\Models\CompetitionEntryScore;
 use App\Models\CompetitionMembersEntry;

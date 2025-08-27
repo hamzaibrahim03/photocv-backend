@@ -171,4 +171,9 @@ class Competition extends Model
 					->withTimestamps();
 	}
 
+	public function club()
+	{
+		return $this->belongsTo(Club::class, 'club_id');
+	}
+
 }

@@ -9,6 +9,7 @@ use App\Models\EventImage;
 use App\Traits\DataTables\EventDataTableTrait;
 use Carbon\Carbon;
 use App\Http\Responses\EventResponse;
+use App\Models\User;
 
 class EventRepository implements EventRepositoryInterface
 {
@@ -312,5 +313,33 @@ class EventRepository implements EventRepositoryInterface
             ->whereDate('event_date', '>=', now())
             ->orderBy('event_date', 'asc')
             ->get();
+    }
+
+    /**
+     * Method to get upcoming events for all clubs the user is associated with.
+     * @param mixed $userId
+     */
+    public function getUpcomingEventsForAllClubs($userId)
+    {
+        $user = User::with('clubs.events')->findOrFail($userId);
+
+        $clubsWithUpcomingEvents = $user->clubs->map(function ($club) {
+            // Get the nearest upcoming event
+            $nextEvent = $club->events()
+                ->whereDate('event_date', '>=', now())
+                ->orderBy('event_date', 'asc')
+                ->first();
+
+            return [
+                'club_name'     => $club->club_name,
+                'next_event'    => $nextEvent ? $nextEvent->event_date->toDateString() : null,
+                'days_remaining'=> $nextEvent ? now()->diffInDays($nextEvent->event_date, false) : null,
+            ];
+        });
+
+        return EventResponse::success(
+            'Data reterived successfully.',
+            $clubsWithUpcomingEvents
+        );
     }
 }

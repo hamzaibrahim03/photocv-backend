@@ -80,8 +80,11 @@ use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepositoryInterface;
 use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepository;
 
-use App\Repositories\CompetitionEntryScoreRepository;
-use App\Repositories\CompetitionEntryScoreRepositoryInterface;
+use App\Repositories\Judge\CompetitionEntryScoreRepository;
+use App\Repositories\Judge\CompetitionEntryScoreRepositoryInterface;
+
+use App\Repositories\Judge\JudgeRepository;
+use App\Repositories\Judge\JudgeRepositoryInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -104,6 +107,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(MemberCompetitionRepositoryInterface::class, MemberCompetitionRepository::class);
         $this->app->bind(CompetitionResultRepositoryInterface::class, CompetitionResultRepository::class);
         $this->app->bind(CompetitionEntryScoreRepositoryInterface::class, CompetitionEntryScoreRepository::class);
+        $this->app->bind(JudgeRepositoryInterface::class, JudgeRepository::class);
 
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);

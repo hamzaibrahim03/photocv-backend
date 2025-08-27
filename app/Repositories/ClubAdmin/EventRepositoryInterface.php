@@ -10,4 +10,5 @@ interface EventRepositoryInterface
     public function update($id, array $data, $files);
     public function delete($id);
     public function getEventExtras($request);
+    public function getUpcomingEventsForAllClubs($userId);
 }

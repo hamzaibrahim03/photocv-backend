@@ -27,7 +27,7 @@ use App\Http\Controllers\v1\Member\MemberPracticeLogController;
 use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
-use App\Http\Controllers\v1\JudgeController;
+use App\Http\Controllers\v1\Judge\JudgeController;
 
 Route::prefix('v1')->group(function() {
 
@@ -49,8 +49,13 @@ Route::prefix('v1')->group(function() {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/roles', [RoleController::class, 'index']);
 
-        Route::get('/judge/{competitionId}/entries', [JudgeController::class, 'getEntriesWithScores']);
-        Route::post('/judge/entry/{entryId}/score', [JudgeController::class, 'saveScore']);
+        //judges endpoints
+        Route::prefix('judge')->name('judge.')->group(function () {
+            Route::get('/{competitionId}/entries', [JudgeController::class, 'getEntriesWithScores']);
+            Route::post('/entry/{entryId}/score', [JudgeController::class, 'saveScore']);
+
+            Route::post('/dashboard', [JudgeController::class, 'dashboardData']);
+        });
 
         // club admin routes
         Route::middleware(['auth', 'role:club_admin'])->group(function () {

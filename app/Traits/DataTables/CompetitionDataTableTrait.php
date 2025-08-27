@@ -330,4 +330,32 @@ trait CompetitionDataTableTrait
             'recentSubmissions' => $recentSubmissions,
         ]);
     }
+
+    /**
+     * Get clubs with upcoming competitions for a user.
+     *
+     * @param  \App\Models\User  $user
+     * @param  \Illuminate\Http\Request|null  $request
+     */
+    public function getClubsInfoWithUpcomingCompetitions($user, $request)
+    {
+        $query = $user->clubs()
+            ->withCount([
+                'upcomingCompetitions as total_upcoming_competitions'
+            ])
+            ->with([
+                'upcomingCompetitions' => function($q) {
+                    $q->orderBy('start_date', 'asc');
+                }
+            ]);
+
+        return DataTables::of($query)
+            ->addColumn('club_name', fn($club) => $club->club_name)
+            ->addColumn('total_upcoming', fn($club) => $club->total_upcoming_competitions)
+            ->addColumn('next_competition', function($club) {
+                $next = $club->upcomingCompetitions->first();
+                return $next ? $next->name . ' (' . $next->start_date->format('d M Y') . ')' : '-';
+            })
+            ->make(true);
+    }
 }

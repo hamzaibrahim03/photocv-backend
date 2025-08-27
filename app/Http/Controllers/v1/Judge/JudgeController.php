@@ -1,18 +1,21 @@
 <?php
 
-namespace App\Http\Controllers\v1;
+namespace App\Http\Controllers\v1\Judge;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Services\CompetitionEntryScoreService;
+use App\Services\Judge\CompetitionEntryScoreService;
+use App\Services\Judge\JudgeService;
 
 class JudgeController extends Controller
 {
     protected $service;
+    protected $judgeService;
 
-    public function __construct(CompetitionEntryScoreService $service)
+    public function __construct(CompetitionEntryScoreService $service, JudgeService $judgeService)
     {
         $this->service = $service;
+        $this->judgeService = $judgeService;
     }
 
     public function getEntriesWithScores($competitionId)
@@ -38,5 +41,10 @@ class JudgeController extends Controller
             'message' => 'Score saved successfully',
             'data'    => $score
         ]);
+    }
+
+    public function dashboardData(Request $request)
+    {
+        return $this->judgeService->getDashboardData(auth()->id(), $request);
     }
 }

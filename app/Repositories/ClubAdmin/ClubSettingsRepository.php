@@ -27,7 +27,8 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 return ClubSettingResponse::error('No club found for the current user.', 404);
             }
 
-            $clubSetting = $club->setting->with('coverImages')->first();
+            $club->load('setting.coverImages');
+            $clubSetting = $club->setting;
 
             // Total members in the club
             $totalMemberCount = User::whereHas('clubs', function ($query) use ($club) {
