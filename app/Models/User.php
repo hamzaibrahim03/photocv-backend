@@ -220,6 +220,12 @@ class User extends Authenticatable
 			->count();
 	}
 
+	public function judgingCompetitions()
+	{
+		return $this->belongsToMany(Competition::class, 'competition_judges')
+					->withTimestamps();
+	}
+
 	
 	// public function likedPhotos()
 	// {

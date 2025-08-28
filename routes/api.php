@@ -55,6 +55,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/entry/{entryId}/score', [JudgeController::class, 'saveScore']);
 
             Route::post('/dashboard', [JudgeController::class, 'dashboardData']);
+            Route::get('/clubs/{clubId}/competitions', [JudgeController::class, 'competitionsForJudge']);
         });
 
         // club admin routes

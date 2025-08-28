@@ -47,4 +47,9 @@ class JudgeController extends Controller
     {
         return $this->judgeService->getDashboardData(auth()->id(), $request);
     }
+
+    public function competitionsForJudge($clubId)
+    {
+        return $this->judgeService->getCompetitionsForJudge(auth()->id(), $clubId);
+    }
 }

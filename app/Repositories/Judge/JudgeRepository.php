@@ -3,6 +3,8 @@
 namespace App\Repositories\Judge;
 
 use App\Models\User;
+use App\Models\Club;
+use App\Models\Competition;
 use App\Models\CompetitionEntryScore;
 use App\Http\Responses\GenericResponse;
 use App\Traits\DataTables\CompetitionDataTableTrait;
@@ -100,5 +102,29 @@ class JudgeRepository implements JudgeRepositoryInterface
         }
     }
 
+    public function getCompetitionsForJudgeInClub($judgeId, $clubId)
+    {
+        $club = Club::findOrFail($clubId);
+
+        // Competitions where judge IS assigned
+        $assigned = Competition::where('club_id', $clubId)
+            ->whereHas('judges', function ($q) use ($judgeId) {
+                $q->where('user_id', $judgeId);
+            })
+            ->get();
+
+        // Competitions where judge is NOT assigned
+        $unassigned = Competition::where('club_id', $clubId)
+            ->whereDoesntHave('judges', function ($q) use ($judgeId) {
+                $q->where('user_id', $judgeId);
+            })
+            ->get();
+
+        return response()->json([
+            'club' => $club->club_name,
+            'assigned_competitions' => $assigned,
+            'unassigned_competitions' => $unassigned,
+        ]);
+    }
 
 }
