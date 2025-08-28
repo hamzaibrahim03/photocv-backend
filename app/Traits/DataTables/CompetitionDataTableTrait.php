@@ -14,6 +14,12 @@ trait CompetitionDataTableTrait
 {
     use CommonDataTableTrait;
 
+    /**
+     * Get all competition results with filtering, searching, and sorting.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     */
     public function getAllCompetitionResults($request, $query)
     {
         // Search filter
@@ -361,6 +367,13 @@ trait CompetitionDataTableTrait
             ->make(true);
     }
 
+    /**
+     * Get competitions for a judge in a specific club with DataTables.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $judgeId
+     * @param  int  $clubId
+     */
     public function getCompetitionsForJudgeInClubWithDatatable($request, $judgeId, $clubId)
     {
         try {
@@ -452,6 +465,13 @@ trait CompetitionDataTableTrait
         }
     }
 
+    /**
+     * Get judge scores for a specific competition with DataTables.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $competitionId
+     * @param  int  $judgeId
+     */
     public function getJudgeScoresForCompetitionDatatable($request, $competitionId, $judgeId)
     {
         // Ensure the judge is assigned to this competition
