@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\CompetitionMembersEntry;
 use App\Models\Club;
+use App\Models\CompetitionEntryScore;
 
 trait CompetitionDataTableTrait
 {
@@ -449,5 +450,107 @@ trait CompetitionDataTableTrait
                 'code'  => $e->getCode() ?: 500
             ], 500);
         }
+    }
+
+    public function getJudgeScoresForCompetitionDatatable($request, $competitionId, $judgeId)
+    {
+        // Ensure the judge is assigned to this competition
+        $competition = Competition::with('judges:id')->findOrFail($competitionId);
+
+        if (! $competition->judges->contains('id', $judgeId)) {
+            // DataTables expects JSON, so always return this format
+            return DataTables::of(collect([]))
+                ->with([
+                    'recordsTotal'    => 0,
+                    'recordsFiltered' => 0,
+                    'error'           => 'You are not a judge or not assigned to this competition.'
+                ])
+                ->make(true);
+        }
+
+        // Base query
+        $query = CompetitionMembersEntry::query()
+            ->whereHas('competitionMember', function ($q) use ($competitionId) {
+                $q->where('comp_id', $competitionId);
+            })
+            ->with([
+                'competitionMember.member:id,username,first_name,last_name,email',
+                'scores' => function ($q) use ($judgeId) {
+                    $q->where('judge_id', $judgeId);
+                }
+            ]);
+
+        // ---- search_term (custom) ----
+        if ($request->filled('search_term')) {
+            $term = trim($request->get('search_term'));
+            $query->where(function ($q) use ($term) {
+                $q->where('entry_image_title', 'LIKE', "%{$term}%")
+                ->orWhereHas('competitionMember.member', function ($q2) use ($term) {
+                    $q2->where('username', 'LIKE', "%{$term}%")
+                        ->orWhere('email', 'LIKE', "%{$term}%")
+                        ->orWhere('first_name', 'LIKE', "%{$term}%")
+                        ->orWhere('last_name', 'LIKE', "%{$term}%")
+                        ->orWhereRaw("CONCAT(COALESCE(first_name,''),' ',COALESCE(last_name,'')) LIKE ?", ["%{$term}%"]);
+                });
+            });
+        }
+
+        // ---- ordering ----
+        $sortable = [
+            'entry_image_title' => 'competition_members_entries.entry_image_title',
+            'total_score'       => 'competition_members_entries.total_score',
+            'created_at'        => 'competition_members_entries.created_at',
+        ];
+
+        if ($request->has('order') && is_array($request->order) && count($request->order)) {
+            $orderColIndex = (int) $request->order[0]['column'];
+            $orderDir      = $request->order[0]['dir'] ?? 'asc';
+            $columns       = $request->get('columns', []);
+            $requestedKey  = $columns[$orderColIndex]['data'] ?? null;
+
+            if ($requestedKey && isset($sortable[$requestedKey])) {
+                $query->orderBy($sortable[$requestedKey], $orderDir === 'desc' ? 'desc' : 'asc');
+            } else {
+                $query->latest('competition_members_entries.created_at');
+            }
+        } else {
+            $query->latest('competition_members_entries.created_at');
+        }
+
+        // ---- DataTables response ----
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->addColumn('member_name', function ($entry) {
+                $m = $entry->competitionMember->member ?? null;
+                $full = trim(($m->first_name ?? '') . ' ' . ($m->last_name ?? ''));
+                return $full !== '' ? $full : ($m->username ?? '');
+            })
+            ->addColumn('member_email', function ($entry) {
+                return $entry->competitionMember->member->email ?? '';
+            })
+            ->addColumn('score', function ($entry) {
+                return optional($entry->scores->first())->score ?? null;
+            })
+            ->addColumn('position', function ($entry) {
+                return optional($entry->scores->first())->position ?? null;
+            })
+            ->editColumn('entry_image', function ($entry) {
+                return $entry->entry_image_url ?? null;
+            })
+            ->with([
+                'progress' => [
+                    'scored' => $query->get()->filter(fn($e) => $e->scores->isNotEmpty())->count(),
+                    'total'  => $query->count(),
+                ],
+                'positions' => CompetitionEntryScore::with('entry.competitionMember')
+                    ->whereHas('entry.competitionMember', function ($q) use ($competitionId) {
+                        $q->where('comp_id', $competitionId);
+                    })
+                    ->where('judge_id', $judgeId)
+                    ->get()
+                    ->groupBy('position')
+                    ->map->count()
+            ])
+            ->make(true);
     }
 }

@@ -18,12 +18,10 @@ class JudgeController extends Controller
         $this->judgeService = $judgeService;
     }
 
-    public function getEntriesWithScores($competitionId)
+    public function getEntriesWithScores(Request $request, $competitionId)
     {
         $judgeId = auth()->id();
-        $result = $this->service->getEntriesWithScores($competitionId, $judgeId);
-
-        return response()->json($result);
+        return $this->service->getEntriesWithScores($request, $competitionId, $judgeId);
     }
 
     public function saveScore(Request $request, $entryId)
