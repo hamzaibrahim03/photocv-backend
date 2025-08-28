@@ -11,6 +11,7 @@ use App\Repositories\ClubAdmin\ClubNewsRepository;
 use App\Repositories\ClubAdmin\ClubSettingsRepository;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
+use App\Repositories\ClubAdmin\NoticeRepositoryInterface;
 use App\Models\User;
 use App\Models\Photo;
 use Carbon\Carbon;
@@ -24,6 +25,7 @@ class PublicClubController extends Controller
     protected ClubSettingsRepository $clubSettingRepo;
     protected ClubGalleryRepository $clubGalleryRepo;
     protected $competitionResultRepository;
+    protected $noticeRepository;
 
     public function __construct(
         ClubDashboardRepository $clubDashboardRepo,
@@ -32,7 +34,8 @@ class PublicClubController extends Controller
         ClubNewsRepository $clubNewsRepo,
         ClubSettingsRepository $clubSettingRepo,
         ClubGalleryRepository $clubGalleryRepo,
-        CompetitionResultRepositoryInterface $competitionResultRepository
+        CompetitionResultRepositoryInterface $competitionResultRepository,
+        NoticeRepositoryInterface $noticeRepository
     ) {
         $this->clubDashboardRepo = $clubDashboardRepo;
         $this->eventRepo = $eventRepo;
@@ -41,6 +44,7 @@ class PublicClubController extends Controller
         $this->clubSettingRepo = $clubSettingRepo;
         $this->clubGalleryRepo = $clubGalleryRepo;
         $this->competitionResultRepository = $competitionResultRepository;
+        $this->noticeRepository = $noticeRepository;
     }
 
     public function getClubData(Request $request)
@@ -119,6 +123,7 @@ class PublicClubController extends Controller
                     ];
                 }),
                 'clubNews' => $this->clubNewsRepo->getClubNews($clubId),
+                'latest_notice' => $this->noticeRepository->getLatestNotice($clubId),
                 // 'latestReseults' => $this->clubDashboardRepo->getRecentResults($clubId),
                 'latestResults' => $this->competitionResultRepository->getAllPublishedResults($clubId),
                 'clubSettings' => $this->clubSettingRepo->getAllClubSettings($user->id),

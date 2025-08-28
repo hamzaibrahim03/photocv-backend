@@ -37,9 +37,9 @@ class JudgeService
         ], 200);
     }
 
-    public function getCompetitionsForJudge($judgeId, $clubId)
+    public function getCompetitionsForJudge($request, $judgeId, $clubId)
     {
-        return $this->judgeRepository->getCompetitionsForJudgeInClub($judgeId, $clubId);
+        return $this->judgeRepository->getCompetitionsForJudgeInClub($request, $judgeId, $clubId);
     }
 
 }

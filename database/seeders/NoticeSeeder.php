@@ -15,7 +15,7 @@ class NoticeSeeder extends Seeder
                 'featured_image' => null,
                 'member_id' => 1,
                 'notice_type_id' => 1, // General Notice
-                'title' => 'Monthly Club Meeting',
+                'title' => 'Item for sale',
                 'description' => 'Join us for our regular monthly club meeting.',
                 'tags' => 'meeting,club',
                 'location' => 'Main Hall, Club House',

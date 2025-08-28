@@ -18,13 +18,15 @@ class DatabaseSeeder extends Seeder
       $this->call(CatalogSeeder::class);
       $this->call([
         EventSeeder::class,
-        CompetitionSeeder::class,
         NewsSeeder::class,
         PageSeeder::class,
         NoticeSeeder::class,
         GallerySeeder::class,
         MemberSeeder::class,
         CommentsSeeder::class,
+        PhotoSeeder::class,
+        CompetitionSeeder::class,
+        CompetitionMemberSeeder::class,
       ]);
     }
 }

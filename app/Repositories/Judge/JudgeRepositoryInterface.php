@@ -8,5 +8,5 @@ interface JudgeRepositoryInterface
     public function getUpcomingCompetitionsForJudge($judgeId);
     public function getClubsWithUpcomingCompetitions($judgeId, $request);
     public function getAllRecentJudgingByUser($judgeId);
-    public function getCompetitionsForJudgeInClub($judgeId, $clubId);
+    public function getCompetitionsForJudgeInClub($request, $judgeId, $clubId);
 }

@@ -13,7 +13,9 @@ class CompetitionEntryScore extends Model
         'entry_id',
         'judge_id',
         'score',
-        'comment'
+        'comment',
+        'position',
+        'is_bookmarked',
     ];
 
     public function entry()

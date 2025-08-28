@@ -102,29 +102,13 @@ class JudgeRepository implements JudgeRepositoryInterface
         }
     }
 
-    public function getCompetitionsForJudgeInClub($judgeId, $clubId)
+    public function getCompetitionsForJudgeInClub($request, $judgeId, $clubId)
     {
-        $club = Club::findOrFail($clubId);
-
-        // Competitions where judge IS assigned
-        $assigned = Competition::where('club_id', $clubId)
-            ->whereHas('judges', function ($q) use ($judgeId) {
-                $q->where('user_id', $judgeId);
-            })
-            ->get();
-
-        // Competitions where judge is NOT assigned
-        $unassigned = Competition::where('club_id', $clubId)
-            ->whereDoesntHave('judges', function ($q) use ($judgeId) {
-                $q->where('user_id', $judgeId);
-            })
-            ->get();
-
-        return response()->json([
-            'club' => $club->club_name,
-            'assigned_competitions' => $assigned,
-            'unassigned_competitions' => $unassigned,
-        ]);
+        try {
+            return $this->getCompetitionsForJudgeInClubWithDatatable($request, $judgeId, $clubId);
+        }catch (\Exception $e) {
+            return GenericResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
     }
 
 }

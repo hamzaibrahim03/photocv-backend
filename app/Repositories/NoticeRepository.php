@@ -248,4 +248,26 @@ class NoticeRepository implements NoticeRepositoryInterface
         ];
     }
 
+    public function getLatestNotice($clubId)
+    {
+        try {
+            $latestNotice = MemberNotice::where('club_id', $clubId)
+                ->latest('created_at')
+                ->first();
+
+            if (!$latestNotice) {
+                return NoticeResponse::error('No notices found for this club.', 404);
+            }
+
+            // Transform the featured_image to full URL
+            $latestNotice->featured_image = $latestNotice->featured_image
+                ? asset('storage/' . $latestNotice->featured_image)
+                : null;
+
+            return NoticeResponse::success('Latest notice retrieved successfully.', $latestNotice);
+        } catch (\Exception $e) {
+            return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
 }

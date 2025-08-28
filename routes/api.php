@@ -41,7 +41,7 @@ Route::prefix('v1')->group(function() {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 
-    Route::domain('{username}.staging.cameraclub.website')->group(function () {
+    Route::domain('{username}-staging.cameraclub.website')->group(function () {
         Route::get('/club-public-data', [PublicClubController::class, 'getClubData']);
     });
 

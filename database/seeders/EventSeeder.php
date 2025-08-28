@@ -15,7 +15,7 @@ class EventSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Annual Photography Meetup',
+                'name' => 'Photo Events',
                 'event_date' => Carbon::now()->addDays(10),
                 'description' => 'A gathering of club photographers to share and learn.',
                 'duration' => '2 hours',
@@ -36,7 +36,7 @@ class EventSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Editing Masterclass',
+                'name' => 'Video Call',
                 'event_date' => Carbon::now()->addDays(20),
                 'description' => 'Learn photo editing techniques from the pros.',
                 'duration' => '3 hours',
@@ -57,7 +57,7 @@ class EventSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Street Photography Walk',
+                'name' => 'Lecture',
                 'event_date' => Carbon::now()->addDays(30),
                 'description' => 'Explore the city and capture the urban life.',
                 'duration' => '1 day',

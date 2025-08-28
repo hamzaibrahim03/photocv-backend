@@ -9,6 +9,8 @@ use App\Models\Club;
 use App\Models\ClubSetting;
 use Spatie\Permission\Models\Role;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
+use App\Models\ClubCoverImage;
 
 class UserSeeder extends Seeder
 {
@@ -27,62 +29,122 @@ class UserSeeder extends Seeder
         );
         $superAdmin->assignRole('super_admin');
 
-        // Create a Club Admin
-        $clubadmin = User::firstOrCreate(
-            ['email' => 'clubadmin@photocv.com'],
-            [
-                'username' => 'clubadmin',
-                'password'   => Hash::make('password'),
-            ]
-        );
-        $clubadmin->assignRole('club_admin');
-
-        // Create a Member User
-        $member = User::firstOrCreate(
-            ['email' => 'member@photocv.com'],
-            [
-                'username' => 'member',
-                'password'   => Hash::make('password'),
-            ]
-        );
-        $member->assignRole('member');
 
         // Create another Club Admin with a club
-        $john = User::firstOrCreate(
-            ['email' => 'johndoe@photocv.com'],
+        $ryton = User::firstOrCreate(
+            ['email' => 'ryton@cameraclub.website'],
             [
-                'username' => 'johnphotocv',
+                'username' => 'ryton',
+                'first_name' => 'ryton',
+                'last_name' => 'club',
                 'password' => Hash::make('secret123'),
             ]
         );
-        $john->assignRole('club_admin');
+        $ryton->assignRole('club_admin');
 
-        // Create Club for John if not already exists
+        // Create Club for ryton if not already exists
         $club = Club::firstOrCreate(
-            ['user_id' => $john->id],
+            ['user_id' => $ryton->id],
             [
-                'club_name'    => 'My First Club',
-                'tag_line'     => 'Anyone can join',
-                'domain_type'  => 'custom',
-                'domain_name'  => 'myfirstclub.com',
-                'created_by'   => $john->id,
+                'club_name'       => 'Ryton Camera Club',
+                'tag_line'        => 'A camera club since September 1950',
+                'about'           => 'Reach your true photographic potential',
+                'contact_details' => 'ryton@cameraclub.website',
+                'domain_type'     => 'subdomain',
+                'domain_name'     => 'ryton.cameraclub.website',
+                'created_by'      => $ryton->id,
             ]
         );
 
         // Create Club Settings for John's club
-        ClubSetting::firstOrCreate(
+        $clubSetting = ClubSetting::firstOrCreate(
             ['club_id' => $club->id],
             [
-                'registration'         => 'open',
-                'directory_visibility' => 'visible',
-                'comments'             => 'enabled',
-                'likes'                => 'enabled',
-                'website_sections'     => 'News', // Use one of the enum values, or customize logic
-                'reminders'            => 'all',
-                'header_title'         => 'About title',
-                'header_description'   => 'About Description',
-                'footer_text'          => 'Footer Description',
+                'timezone'                          => 'UK',
+                'date'                              => now()->toDateString(),
+                'club_privacy'                      => 'Public',
+                'theme_colors'                      => 'Dark',
+                'text_color'                        => '#333333',
+                'primary_color'                     => '#7FA483',
+                'background_color'                  => '#FFFFFF',
+                'secondary_color'                   => '#ECEDE6',
+                'accent_color'                      => '#DD9757',
+                'typography'                        => 'Inter',
+                'fonts'                             => 'Inter',
+                'header_title'                      => 'What makes Ryton Camera Club?',
+                'header_description'                => 'Ryton Camera Club was founded 75 years ago, it was...',
+                'header_img'                        => 'uploads/clubs/header/default.png',
+                'footer_text'                       => 'About Our Club',
+                'footer_img'                        => 'uploads/clubs/footer/default.png',
+                'footer_description'                => 'We\'re a passionate community of creators, innovators...',
+                'logo'                              => 'club_logos/default.png',
+                'registration'                      => 'open',
+                'directory_visibility'              => 'club_only',
+                'comments'                          => 'enabled',
+                'likes'                             => 'enabled',
+                'website_sections'                  => 'News',
+                'comment_preference'                => 'all',
+                'reminders'                         => 'all',
+                'fb_link_option'                    => 1,
+                'fb_link'                           => 'http://facebook.com',
+                'insta_link_option'                 => 0,
+                'insta_link'                        => null,
+                'flickr_link_option'                => 1,
+                'flickr_link'                       => 'http://flicker.com',
+                'gdpr_privacy_policy_management'    => 'Test',
+                'cookies'                           => 1,
+                'cookies_description'               => 'Test',
+                'data_collection_preferences'       => 1,
+                'data_collection_preferences_description' => 'Test',
+                'allow_reporting'                   => 1,
+                'allow_reporting_description'       => 'Test',
             ]
         );
+
+        /**
+         * === Upload Images from Seeder Data Folder ===
+         * Copy your files into: database/seeders/data/ryton-club-data/
+         * ├── logo/logo.svg
+         * └── cover_images/image1.jpg, image2.jpg, ...
+         */
+        $basePath = database_path('seeders/data/ryton-club-data');
+
+        // Upload Logo
+        $logoPath = $basePath . '/logo/logo.svg';
+        if (file_exists($logoPath)) {
+            $logoTarget = 'clubs/logo/' . basename($logoPath);
+            Storage::disk('public')->put($logoTarget, file_get_contents($logoPath));
+            $clubSetting->update(['logo' => $logoTarget]);
+        }
+
+        // Upload Cover Images
+        $coverFolder = $basePath . '/cover_images';
+        if (is_dir($coverFolder)) {
+            foreach (glob($coverFolder . '/*.*') as $coverImagePath) {
+                $targetPath = 'clubs/cover/' . basename($coverImagePath);
+                Storage::disk('public')->put($targetPath, file_get_contents($coverImagePath));
+
+                ClubCoverImage::firstOrCreate([
+                    'club_setting_id' => $clubSetting->id,
+                    'image_path'      => $targetPath,
+                ]);
+            }
+        }
+
+        // === Upload Header Image ===
+        $headerPath = $basePath . '/header/header.jpg';
+        if (file_exists($headerPath)) {
+            $headerTarget = 'clubs/header/' . basename($headerPath);
+            Storage::disk('public')->put($headerTarget, file_get_contents($headerPath));
+            $clubSetting->update(['header_img' => $headerTarget]);
+        }
+
+        // === Upload Footer Image ===
+        $footerPath = $basePath . '/footer/footer.jpg';
+        if (file_exists($footerPath)) {
+            $footerTarget = 'clubs/footer/' . basename($footerPath);
+            Storage::disk('public')->put($footerTarget, file_get_contents($footerPath));
+            $clubSetting->update(['footer_img' => $footerTarget]);
+        }
     }
 }

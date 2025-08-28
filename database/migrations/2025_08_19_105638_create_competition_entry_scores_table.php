@@ -17,6 +17,8 @@ return new class extends Migration
             $table->bigInteger('judge_id');
             $table->integer('score')->nullable();
             $table->text('comment')->nullable();
+            $table->enum('position', ['1', '2', '3'])->nullable();
+            $table->boolean('is_bookmarked')->default(false);
             $table->timestamps();
             $table->softDeletes();
 

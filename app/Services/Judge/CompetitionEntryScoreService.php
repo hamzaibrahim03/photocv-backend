@@ -15,14 +15,23 @@ class CompetitionEntryScoreService
 
     public function getEntriesWithScores($competitionId, $judgeId)
     {
-        $entries = $this->repository->getJudgeScoresForCompetition($competitionId, $judgeId);
+        $result = $this->repository->getJudgeScoresForCompetition($competitionId, $judgeId);
+
+        // If judge not assigned, just pass the error message forward
+        if (! ($result['success'] ?? false)) {
+            return $result;
+        }
+
+        $entries = $result['entries'];
 
         return [
-            'entries' => $entries,
-            'progress' => [
+            'success'   => true,
+            'entries'   => $entries,
+            'progress'  => [
                 'scored' => $entries->filter(fn($entry) => $entry->scores->isNotEmpty())->count(),
-                'total'  => $entries->count()
-            ]
+                'total'  => $entries->count(),
+            ],
+            'positions' => $result['positions']
         ];
     }
 

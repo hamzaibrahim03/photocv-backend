@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Competition;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use App\Models\CompetitionJudge;
 
 class CompetitionSeeder extends Seeder
 {
@@ -14,7 +15,7 @@ class CompetitionSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Annual Print Competition',
+                'name' => 'Animal',
                 'description' => 'Showcase your best printed works.',
                 'competition_type_id' => 1,
                 'judging_type_id' => 1,
@@ -41,12 +42,13 @@ class CompetitionSeeder extends Seeder
                 'auto_certificate' => true,
                 'allow_judges_feedback' => true,
                 'created_by' => 1,
-                'updated_by' => 1
+                'updated_by' => 1,
+                'judges' => [6,7] // attach judge IDs
             ],
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Digital Challenge',
+                'name' => 'Sports',
                 'description' => 'A digital-only competition.',
                 'competition_type_id' => 2,
                 'judging_type_id' => 2,
@@ -73,12 +75,13 @@ class CompetitionSeeder extends Seeder
                 'auto_certificate' => true,
                 'allow_judges_feedback' => false,
                 'created_by' => 1,
-                'updated_by' => 1
+                'updated_by' => 1,
+                'judges' => [7,8] // attach judge IDs
             ],
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Open Theme Competition',
+                'name' => 'Color',
                 'description' => 'Submit any creative work under an open theme.',
                 'competition_type_id' => 1,
                 'judging_type_id' => 3,
@@ -105,12 +108,24 @@ class CompetitionSeeder extends Seeder
                 'auto_certificate' => false,
                 'allow_judges_feedback' => true,
                 'created_by' => 1,
-                'updated_by' => 1
-            ]
+                'updated_by' => 1,
+                'judges' => [8,9] // multiple judges
+            ],
         ];
 
         foreach ($competitions as $data) {
-            \App\Models\Competition::create($data);
+            $judges = $data['judges'] ?? [];
+            unset($data['judges']);
+
+            $competition = Competition::create($data);
+
+            // Insert into competition_judges pivot
+            foreach ($judges as $judgeId) {
+                CompetitionJudge::create([
+                    'competition_id' => $competition->id,
+                    'user_id'       => $judgeId,
+                ]);
+            }
         }
     }
 }

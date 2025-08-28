@@ -7,6 +7,7 @@ use App\Models\Competition;
 use Illuminate\Support\Facades\Storage;
 use Carbon\Carbon;
 use App\Models\CompetitionMembersEntry;
+use App\Models\Club;
 
 trait CompetitionDataTableTrait
 {
@@ -357,5 +358,96 @@ trait CompetitionDataTableTrait
                 return $next ? $next->name . ' (' . $next->start_date->format('d M Y') . ')' : '-';
             })
             ->make(true);
+    }
+
+    public function getCompetitionsForJudgeInClubWithDatatable($request, $judgeId, $clubId)
+    {
+        try {
+            $club = Club::findOrFail($clubId);
+
+            // Base query for all competitions in this club
+            $baseQuery = Competition::with([
+                    'competitionMembers' => function ($q) {
+                        $q->select('id', 'comp_id', 'member_id');
+                    },
+                    'competitionMembers.member:id,first_name,last_name,email',
+                    'competitionMembers.entries' => function ($q) {
+                        $q->select(
+                            'id', 'member_comp_id', 'entry_image', 'entry_image_title',
+                            'entry_type', 'position', 'total_score', 'is_published'
+                        );
+                    }
+                ])
+                ->where('club_id', $clubId);
+
+            // --- Filters from request ---
+            if ($request->filled('search_term')) {
+                $baseQuery->where('name', 'LIKE', '%' . $request->search_term . '%');
+            }
+
+            if ($request->filled('competition_type_id')) {
+                $baseQuery->where('competition_type_id', $request->competition_type_id);
+            }
+
+            if ($request->filled('status')) {
+                $baseQuery->where('status', $request->status);
+            }
+
+            // --- Assigned competitions ---
+            $assigned = (clone $baseQuery)
+                ->whereHas('judges', fn($q) => $q->where('user_id', $judgeId))
+                ->get()
+                ->map(fn($c) => array_merge($c->toArray(), ['is_assigned' => 'Yes']));
+
+            // --- Unassigned competitions ---
+            $unassigned = (clone $baseQuery)
+                ->whereDoesntHave('judges', fn($q) => $q->where('user_id', $judgeId))
+                ->get()
+                ->map(fn($c) => array_merge($c->toArray(), ['is_assigned' => 'No']));
+
+            // Merge both for DataTables
+            $allCompetitions = $assigned->merge($unassigned);
+
+            // Counts
+            $totalCompetitions = $allCompetitions->count();
+            $assignedCount = $assigned->count();
+            $unassignedCount = $unassigned->count();
+
+            // Return DataTables response
+            return DataTables::of($allCompetitions)
+                ->addColumn('is_assigned', fn($row) => $row['is_assigned'])
+                ->addColumn('entries', function ($row) {
+                    return collect($row['competition_members'] ?? [])
+                        ->flatMap(function ($member) {
+                            return collect($member['entries'] ?? [])
+                                ->map(function ($entry) use ($member) {
+                                    return [
+                                        'entry_image' => $entry['entry_image'] ? asset('storage/' . $entry['entry_image']) : null,
+                                        'entry_title' => $entry['entry_image_title'],
+                                        'entry_type' => $entry['entry_type'],
+                                        'position' => $entry['position'],
+                                        'total_score' => $entry['total_score'],
+                                        'is_published' => $entry['is_published'],
+                                        'member' => $member['member'] ?? null,
+                                    ];
+                                });
+                        })
+                        ->values()
+                        ->toArray();
+                })
+                ->with([
+                    'club' => $club->club_name,
+                    'total_competitions' => $totalCompetitions,
+                    'assigned_competitions_count' => $assignedCount,
+                    'unassigned_competitions_count' => $unassignedCount,
+                ])
+                ->make(true);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => $e->getMessage(),
+                'code'  => $e->getCode() ?: 500
+            ], 500);
+        }
     }
 }

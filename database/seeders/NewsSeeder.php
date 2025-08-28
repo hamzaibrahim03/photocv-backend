@@ -13,7 +13,7 @@ class NewsSeeder extends Seeder
         $newsItems = [
             [
                 'club_id' => 1,
-                'title' => 'Annual Meetup Announced',
+                'title' => 'Photographers wow spectators with dynamic images....',
                 'news_type_id' => 1, // Assuming 1 = Urgent News
                 'short_description' => 'Join us for our biggest annual gathering.',
                 'description' => 'Our annual meetup will feature workshops, networking, and awards. Don’t miss it!',
@@ -22,7 +22,7 @@ class NewsSeeder extends Seeder
             ],
             [
                 'club_id' => 1,
-                'title' => 'New Competition Opening Soon',
+                'title' => 'Learn the secrets of capturing fast paced sports moments....',
                 'news_type_id' => 2, // Assuming 2 = General News
                 'short_description' => 'A new photography competition is launching soon.',
                 'description' => 'Get ready to submit your best work! More details will be shared in the coming days.',
@@ -31,7 +31,7 @@ class NewsSeeder extends Seeder
             ],
             [
                 'club_id' => 1,
-                'title' => 'Important Update on Club Policies',
+                'title' => 'A visual journey of breathtaking sports moments....',
                 'news_type_id' => 1, // Urgent News
                 'short_description' => 'Please review the latest changes in club rules.',
                 'description' => 'We have updated our policy regarding event participation and photo submissions. Read the full post for details.',
