@@ -11,7 +11,7 @@ use App\Repositories\ClubAdmin\ClubNewsRepository;
 use App\Repositories\ClubAdmin\ClubSettingsRepository;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
-use App\Repositories\ClubAdmin\NoticeRepositoryInterface;
+use App\Repositories\NoticeRepositoryInterface;
 use App\Models\User;
 use App\Models\Photo;
 use Carbon\Carbon;
