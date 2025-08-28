@@ -30,7 +30,9 @@ class JudgeController extends Controller
 
         $validated = $request->validate([
             'score'   => 'required|integer|min:1|max:100',
-            'comment' => 'nullable|string'
+            'comment' => 'nullable|string',
+            'position' => 'nullable|string',
+            'is_bookmarked' => 'nullable|boolean',
         ]);
 
         $score = $this->service->saveScore($entryId, $judgeId, $validated);
