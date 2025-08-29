@@ -170,41 +170,42 @@ trait CompetitionDataTableTrait
             'competitionMembers' => function ($q) {
                 $q->select('id', 'comp_id', 'member_id');
             },
-            'competitionMembers.entries',
             'competitionMembers.entries.scores' => function ($q) {
                 $q->with('judge:id,first_name,last_name,email')
-                // ->where('judge_id', auth()->id())
                 ->select('id', 'entry_id', 'judge_id', 'score', 'comment');
             },
+            'competitionMembers.entries',
             'competitionMembers.member:id,first_name,last_name,email'
-        ])
-        ->withCount([
-            'competitionMembers as total_images' => function ($q) {
-                $q->join('competition_members_entries as cme', 'competition_members.id', '=', 'cme.member_comp_id');
-            }
         ]);
 
-        // DataTables output
-        return DataTables::of($query)
+        $competitions = $query->get();
+
+        // Transform data to entry-centric format
+        $entries = [];
+        foreach ($competitions as $competition) {
+            foreach ($competition->competitionMembers as $memberComp) {
+                foreach ($memberComp->entries as $entry) {
+                    $totalScore = $entry->scores->sum('score');
+                    $entries[] = [
+                        'entry_id' => $entry->id,
+                        'entry_image' => asset('storage/' . $entry->entry_image),
+                        'entry_image_title' => $entry->entry_image_title,
+                        'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+                        'scores' => $entry->scores->map(function ($score) {
+                            return [
+                                'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
+                                'score' => $score->score,
+                                'comment' => $score->comment
+                            ];
+                        }),
+                        'total_score' => $totalScore
+                    ];
+                }
+            }
+        }
+
+        return DataTables::of(collect($entries))
             ->addIndexColumn()
-            ->editColumn('featured_image', function ($competition) {
-                return $competition->featured_image
-                    ? asset('storage/' . $competition->featured_image)
-                    : null;
-            })
-            ->addColumn('images', function ($competition) {
-                return $competition->competitionMembers
-                    ->flatMap(function ($member) {
-                        return $member->entries->map(function ($entry) {
-                            return asset('storage/' . $entry->entry_image);
-                        });
-                    })
-                    ->values()
-                    ->toArray();
-            })
-            ->addColumn('action', function ($competition) {
-                return '<a href="'.route('competitions.show', $competition->id).'" class="btn btn-sm btn-primary">View</a>';
-            })
             ->make(true);
     }
 
@@ -567,6 +568,7 @@ trait CompetitionDataTableTrait
                         $q->where('comp_id', $competitionId);
                     })
                     ->where('judge_id', $judgeId)
+                    ->whereNotNull('position') // <-- ignore null positions
                     ->get()
                     ->groupBy('position')
                     ->map->count()

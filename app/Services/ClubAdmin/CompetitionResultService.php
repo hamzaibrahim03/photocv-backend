@@ -19,7 +19,7 @@ class CompetitionResultService
 
     public function show($id, $request)
     {
-        return $this->competitionResultRepository->show($id, $request);
+        return $this->competitionResultRepository->getCompetitionEntriesWithScores($id, $request);
     }
 
     public function assignPositionsAndPublish($data, $competitionId)

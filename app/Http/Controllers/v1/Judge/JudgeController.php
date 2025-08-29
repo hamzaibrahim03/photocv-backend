@@ -35,12 +35,7 @@ class JudgeController extends Controller
             'is_bookmarked' => 'nullable|boolean',
         ]);
 
-        $score = $this->service->saveScore($entryId, $judgeId, $validated);
-
-        return response()->json([
-            'message' => 'Score saved successfully',
-            'data'    => $score
-        ]);
+        return $this->service->saveScore($entryId, $judgeId, $validated);
     }
 
     public function dashboardData(Request $request)

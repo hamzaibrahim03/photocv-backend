@@ -60,4 +60,9 @@ class CompetitionMembersEntry extends Model
 		return $this->hasMany(CompetitionEntryScore::class, 'entry_id');
 	}
 
+	public function competition()
+    {
+        return $this->belongsTo(Competition::class, 'comp_id');
+    }
+
 }

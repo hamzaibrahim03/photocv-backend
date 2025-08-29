@@ -48,7 +48,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
-    public function show($id, $request)
+    public function getCompetitionEntriesWithScores($id, $request)
     {
         try {
             $user = auth()->user();
