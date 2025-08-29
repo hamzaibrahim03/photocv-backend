@@ -9,8 +9,8 @@ use App\Models\Member;
 use App\Models\MemberBrand;
 use App\Models\MemberContact;
 use App\Models\MemberSocialLink;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
+use App\Models\MemberCoverImage;
+
 
 class SignUpRepository implements SignUpRepositoryInterface
 {
@@ -81,66 +81,88 @@ class SignUpRepository implements SignUpRepositoryInterface
         }
 
         // Create Member record
-        if (!empty($data['member'])) {
             $member = Member::create([
-                'user_id' => $user->id,
-                'domain_name' => $data['member']['domain_name'] ?? null,
-                'color_theme' => $data['member']['color_theme'] ?? null,
-                // 'cover_image' => $data['member']['cover_image'] ?? null,
-                'font' => $data['member']['font'] ?? null,
-                'profile_privacy' => $data['member']['profile_privacy'] ?? 'public',
-                'footer_text' => $data['member']['footer_text'] ?? null,
-                'social_links_visibility' => $data['member']['social_links_visibility'] ?? [],
+                'user_id'               => $user->id,
+                'domain_name'           => $data['member']['domain_name'] ?? null,
+                'domain_type'           => $data['member']['domain_type'] ?? null,
+                'color_theme'           => $data['member']['color_theme'] ?? null,
+                'fonts'                  => $data['member']['fonts'] ?? null,
+                'logo'                  => $data['member']['logo'] ?? null,
+                'profile_privacy'       => $data['member']['profile_privacy'] ?? 'public',
+                'header_text'           => $data['member']['header_text'] ?? null,
+                'footer_text'           => $data['member']['footer_text'] ?? null,
+                'social_links_visibility'=> $data['member']['social_links_visibility'] ?? [],
             ]);
-        }
 
-        // Create MemberBrands record
-        if (!empty($data['member_brands'])) {
-            $memberId = $member->id ?? null;
-
-            // Loop through interests
-            if (!empty($data['member_brands']['interest'])) {
-                foreach ($data['member_brands']['interest'] as $interest) {
-                    MemberBrand::create([
-                        'member_id' => $memberId,
-                        'interest' => $interest,
-                        'brands' => null,
+            // Multiple cover images (strings/paths)
+            if (!empty($data['member']['cover_images']) && is_array($data['member']['cover_images'])) {
+                foreach (array_values($data['member']['cover_images']) as $idx => $imagePath) {
+                    MemberCoverImage::create([
+                        'member_id'  => $member->id,
+                        'image_path' => $imagePath,
+                        'position'   => $idx,
                     ]);
                 }
             }
 
-            // Loop through brands
-            if (!empty($data['member_brands']['brands'])) {
-                foreach ($data['member_brands']['brands'] as $brand) {
-                    MemberBrand::create([
-                        'member_id' => $memberId,
-                        'interest' => null,
-                        'brands' => $brand,
+            // If you expect file uploads instead of paths, use this instead:
+            /*
+            if (!empty($data['member']['cover_images']) && is_array($data['member']['cover_images'])) {
+                foreach (array_values($data['member']['cover_images']) as $idx => $uploadedFile) {
+                    $stored = $uploadedFile->store('uploads/members/covers', 'public');
+                    MemberCoverImage::create([
+                        'member_id'  => $member->id,
+                        'image_path' => $stored,
+                        'position'   => $idx,
                     ]);
                 }
             }
-        }
+            */
 
-        // Create MemberContact record
-        if (!empty($data['member_contact'])) {
-            MemberContact::create([
-                'member_id' => $member->id ?? null,
-                'email' => $data['member_contact']['email'] ?? null,
-                'phone' => $data['member_contact']['phone'] ?? null,
-                'address' => $data['member_contact']['address'] ?? null,
-            ]);
-        }
+            // MemberBrands
+            if (!empty($data['member_brands'])) {
+                $memberId = $member->id;
 
-        // Create MemberSocialLink records
-        if (!empty($data['member_social_media'])) {
-            foreach ($data['member_social_media'] as $social) {
-                MemberSocialLink::create([
-                    'member_id' => $member->id ?? null,
-                    'social_media_name' => $social['social_media_name'],
-                    'social_link' => $social['social_link'],
+                if (!empty($data['member_brands']['interest'])) {
+                    foreach ($data['member_brands']['interest'] as $interest) {
+                        MemberBrand::create([
+                            'member_id' => $memberId,
+                            'interest'  => $interest,
+                            'brands'    => null,
+                        ]);
+                    }
+                }
+                if (!empty($data['member_brands']['brands'])) {
+                    foreach ($data['member_brands']['brands'] as $brand) {
+                        MemberBrand::create([
+                            'member_id' => $memberId,
+                            'interest'  => null,
+                            'brands'    => $brand,
+                        ]);
+                    }
+                }
+            }
+
+            // MemberContact
+            if (!empty($data['member_contact'])) {
+                MemberContact::create([
+                    'member_id' => $member->id,
+                    'email'     => $data['member_contact']['email'] ?? null,
+                    'phone'     => $data['member_contact']['phone'] ?? null,
+                    'address'   => $data['member_contact']['address'] ?? null,
                 ]);
             }
-        }
+
+            // Social links
+            if (!empty($data['member_social_media'])) {
+                foreach ($data['member_social_media'] as $social) {
+                    MemberSocialLink::create([
+                        'member_id'          => $member->id,
+                        'social_media_name'  => $social['social_media_name'],
+                        'social_link'        => $social['social_link'],
+                    ]);
+                }
+            }
 
         return $user;
     }

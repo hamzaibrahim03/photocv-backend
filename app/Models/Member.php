@@ -45,28 +45,29 @@ class Member extends Model
 		'created_by' => 'int',
 		'updated_by' => 'int',
 		'deleted_by' => 'int',
+		'color_theme' => 'array',
 		'social_links_visibility' => 'array',
 	];
 
 	protected $fillable = [
 		'user_id',
-		'header_image',
-		'club_privacy',
-		'profile_privacy',
-		'header_text',
-		'footer_text',
-		'background_color',
-		'font',
-		'logo',
-		'cover_image',
-		'color_theme',
-		'social_links_visibility',
-		'user_consent_cookie',
-		'data_collection_preference',
-		'content_moderation_reporting',
-		'created_by',
-		'updated_by',
-		'deleted_by'
+        'club_privacy',
+        'profile_privacy',
+        'header_text',
+        'footer_text',
+        'domain_name',
+        'domain_type',
+        'color_theme',
+        'font',
+        'logo',
+        'header_image',
+        'social_links_visibility',
+        'user_consent_cookie',
+        'data_collection_preference',
+        'content_moderation_reporting',
+        'created_by',
+        'updated_by',
+        'deleted_by',
 	];
 
 	public function memberContact()
@@ -83,5 +84,15 @@ class Member extends Model
 	{
 		return $this->hasMany(MemberSocialLink::class);
 	}
+
+	public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function coverImages()
+    {
+        return $this->hasMany(MemberCoverImage::class);
+    }
 
 }
