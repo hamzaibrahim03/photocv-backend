@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Services\MemberService;
 use App\Http\Requests\Member\StoreMemberRequest;
 use App\Http\Requests\Member\UpdateMemberRequest;
-use App\Http\Requests\Member\GalleryRequest ;
+use App\Http\Requests\Member\GalleryRequest;
 
 class MemberController extends Controller
 {

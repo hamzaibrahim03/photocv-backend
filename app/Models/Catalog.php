@@ -62,4 +62,19 @@ class Catalog extends Model
 	{
 		return $this->hasMany(ClubNews::class, 'news_type_id');
 	}
+
+	public function bookingsByType()
+    {
+        return $this->hasMany(Booking::class, 'booking_type_id');
+    }
+
+    public function bookingsByLeadSource()
+    {
+        return $this->hasMany(Booking::class, 'lead_source_id');
+    }
+
+	public function gears()
+	{
+		return $this->hasMany(Gear::class, 'category_id');
+	}
 }

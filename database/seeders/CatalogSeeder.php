@@ -31,6 +31,37 @@ class CatalogSeeder extends Seeder
             ['name' => 'Urgent News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
             ['name' => 'General News', 'catalog_type' => 'news_type', 'icon' => 'urgent.png'],
             ['name' => 'General Pages', 'catalog_type' => 'page_type', 'icon' => 'urgent.png'],
+            // Booking Types
+            ['name' => 'Wedding', 'catalog_type' => 'booking_type', 'icon' => 'fa-solid fa-heart'],
+            ['name' => 'Event', 'catalog_type' => 'booking_type', 'icon' => 'fa-solid fa-calendar'],
+            ['name' => 'Portrait', 'catalog_type' => 'booking_type', 'icon' => 'fa-solid fa-user'],
+            ['name' => 'Commercial', 'catalog_type' => 'booking_type', 'icon' => 'fa-solid fa-briefcase'],
+
+            // Lead Sources
+            ['name' => 'Instagram', 'catalog_type' => 'lead_source', 'icon' => 'fa-brands fa-instagram'],
+            ['name' => 'Facebook', 'catalog_type' => 'lead_source', 'icon' => 'fa-brands fa-facebook'],
+            ['name' => 'Website', 'catalog_type' => 'lead_source', 'icon' => 'fa-solid fa-globe'],
+            ['name' => 'Referral', 'catalog_type' => 'lead_source', 'icon' => 'fa-solid fa-user-friends'],
+
+            // Services
+            ['name' => 'Photography', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-camera'],
+            ['name' => 'Videography', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-video'],
+            ['name' => 'Drone', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-drone'],
+            ['name' => 'Live Streaming', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-signal'],
+
+            // Deliverables
+            ['name' => 'Album', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-book'],
+            ['name' => 'Digital Gallery', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-images'],
+            ['name' => 'Prints', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-print'],
+            ['name' => 'USB Drive', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-usb'],
+
+            // Gear Categories
+            ['name' => 'Camera', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-camera'],
+            ['name' => 'Lens', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-circle'],
+            ['name' => 'Drone', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-drone'],
+            ['name' => 'Lighting', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-lightbulb'],
+            ['name' => 'Accessory', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-plug'],
+
         ];
 
         DB::table('catalog')->insert($catalogs);

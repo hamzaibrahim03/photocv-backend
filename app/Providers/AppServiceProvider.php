@@ -86,6 +86,9 @@ use App\Repositories\Judge\CompetitionEntryScoreRepositoryInterface;
 use App\Repositories\Judge\JudgeRepository;
 use App\Repositories\Judge\JudgeRepositoryInterface;
 
+use App\Repositories\Member\BookingRepository;
+use App\Repositories\Member\BookingRepositoryInterface;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -108,6 +111,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(CompetitionResultRepositoryInterface::class, CompetitionResultRepository::class);
         $this->app->bind(CompetitionEntryScoreRepositoryInterface::class, CompetitionEntryScoreRepository::class);
         $this->app->bind(JudgeRepositoryInterface::class, JudgeRepository::class);
+
+        $this->app->bind(BookingRepositoryInterface::class, BookingRepository::class);
 
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);

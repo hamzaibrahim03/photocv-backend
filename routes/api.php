@@ -28,6 +28,7 @@ use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
 use App\Http\Controllers\v1\Judge\JudgeController;
+use App\Http\Controllers\v1\Member\BookingController;
 
 Route::prefix('v1')->group(function() {
 
@@ -105,6 +106,8 @@ Route::prefix('v1')->group(function() {
         Route::middleware(['auth', 'role:member'])->group(function () {
             Route::post('/join-club', [MemberController::class, 'requestToJoinClub']);
             Route::get('/joined-clubs', [MemberController::class, 'joinedClubs']);
+
+            Route::apiResource('booking', BookingController::class);
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);

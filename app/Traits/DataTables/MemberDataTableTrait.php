@@ -8,6 +8,8 @@ use App\Models\User;
 use App\Models\MemberAward;
 use App\Models\MemberBrand;
 use App\Models\MemberPracticeLog;
+use App\Models\Booking;
+use App\Http\Resources\BookingResource;
 
 trait MemberDataTableTrait
 {
@@ -203,6 +205,40 @@ trait MemberDataTableTrait
                     return '<a href="' . asset('storage/' . $log->file) . '" target="_blank" class="btn btn-sm btn-primary">View</a>';
                 }
                 return '';
+            })
+            ->rawColumns(['action'])
+            ->make(true);
+    }
+
+    public function getMemberBookings($request, $userId)
+    {
+        $query = Booking::with(['gears', 'attachments', 'bookingType', 'leadSource'])
+            ->where('user_id', auth()->id());
+
+        // Apply search filter
+        if ($request->has('search_term') && $request->search_term !== '') {
+            $query->where(function ($q) use ($request) {
+                $q->where('title', 'like', '%' . $request->search_term . '%')
+                ->orWhere('client_name', 'like', '%' . $request->search_term . '%');
+            });
+        }
+
+        if ($request->has('order') && count($request->order)) {
+            $columnIndex = $request->order[0]['column'];
+            $direction = $request->order[0]['dir'];
+            $column = $request->columns[$columnIndex]['data'];
+
+            // Prevent ordering on nested fields
+            $allowedColumns = ['id', 'title', 'client_name', 'event_date', 'booking_status', 'total_cost'];
+            if (in_array($column, $allowedColumns)) {
+                $query->orderBy($column, $direction);
+            }
+        }
+
+        return DataTables::of($query)
+            ->addIndexColumn()
+            ->setTransformer(function ($booking) {
+                return (new BookingResource($booking))->resolve();
             })
             ->rawColumns(['action'])
             ->make(true);

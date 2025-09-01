@@ -226,6 +226,16 @@ class User extends Authenticatable
 					->withTimestamps();
 	}
 
+	public function bookings()
+	{
+		return $this->hasMany(Booking::class);
+	}
+
+	public function gears()
+	{
+		return $this->hasMany(Gear::class);
+	}
+
 	
 	// public function likedPhotos()
 	// {
