@@ -49,12 +49,6 @@ class CatalogSeeder extends Seeder
             ['name' => 'Drone', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-drone'],
             ['name' => 'Live Streaming', 'catalog_type' => 'service_type', 'icon' => 'fa-solid fa-signal'],
 
-            // Deliverables
-            ['name' => 'Album', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-book'],
-            ['name' => 'Digital Gallery', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-images'],
-            ['name' => 'Prints', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-print'],
-            ['name' => 'USB Drive', 'catalog_type' => 'deliverable_type', 'icon' => 'fa-solid fa-usb'],
-
             // Gear Categories
             ['name' => 'Camera', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-camera'],
             ['name' => 'Lens', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-circle'],

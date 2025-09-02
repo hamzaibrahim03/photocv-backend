@@ -15,7 +15,7 @@ class BookingService
     }
 
     /**
-     * Get all members with optional filtering and pagination.
+     * Get all bookings of auth member with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -26,7 +26,7 @@ class BookingService
     }
 
     /**
-     * Method to store note
+     * Method to store booking
      * @param mixed $data
      */
     public function store($data)
@@ -35,7 +35,7 @@ class BookingService
     }
 
     /**
-     * Method to show single note
+     * Method to show single booking
      * @param mixed $data
      */
     public function show($id)
@@ -50,7 +50,7 @@ class BookingService
     }
 
     /**
-     * Method to update note
+     * Method to update booking
      * @param mixed $data
      * @param mixed $id
      * @return void
@@ -61,7 +61,7 @@ class BookingService
     }
 
     /**
-     * Method to delete note
+     * Method to delete booking
      * @param mixed $id
      * @return void
      */

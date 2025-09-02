@@ -13,7 +13,7 @@ class BookingRepository implements BookingRepositoryInterface
     use MemberDataTableTrait;
 
     /**
-     * Get all members with optional filtering and pagination.
+     * Get all bookings with optional filtering and pagination.
      *
      * @param  \Illuminate\Http\Request  $request
      */
@@ -79,7 +79,7 @@ class BookingRepository implements BookingRepositoryInterface
     }
 
     /**
-     * Method to update note
+     * Method to update booking
      * @param mixed $data
      * @param mixed $id
      */
@@ -129,7 +129,7 @@ class BookingRepository implements BookingRepositoryInterface
     }
 
     /**
-     * Method to delete note
+     * Method to delete booking
      * @param mixed $id
      */
     public function delete($id)
