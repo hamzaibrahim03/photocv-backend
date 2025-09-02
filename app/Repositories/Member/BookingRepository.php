@@ -20,8 +20,8 @@ class BookingRepository implements BookingRepositoryInterface
     public function index( $request )
     {
         try {
-            $memberNotes = $this->getMemberBookings($request, auth()->user()->id);
-            return MemberResponse::success('MemberNotes retrieved successfully.', $memberNotes);
+            $memberBooking = $this->getMemberBookings($request, auth()->user()->id);
+            return MemberResponse::success('MemberBooking retrieved successfully.', $memberBooking);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }

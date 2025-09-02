@@ -89,6 +89,9 @@ use App\Repositories\Judge\JudgeRepositoryInterface;
 use App\Repositories\Member\BookingRepository;
 use App\Repositories\Member\BookingRepositoryInterface;
 
+use App\Repositories\Member\PlannedLocationRepository;
+use App\Repositories\Member\PlannedLocationRepositoryInterface;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -113,6 +116,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(JudgeRepositoryInterface::class, JudgeRepository::class);
 
         $this->app->bind(BookingRepositoryInterface::class, BookingRepository::class);
+        $this->app->bind(PlannedLocationRepositoryInterface::class, PlannedLocationRepository::class);
 
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);

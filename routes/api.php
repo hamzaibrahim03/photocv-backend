@@ -29,6 +29,7 @@ use App\Http\Controllers\v1\ClubAdmin\RoleController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
 use App\Http\Controllers\v1\Judge\JudgeController;
 use App\Http\Controllers\v1\Member\BookingController;
+use App\Http\Controllers\v1\Member\PlannedLocationController;
 
 Route::prefix('v1')->group(function() {
 
@@ -109,6 +110,8 @@ Route::prefix('v1')->group(function() {
 
             Route::apiResource('booking', BookingController::class);
             Route::post('booking-extras', [BookingController::class, 'bookingExtras']);
+
+            Route::apiResource('planned-locations', PlannedLocationController::class);
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
