@@ -212,7 +212,6 @@ class EventRepository implements EventRepositoryInterface
     /**
      * Get additional event-related data for the club dashboard.
      *
-     * @return array
      */
     public function getEventExtras($request)
     {
@@ -237,7 +236,7 @@ class EventRepository implements EventRepositoryInterface
             : Carbon::now()->endOfMonth();
 
         // Recent comments
-        $recentComments = Event::with('comments') // Eager load comments
+        $recentComments = Event::with('comments')
             ->where('club_id', $clubId)
             ->latest('event_date')
             ->take(5)
@@ -251,15 +250,10 @@ class EventRepository implements EventRepositoryInterface
             ->get();
 
         // Upcoming event (closest future event)
-        $upcomingEvents = $this->getUpcomingEvents($clubId);
-
-        $firstEvent = $upcomingEvents->first();
-        $upcoming = $firstEvent
-            ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($firstEvent->event_date)->startOfDay(), false)]
-            : null;
+        $upcoming = $this->getUpcomingEventRemainingDays($clubId);
 
         // Total event count
-        $totalEvents = Event::where('club_id', $clubId)->count();
+        $totalEvents = $this->getTotalEvents($clubId);
 
         // Monthly calendar data
         $events = Event::where('club_id', $clubId)
@@ -306,6 +300,45 @@ class EventRepository implements EventRepositoryInterface
         ];
     }
 
+    /**
+     * Get total number of events for a club.
+     *
+     * @param int $clubId
+     * @return int
+     */
+    public function getTotalEvents($clubId)
+    {
+        return Event::where('club_id', $clubId)->count();
+    }
+
+    /**
+     * Get remaining days until the next upcoming event for a club.
+     *
+     * @param int $clubId
+     * @return array|null
+     */
+    public function getUpcomingEventRemainingDays($clubId)
+    {
+        $upcomingEvents = $this->getUpcomingEvents($clubId);
+
+        $firstEvent = $upcomingEvents->first();
+
+        return $firstEvent
+            ? [
+                'remaining_days' => Carbon::now()
+                    ->startOfDay()
+                    ->diffInDays(
+                        Carbon::parse($firstEvent->event_date)->startOfDay(),
+                        false
+                    )
+            ]
+            : null;
+    }
+
+    /**
+     * Method to get upcoming events for a specific club.
+     * @param mixed $clubId
+     */
     public function getUpcomingEvents($clubId)
     {
         return Event::with('images')

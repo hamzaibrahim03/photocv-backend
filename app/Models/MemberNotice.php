@@ -7,12 +7,13 @@
 namespace App\Models;
 
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class MemberNotice
- * 
+ *
  * @property int $id
  * @property int|null $member_id
  * @property int|null $notice_type_id
@@ -71,23 +72,30 @@ class MemberNotice extends Model
         return $this->hasMany(Comment::class, 'record_id')
             ->where('record_type', 'notice')
             ->where('is_published', true)
-            ->with('user'); // Eager load user
+            ->with('user');
     }
 
-	// Define relationship for likes (assuming is_like = true is stored)
 	public function likes()
 	{
 		return $this->hasMany(Comment::class, 'record_id')
 			->where('record_type', 'notice')
-			->where('comment_type', 'like') // or use is_like = true if stored as boolean
+			->where('comment_type', 'like')
 			->where('is_published', true);
 	}
 
 	public function getFeaturedImageUrlAttribute()
 	{
-		return $this->featured_image
-			? asset('storage/' . $this->featured_image)
-			: null;
+		if (!$this->featured_image) {
+			return null;
+		}
+
+		// If already a full URL, return as is
+		if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
+			return $this->featured_image;
+		}
+
+		// Otherwise, prepend storage path
+		return asset('storage/' . $this->featured_image);
 	}
 
 	public function club()

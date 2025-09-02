@@ -11,4 +11,6 @@ interface EventRepositoryInterface
     public function delete($id);
     public function getEventExtras($request);
     public function getUpcomingEventsForAllClubs($userId);
+    public function getTotalEvents($clubId);
+    public function getUpcomingEventRemainingDays($clubId);
 }

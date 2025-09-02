@@ -55,4 +55,12 @@ class BookingController extends Controller
     {
         return $this->bookingService->delete($id);
     }
+
+    /**
+     * Get booking extras.
+     */
+    public function bookingExtras()
+    {
+        return $this->bookingService->bookingExtras();
+    }
 }

@@ -108,6 +108,7 @@ Route::prefix('v1')->group(function() {
             Route::get('/joined-clubs', [MemberController::class, 'joinedClubs']);
 
             Route::apiResource('booking', BookingController::class);
+            Route::post('booking-extras', [BookingController::class, 'bookingExtras']);
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
