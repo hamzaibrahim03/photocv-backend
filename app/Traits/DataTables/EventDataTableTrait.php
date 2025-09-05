@@ -17,11 +17,11 @@ trait EventDataTableTrait
      *
      * @param  \Illuminate\Http\Request  $request
      */
-    public function getAllEventData($request)
+    public function getAllEventData($request, $userId)
     {
         $query = Event::with(['types', 'tags', 'images', 'comments']);
 
-        $club = Club::where('user_id', auth()->id())->first();
+        $club = Club::where('user_id', $userId)->first();
         if ($club) {
             $query->where('club_id', $club->id);
         } else {

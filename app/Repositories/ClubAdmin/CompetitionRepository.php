@@ -50,7 +50,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         }
     }
 
-    public function show( $id )
+    public function show( $id, $userId )
     {
         try {
             $competition = Competition::with([
@@ -64,7 +64,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ])->findOrFail($id);
 
             // Get logged-in user's club
-            $club = Club::where('user_id', auth()->id())->first();
+            $club = Club::where('user_id', $userId)->first();
 
             // Check if the event belongs to the user's club
             if (!$club || $competition->club_id !== $club->id) {
@@ -317,13 +317,17 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         });
     }
 
-    public function getLatestCompetitionsByLimit(int $clubId, int $limit = 3)
+    public function getLatestCompetitionsByLimit(int $clubId, ?int $limit = 3)
     {
-        return Competition::where('club_id', $clubId)
+        $query = Competition::where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
-            ->orderBy('start_date', 'asc')
-            ->limit($limit)
-            ->get();
+            ->orderBy('start_date', 'asc');
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
     }
 
 }

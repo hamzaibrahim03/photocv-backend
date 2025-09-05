@@ -18,7 +18,7 @@ class CompetitionService
     }
 
     public function showCompetition( $id ) {
-        return $this->competitionRepository->show( $id );
+        return $this->competitionRepository->show( $id, auth()->id() );
     }
 
     public function createCompetition(array $data )

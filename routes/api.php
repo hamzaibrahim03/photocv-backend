@@ -22,7 +22,7 @@ use App\Http\Controllers\v1\Member\MemberAdminController;
 use App\Http\Controllers\v1\Member\MemberNoteController;
 use App\Http\Controllers\v1\Member\MemberClassLogController;
 use App\Http\Controllers\v1\Member\MemberInterestBrandController;
-use App\Http\Controllers\v1\PublicClubController;
+use App\Http\Controllers\v1\ClubPublic\PublicClubController;
 use App\Http\Controllers\v1\Member\MemberPracticeLogController;
 use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
@@ -43,9 +43,27 @@ Route::prefix('v1')->group(function() {
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 
-    Route::domain('{username}-staging.cameraclub.website')->group(function () {
-        Route::get('/club-public-data', [PublicClubController::class, 'getClubData']);
-    });
+    // Public club routes
+    Route::domain('{username}-staging.cameraclub.website')
+        ->prefix('club/public')
+        ->name('club.public.')
+        ->group(function () {
+            Route::get('/home', [PublicClubController::class, 'home']);
+            Route::get('/event', [PublicClubController::class, 'eventIndex']);
+            Route::post('/event', [PublicClubController::class, 'event']);
+
+            Route::post('/competitions', [PublicClubController::class, 'competitionIndex']);
+            Route::post('/competition', [PublicClubController::class, 'competition']);
+
+            Route::get('/galleries', [PublicClubController::class, 'galleries']);
+
+            Route::get('/news', [PublicClubController::class, 'newsIndex']);
+            Route::post('/news', [PublicClubController::class, 'newsSingle']);
+        });
+
+    // Route::domain('{username}-staging.cameraclub.website')->group(function () {
+    //     Route::get('/home', [PublicClubController::class, 'home']);
+    // });
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');

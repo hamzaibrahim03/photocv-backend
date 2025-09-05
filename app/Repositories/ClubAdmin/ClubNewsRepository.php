@@ -22,16 +22,13 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
         }
     }
 
-    public function show( $id )
+    public function getNewsById( $id, $userId )
     {
         try {
             $clubNews = ClubNews::with('clubNewsType', 'comments')->findOrFail($id);
-            if (!$clubNews) {
-                return ClubNewsResponse::error('Club news not found.', 404);
-            }
 
             // Get logged-in user's club
-            $club = Club::where('user_id', auth()->id())->first();
+            $club = Club::where('user_id', $userId)->first();
 
             // Check if the event belongs to the user's club
             if (!$club || $clubNews->club_id !== $club->id) {

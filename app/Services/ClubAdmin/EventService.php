@@ -20,7 +20,7 @@ class EventService
      */
     public function allEvents( $request )
     {
-        return $this->eventRepository->all( $request );
+        return $this->eventRepository->all( $request, auth()->id() );
     }
 
     /**
@@ -30,7 +30,7 @@ class EventService
      * @return \Illuminate\Http\JsonResponse
      */
     public function showEvent( $id ) {
-        return $this->eventRepository->show( $id );
+        return $this->eventRepository->getEventById( $id, auth()->id() );
     }
 
     /**

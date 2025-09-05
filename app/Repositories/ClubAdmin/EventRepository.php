@@ -21,10 +21,10 @@ class EventRepository implements EventRepositoryInterface
      * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function all( $request )
+    public function all( $request, $userId )
     {
         try {
-            $events = $this->getAllEventData($request);
+            $events = $this->getAllEventData($request, $userId);
             return EventResponse::success('Events retrieved successfully.', $events);
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
@@ -37,13 +37,13 @@ class EventRepository implements EventRepositoryInterface
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function getEventById($id, $userId)
     {
         try {
             $event = Event::with(['types', 'tags', 'comments', 'images'])->findOrFail($id);
 
             // Get logged-in user's club
-            $club = Club::where('user_id', auth()->id())->first();
+            $club = Club::where('user_id', $userId)->first();
 
             // Check ownership
             if (!$club || $event->club_id !== $club->id) {

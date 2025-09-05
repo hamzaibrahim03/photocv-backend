@@ -18,7 +18,7 @@ class ClubNewsService
     }
 
     public function showClubNews( $id ) {
-        return $this->clubNewsRepository->show( $id );
+        return $this->clubNewsRepository->getNewsById( $id, auth()->id() );
     }
 
     public function createClubNews(array $data, $file)
