@@ -15,7 +15,7 @@ class CompetitionSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Animal',
+                'name' => 'Open Competition',
                 'description' => 'Showcase your best printed works.',
                 'competition_type_id' => 1,
                 'judging_type_id' => 1,
@@ -48,7 +48,7 @@ class CompetitionSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Sports',
+                'name' => 'Line from a Song',
                 'description' => 'A digital-only competition.',
                 'competition_type_id' => 2,
                 'judging_type_id' => 2,
@@ -81,7 +81,7 @@ class CompetitionSeeder extends Seeder
             [
                 'club_id' => 1,
                 'featured_image' => null,
-                'name' => 'Color',
+                'name' => 'Nature Competition',
                 'description' => 'Submit any creative work under an open theme.',
                 'competition_type_id' => 1,
                 'judging_type_id' => 3,
