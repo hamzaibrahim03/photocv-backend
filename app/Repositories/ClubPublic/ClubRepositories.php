@@ -10,6 +10,7 @@ use App\Repositories\ClubAdmin\ClubSettingsRepository;
 use App\Repositories\ClubAdmin\ClubGalleryRepository;
 use App\Repositories\ClubAdmin\CompetitionResultRepositoryInterface;
 use App\Repositories\NoticeRepositoryInterface;
+use App\Repositories\MemberRepositoryInterface;
 
 class ClubRepositories
 {
@@ -21,6 +22,7 @@ class ClubRepositories
         public ClubSettingsRepository $clubSettingRepo,
         public ClubGalleryRepository $clubGalleryRepo,
         public CompetitionResultRepositoryInterface $competitionResultRepository,
-        public NoticeRepositoryInterface $noticeRepository
+        public NoticeRepositoryInterface $noticeRepository,
+        public MemberRepositoryInterface $memberRepository
     ) {}
 }

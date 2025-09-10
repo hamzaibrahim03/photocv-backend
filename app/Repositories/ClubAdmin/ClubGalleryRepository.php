@@ -14,7 +14,6 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
     /**
      * Method to get club galleries
      * @param mixed $data
-     * @return void
      */
     public function getClubGalleries($clubAdminId)
     {
@@ -83,7 +82,6 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
     /**
      * Method to get club gallery information
      * @param mixed $galleryId
-     * @return void
      */
     public function getClubGallery($galleryId)
     {

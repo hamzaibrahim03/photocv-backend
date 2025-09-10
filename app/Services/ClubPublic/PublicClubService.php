@@ -67,6 +67,28 @@ class PublicClubService
     }
 
     /**
+     * Method to get single member galleries
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $memberId
+     */
+    public function memberGalleries($request, $username, $memberId)
+    {
+        return $this->publicClubRepository->memberGalleries($request, $username, $memberId);
+    }
+
+    /**
+     * Method to get sigle gallery information
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $galleryId
+     */
+    public function clubGallery($request, $username, $galleryId)
+    {
+        return $this->publicClubRepository->clubGallery($request, $username, $galleryId);
+    }
+
+    /**
      * Method to get club public news data
      * @param mixed $request
      */

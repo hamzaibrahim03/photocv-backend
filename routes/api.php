@@ -44,26 +44,28 @@ Route::prefix('v1')->group(function() {
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
 
     // Public club routes
-    // Route::domain('{username}-staging.cameraclub.website')
-    //     ->prefix('club/public')
-    //     ->name('club.public.')
-    //     ->group(function () {
-    //         Route::get('/home', [PublicClubController::class, 'home']);
-    //         Route::get('/event', [PublicClubController::class, 'eventIndex']);
-    //         Route::post('/event', [PublicClubController::class, 'event']);
+    Route::domain('{username}-staging.cameraclub.website')
+        ->prefix('club/public')
+        ->name('club.public.')
+        ->group(function () {
+            Route::get('/home', [PublicClubController::class, 'home']);
+            Route::get('/event', [PublicClubController::class, 'eventIndex']);
+            Route::post('/event', [PublicClubController::class, 'event']);
 
-    //         Route::post('/competitions', [PublicClubController::class, 'competitionIndex']);
-    //         Route::post('/competition', [PublicClubController::class, 'competition']);
+            Route::post('/competitions', [PublicClubController::class, 'competitionIndex']);
+            Route::post('/competition', [PublicClubController::class, 'competition']);
 
-    //         Route::get('/galleries', [PublicClubController::class, 'galleries']);
+            Route::get('/galleries', [PublicClubController::class, 'galleries']);
+            Route::get('/gallery/{id}', [PublicClubController::class, 'clubGallery']);
+            Route::get('/member/{id}/galleries', [PublicClubController::class, 'memberGalleries']);
 
-    //         Route::get('/news', [PublicClubController::class, 'newsIndex']);
-    //         Route::post('/news', [PublicClubController::class, 'newsSingle']);
-    //     });
+            Route::get('/news', [PublicClubController::class, 'newsIndex']);
+            Route::post('/news', [PublicClubController::class, 'newsSingle']);
+        });
 
-    Route::domain('{username}-staging.cameraclub.website')->group(function () {
-        Route::get('/club-public-data', [PublicClubController::class, 'home']);
-    });
+    // Route::domain('{username}-staging.cameraclub.website')->group(function () {
+    //     Route::get('/club-public-data', [PublicClubController::class, 'home']);
+    // });
 
     Route::middleware(['auth:sanctum'])->group(function () {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');

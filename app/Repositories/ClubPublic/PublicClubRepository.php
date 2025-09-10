@@ -197,16 +197,70 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         $user     = User::where('username', $username)->firstOrFail();
         $clubId   = $user->club->id;
 
+        // check if user asked for a specific dataset
+        $only = $request->query('only'); // values: "memberGalleries", "clubGalleries"
+
+        $data = [];
+
+        // if (!$only || $only === 'clubSettings') {
+            $data['clubSettings'] = $this->repos->clubSettingRepo->getAllClubSettings($user->id);
+        // }
+
+        if (!$only || $only === 'clubGalleries') {
+            $data['clubGalleries'] = $this->repos->clubGalleryRepo->getClubGalleries($user->id);
+        }
+
+        if (!$only || $only === 'memberGalleries') {
+            $data['memberGalleries'] = $this->repos->clubDashboardRepo->getMembersGallerries($clubId);
+        }
+
         return response()->json([
             'success' => true,
             'message' => 'Galleries data retrieved successfully',
+            'data'    => $data
+        ], 200);
+    }
+
+    /**
+     * Method to get single club gallery information
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $galleryId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function clubGallery($request, $username, $galleryId)
+    {
+        $user = User::where('username', $username)->firstOrFail();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data retrieved successfully',
             'data' => [
-                'clubSettings'    => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'clubGalleries'   => $this->repos->clubGalleryRepo->getClubGalleries($user->id),
-                'memberGalleries' => $this->repos->clubDashboardRepo->getMembersGallerries($clubId),
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubGallery'  => $this->repos->clubGalleryRepo->getClubGallery($galleryId),
             ]
         ], 200);
     }
+
+    /**
+     * Method to get single member galleries
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $memberId
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function memberGalleries($request, $username, $memberId)
+    {
+        $user = User::where('username', $username)->firstOrFail();
+        return response()->json([
+            'success' => true,
+            'message' => 'Data retrieved successfully',
+            'data' => [
+                'clubSettings'   => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'memberGalleries'       => $this->repos->memberRepository->memberGalleryDetails($memberId),
+            ]
+        ], 200);
+    }
+
 
     /**
      * Method to get club public news data

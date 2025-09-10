@@ -70,6 +70,28 @@ class PublicClubController extends Controller
     }
 
     /**
+     * Method to get single member gallery information
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $username
+     * @param mixed $memberId
+     */
+    public function memberGalleries(Request $request, $username, $memberId)
+    {
+        return $this->publicClubService->memberGalleries($request, $username, $memberId);
+    }
+
+    /**
+     * Method to get single gallery information
+     * @param \Illuminate\Http\Request $request
+     * @param mixed $username
+     * @param mixed $galleryId
+     */
+    public function clubGallery(Request $request, $username, $galleryId)
+    {
+        return $this->publicClubService->clubGallery($request, $username, $galleryId);
+    }
+
+    /**
      * Method to get club public news data
      * @param \Illuminate\Http\Request $request
      */

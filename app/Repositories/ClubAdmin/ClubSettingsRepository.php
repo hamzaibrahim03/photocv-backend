@@ -9,18 +9,14 @@ use App\Models\Event;
 use App\Models\ClubSeason;
 use App\Http\Responses\ClubSettingResponse;
 use App\Models\ClubCoverImage;
+use App\Models\Competition;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
     public function getAllClubSettings($userId = null)
     {
         try {
-            $user = User::find($userId ?? auth()->id());
-
-            if (!$user) {
-                return ClubSettingResponse::error('User not found.', 404);
-            }
-
+            $user = User::findOrFail($userId ?? auth()->id());
             $club = $user->club;
 
             if (!$club) {
@@ -45,6 +41,31 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 ? ['remaining_days' => Carbon::now()->startOfDay()->diffInDays(Carbon::parse($upcomingEvent->event_date)->startOfDay(), false)]
                 : null;
 
+            // Total counts (all seasons)
+            $totalEventsCount = Event::where('club_id', $club->id)->count();
+            $totalCompetitionsCount = Competition::where('club_id', $club->id)->count();
+
+            // Counts grouped by season (using date ranges)
+            $seasonsWithCounts = $club->seasons->map(function ($season) use ($club) {
+                $eventsCount = Event::where('club_id', $club->id)
+                    ->whereBetween('event_date', [$season->start_date, $season->end_date])
+                    ->count();
+
+                $competitionsCount = Competition::where('club_id', $club->id)
+                    ->whereBetween('start_date', [$season->start_date, $season->end_date])
+                    ->count();
+
+                    return [
+                    'id' => $season->id,
+                    'name' => $season->name,
+                    'status' => $season->status,
+                    'start_date' => $season->start_date,
+                    'end_date' => $season->end_date,
+                    'events_count' => $eventsCount,
+                    'competitions_count' => $competitionsCount,
+                ];
+            });
+
             return ClubSettingResponse::success('Settings retrieved successfully.', [
                 'club' => array_merge(
                     collect($club)->except(['setting'])->toArray(),
@@ -54,8 +75,10 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                     ]
                 ),
                 'settings' => $clubSetting,
-                'seasons' => $club->seasons,
+                'seasons' => $seasonsWithCounts,
                 'total_members' => $totalMemberCount,
+                'total_events' => $totalEventsCount,
+                'total_competitions' => $totalCompetitionsCount,
                 'upcoming_event_days_count' => $upcoming,
             ]);
 
