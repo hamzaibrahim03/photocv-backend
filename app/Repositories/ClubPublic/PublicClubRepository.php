@@ -278,7 +278,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'message' => 'News data retrieved successfully',
             'data' => [
                 'clubSettings'   => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'clubNews'       => $this->repos->clubNewsRepo->getClubNews($clubId),
+                'clubNews'       => $this->repos->clubNewsRepo->index($request, $clubId),
                 'upcomingEvents' => $this->repos->eventRepo->getUpcomingEvents($clubId),
             ]
         ], 200);

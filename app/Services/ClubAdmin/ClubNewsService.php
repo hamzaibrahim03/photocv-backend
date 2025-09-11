@@ -14,7 +14,7 @@ class ClubNewsService
 
     public function allClubNews( $request )
     {
-        return $this->clubNewsRepository->all( $request );
+        return $this->clubNewsRepository->index( $request, auth()->user()->club->id );
     }
 
     public function showClubNews( $id ) {

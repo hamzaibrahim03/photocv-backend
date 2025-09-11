@@ -50,7 +50,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         }
     }
 
-    public function show( $id, $userId )
+    public function show($id, $userId)
     {
         try {
             $competition = Competition::with([
@@ -60,7 +60,9 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'votingMethod',
                 'competitionCategory',
                 'competitionTheme',
-                'judges'
+                'judges',
+                'competitionMembers.entries.scores.judge',
+                'competitionMembers.member'
             ])->findOrFail($id);
 
             // Get logged-in user's club
@@ -76,11 +78,40 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 ? asset('storage/' . $competition->featured_image)
                 : null;
 
+            // Transform entries (like getCompetitionEntryData does)
+            $entries = [];
+            foreach ($competition->competitionMembers as $memberComp) {
+                foreach ($memberComp->entries as $entry) {
+                    $totalScore = $entry->scores->sum('score');
+                    $entries[] = [
+                        'entry_id' => $entry->id,
+                        'entry_image' => asset('storage/' . $entry->entry_image),
+                        'entry_image_title' => $entry->entry_image_title,
+                        'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+                        'scores' => $entry->scores->map(function ($score) {
+                            return [
+                                'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
+                                'score' => $score->score,
+                                'comment' => $score->comment
+                            ];
+                        }),
+                        'is_published' => $entry->is_published,
+                        'position' => $entry->position,
+                        'total_score' => $totalScore
+                    ];
+                }
+            }
+
+            // Attach entries to competition response
+            $competition->entries = $entries;
+
             return CompetitionResponse::success('Competition retrieved successfully.', $competition);
+
         } catch (\Exception $e) {
             return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
     public function create(array $data)
     {

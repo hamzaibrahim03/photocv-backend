@@ -12,10 +12,10 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
 {
     use UtilityTrait;
 
-    public function all( $request )
+    public function index( $request, $clubId )
     {
         try {
-            $clubNews = $this->getAllIndexData($request, ClubNews::with(['clubNewsType', 'comments']), 'title');
+            $clubNews = $this->getAllIndexData($request, ClubNews::where('club_id', $clubId)->with(['clubNewsType', 'comments']), 'title');
             return ClubNewsResponse::success('Club News retrieved successfully.', $clubNews);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);

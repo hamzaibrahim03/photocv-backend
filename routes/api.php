@@ -30,6 +30,7 @@ use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
 use App\Http\Controllers\v1\Judge\JudgeController;
 use App\Http\Controllers\v1\Member\BookingController;
 use App\Http\Controllers\v1\Member\PlannedLocationController;
+use App\Http\Controllers\v1\GlobalSearchController;
 
 Route::prefix('v1')->group(function() {
 
@@ -62,6 +63,8 @@ Route::prefix('v1')->group(function() {
             Route::get('/news', [PublicClubController::class, 'newsIndex']);
             Route::post('/news', [PublicClubController::class, 'newsSingle']);
         });
+
+    Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');
 
     // Route::domain('{username}-staging.cameraclub.website')->group(function () {
     //     Route::get('/club-public-data', [PublicClubController::class, 'home']);
