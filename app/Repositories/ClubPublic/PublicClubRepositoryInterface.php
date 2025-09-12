@@ -14,4 +14,5 @@ interface PublicClubRepositoryInterface
     public function memberGalleries($request, $username, $memberId);
     public function getClubNewsData($request);
     public function getClubSingleNewsData($request);
+    public function aboutUs($request);
 }

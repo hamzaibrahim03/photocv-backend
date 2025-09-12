@@ -62,6 +62,8 @@ Route::prefix('v1')->group(function() {
 
             Route::get('/news', [PublicClubController::class, 'newsIndex']);
             Route::post('/news', [PublicClubController::class, 'newsSingle']);
+
+            Route::get('/about-us', [PublicClubController::class, 'aboutUs']);
         });
 
     Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');

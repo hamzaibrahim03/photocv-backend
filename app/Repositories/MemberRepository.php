@@ -40,6 +40,24 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    public function getMembersByClub($clubId)
+    {
+        return User::with('roles')
+            ->whereHas('clubs', function ($q) use ($clubId) {
+                $q->where('clubs.id', $clubId);
+            })
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'username'   => $user->username,
+                    'first_name' => $user->first_name,
+                    'last_name'  => $user->last_name,
+                    'email'      => $user->email,
+                    'roles'      => $user->roles->pluck('name'),
+                ];
+            });
+    }
+
 
     /**
      * Show a specific member by ID.

@@ -21,6 +21,11 @@ class PagesRepository implements PagesRepositoryInterface
             ->get();
     }
 
+    public static function getBySlug(string $slug)
+    {
+        return Page::where('page_slug', $slug)->first();
+    }
+
     public function all( $request )
     {
         try {

@@ -106,4 +106,13 @@ class PublicClubService
         return $this->publicClubRepository->getClubSingleNewsData($request);
     }
 
+    /**
+     * Get about us data for the public page
+     * @param mixed $request
+     */
+    public function aboutUs($request)
+    {
+        return $this->publicClubRepository->aboutUs($request);
+    }
+
 }

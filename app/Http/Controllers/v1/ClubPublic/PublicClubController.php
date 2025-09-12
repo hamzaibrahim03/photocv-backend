@@ -109,4 +109,13 @@ class PublicClubController extends Controller
         return $this->publicClubService->getClubSingleNewsData($request);
     }
 
+    /**
+     * Method to get about us public page data
+     * @param \Illuminate\Http\Request $request
+     */
+    public function aboutUs(Request $request)
+    {
+        return $this->publicClubService->aboutUs($request);
+    }
+
 }

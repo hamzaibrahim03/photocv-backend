@@ -307,4 +307,26 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         ], 200);
     }
 
+    /**
+     * Method to return about us public page data
+     * @param mixed $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function aboutUs($request)
+    {
+        $username = $request->route('username');
+        $user     = User::where('username', $username)->firstOrFail();
+        $clubId   = $user->club->id;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Data retrieved successfully',
+            'data' => [
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'aboutUs'      => $this->repos->pageRepo->getBySlug('about-us'),
+                'clubOfficials'      => $this->repos->memberRepository->getMembersByClub($clubId),
+            ]
+        ], 200);
+    }
+
 }
