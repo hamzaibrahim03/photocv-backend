@@ -19,6 +19,7 @@ class ClubSetting extends Model
 		'header_img_url',
 		'footer_img_url',
 		'logo_url',
+        'favicon_url',
 		// 'cover_image_url',
 	];
 
@@ -42,6 +43,7 @@ class ClubSetting extends Model
         'footer_img',
         'footer_description',
         'logo',
+        'favicon',
         'cover_image',
         'registration',
         'directory_visibility',
@@ -85,6 +87,11 @@ class ClubSetting extends Model
 	{
 		return $this->cover_image ? asset('storage/' . $this->cover_image) : null;
 	}
+
+    public function getFaviconUrlAttribute()
+    {
+        return $this->favicon ? asset('storage/' . $this->favicon) : null;
+    }
 
     public function club()
     {

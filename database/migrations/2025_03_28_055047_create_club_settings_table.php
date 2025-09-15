@@ -30,6 +30,7 @@ return new class extends Migration {
             $table->string('footer_img')->nullable();
             $table->text('footer_description')->nullable();
             $table->string('logo', 250)->nullable();
+            $table->string('favicon', 250)->nullable();
             // $table->string('cover_image', 250)->nullable();
 
             

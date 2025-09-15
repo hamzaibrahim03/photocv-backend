@@ -128,6 +128,10 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 $data['header_img'] = $data['header_img']->store('uploads/clubs/header', 'public');
             }
 
+            if (!empty($data['favicon'])) {
+                $data['favicon'] = $data['favicon']->store('uploads/clubs/favicon', 'public');
+            }
+
             // Separate Club vs ClubSetting fields
             $clubFields = [
                 'club_name', 'tag_line', 'about', 'contact_details',
