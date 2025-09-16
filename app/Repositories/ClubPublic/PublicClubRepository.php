@@ -57,7 +57,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubGalleries'        => $this->repos->clubGalleryRepo->getClubGalleries($user->id),
                 'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),
                 'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId),
-                'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionData($clubId, $startOfMonth, $endOfMonth),
+                'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'memberGalleries'      => $this->repos->clubDashboardRepo->getMembersGallerries($clubId),
                 'latestMembers'        => $this->repos->clubDashboardRepo->getLatestMembers($clubId),
                 'latestInteractions'   => $photos->map(function ($photo) {

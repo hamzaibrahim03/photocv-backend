@@ -361,4 +361,58 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         return $query->get();
     }
 
+    /**
+     * Method to return events and competitions for calander
+     * @param mixed $clubId
+     * @return array[][][]
+     */
+    public function getCalenderCompetitionAndEvent($clubId)
+    {
+        $startOfMonth = now()->startOfMonth();
+
+        // Fetch events
+        $events = Event::where('club_id', $clubId)
+            ->whereDate('event_date', '>=', $startOfMonth)
+            ->orderBy('event_date', 'asc')
+            ->get(['event_date', 'name'])
+            ->map(fn($e) => [
+                'date' => $e->event_date->toDateString(),
+                'name' => $e->name,
+                'month' => $e->event_date->format('Y-m'),
+            ]);
+
+        // Fetch competitions
+        $competitions = Competition::where('club_id', $clubId)
+            ->whereDate('start_date', '>=', $startOfMonth)
+            ->orderBy('start_date', 'asc')
+            ->get(['start_date', 'name'])
+            ->map(fn($c) => [
+                'date' => $c->start_date->toDateString(),
+                'name' => $c->name,
+                'month' => $c->start_date->format('Y-m'),
+            ]);
+
+        // Group by month
+        $grouped = [];
+
+        foreach ($events as $event) {
+            $month = $event['month'];
+            $grouped[$month]['events'][] = [
+                'date' => $event['date'],
+                'name' => $event['name'],
+            ];
+        }
+
+        foreach ($competitions as $comp) {
+            $month = $comp['month'];
+            $grouped[$month]['competitions'][] = [
+                'date' => $comp['date'],
+                'name' => $comp['name'],
+            ];
+        }
+
+        return $grouped;
+    }
+
+
 }
