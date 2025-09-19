@@ -95,6 +95,9 @@ use App\Repositories\Member\PlannedLocationRepositoryInterface;
 use App\Repositories\ClubPublic\PublicClubRepository;
 use App\Repositories\ClubPublic\PublicClubRepositoryInterface;
 
+use App\Repositories\Member\PlannedDayOutRepository;
+use App\Repositories\Member\PlannedDayOutRepositoryInterface;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -121,6 +124,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BookingRepositoryInterface::class, BookingRepository::class);
         $this->app->bind(PlannedLocationRepositoryInterface::class, PlannedLocationRepository::class);
         $this->app->bind(PublicClubRepositoryInterface::class, PublicClubRepository::class);
+        $this->app->bind(PlannedDayOutRepositoryInterface::class, PlannedDayOutRepository::class);
 
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);

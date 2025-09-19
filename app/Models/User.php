@@ -236,6 +236,11 @@ class User extends Authenticatable
 		return $this->hasMany(Gear::class);
 	}
 
+	public function plannedDayOuts()
+    {
+        return $this->hasMany(PlannedDayOut::class);
+    }
+
 	
 	// public function likedPhotos()
 	// {

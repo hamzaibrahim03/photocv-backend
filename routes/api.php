@@ -31,6 +31,7 @@ use App\Http\Controllers\v1\Judge\JudgeController;
 use App\Http\Controllers\v1\Member\BookingController;
 use App\Http\Controllers\v1\Member\PlannedLocationController;
 use App\Http\Controllers\v1\GlobalSearchController;
+use App\Http\Controllers\v1\Member\PlannedDayOutController;
 
 Route::prefix('v1')->group(function() {
 
@@ -132,6 +133,8 @@ Route::prefix('v1')->group(function() {
         Route::middleware(['auth', 'role:member'])->group(function () {
             Route::post('/join-club', [MemberController::class, 'requestToJoinClub']);
             Route::get('/joined-clubs', [MemberController::class, 'joinedClubs']);
+
+            Route::apiResource('planned-day-outs', PlannedDayOutController::class);
 
             Route::apiResource('booking', BookingController::class);
             Route::post('booking-extras', [BookingController::class, 'bookingExtras']);
