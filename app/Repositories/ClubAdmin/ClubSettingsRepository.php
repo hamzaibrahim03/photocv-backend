@@ -70,6 +70,7 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 'club' => array_merge(
                     collect($club)->except(['setting'])->toArray(),
                     [
+                        'email' => $user->email,
                         'phone' => $user->phone,
                         'address' => $user->address,
                     ]

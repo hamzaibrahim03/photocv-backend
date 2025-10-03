@@ -26,21 +26,18 @@ class PublicClubRepository implements PublicClubRepositoryInterface
 
         $clubId = $user->club->id;
 
-        $month = $request->input('month');
-        $year = $request->input('year');
-
-        $startOfMonth = $month && $year
-            ? Carbon::createFromDate($year, $month, 1)->startOfMonth()
-            : Carbon::now()->startOfMonth();
-
-        $endOfMonth = $month && $year
-            ? Carbon::createFromDate($year, $month, 1)->endOfMonth()
-            : Carbon::now()->endOfMonth();
-
         // Fetch only photos that have comments or likes
         $photos = Photo::with([
             'uploadedBy:id,username,email',
+
+            'comments' => function ($query) {
+                $query->orderBy('created_at', 'desc')->limit(10);
+            },
             'comments.user:id,username,email',
+
+            'likes' => function ($query) {
+                $query->orderBy('created_at', 'desc')->limit(10);
+            },
             'likes.user:id,username,email'
         ])
         ->whereHas('comments')
@@ -71,7 +68,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                             'username' => $photo->uploadedBy?->username,
                             'email'    => $photo->uploadedBy?->email,
                         ],
-                        'comments' => $photo->comments->map(function ($comment) {
+                        'comments' => $photo->comments->sortByDesc('created_at')->map(function ($comment) {
                             return [
                                 'id'      => $comment->id,
                                 'comment' => $comment->comment,
@@ -82,7 +79,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                                 'created_at' => $comment->created_at,
                             ];
                         }),
-                        'likes' => $photo->likes->map(function ($like) {
+                        'likes' => $photo->likes->sortByDesc('created_at')->map(function ($like) {
                             return [
                                 'id'            => $like->id,
                                 'interacted_by' => [
@@ -110,14 +107,16 @@ class PublicClubRepository implements PublicClubRepositoryInterface
     public function getClubEventData($request)
     {
         $username = $request->route('username');
-        $user = User::where('username', $username)->firstOrFail();
+        $user     = User::where('username', $username)->firstOrFail();
+        $clubId   = $user->club->id;
 
         return response()->json([
             'success' => true,
             'message' => 'Event data retrieved successfully',
             'data' => [
-                'clubSettings'  => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'events'       => $this->repos->eventRepo->all($request, $user->id),
+                'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
             ]
         ], 200);
     }
@@ -132,6 +131,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         $username = $request->route('username');
         $user     = User::where('username', $username)->firstOrFail();
         $eventId  = $request->event_id;
+        $clubId   = $user->club->id;
 
         return response()->json([
             'success' => true,
@@ -139,6 +139,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'event'        => $this->repos->eventRepo->getEventById($eventId, $user->id),
+                'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
             ]
         ], 200);
     }
@@ -160,6 +161,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'message' => 'Competition data retrieved successfully',
             'data' => [
                 'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId, null),
             ]
         ], 200);
@@ -172,15 +174,17 @@ class PublicClubRepository implements PublicClubRepositoryInterface
      */
     public function getClubSingleCompetitionData($request)
     {
-        $username = $request->route('username');
-        $user     = User::where('username', $username)->firstOrFail();
+        $username      = $request->route('username');
+        $user          = User::where('username', $username)->firstOrFail();
         $competitionId = $request->competition_id;
+        $clubId        = $user->club->id;
 
         return response()->json([
             'success' => true,
             'message' => 'Competition data retrieved successfully',
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'competition'  => $this->repos->competitionRepo->show($competitionId, $user->id),
             ]
         ], 200);
