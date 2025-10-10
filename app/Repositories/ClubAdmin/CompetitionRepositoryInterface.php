@@ -4,7 +4,7 @@ namespace App\Repositories\ClubAdmin;
 
 interface CompetitionRepositoryInterface
 {
-    public function all( $request );
+    public function all( $request, $clubId = null );
     public function create(array $data);
     public function show( $id, $userId );
     public function update($id, array $data);

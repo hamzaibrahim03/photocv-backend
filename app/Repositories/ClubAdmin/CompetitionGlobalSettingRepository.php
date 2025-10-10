@@ -6,8 +6,11 @@ use App\Models\CompetitionGlobalSetting;
 
 class CompetitionGlobalSettingRepository implements CompetitionGlobalSettingRepositoryInterface
 {
-    public function getFirst()
+    public function getFirst($clubId = null)
     {
+        if(!$clubId) {
+            $clubId = auth()->user()->club->id;
+        }
         return CompetitionGlobalSetting::with([
             'competitionType',
             'judgingType',
@@ -15,7 +18,7 @@ class CompetitionGlobalSettingRepository implements CompetitionGlobalSettingRepo
             'votingMethod',
             'competitionTheme',
             'competitionCategory'
-        ])->where('club_id', auth()->user()->club->id)->first();
+        ])->where('club_id', $clubId)->first();
     }
 
     public function createOrUpdate(array $data)

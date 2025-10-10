@@ -14,7 +14,7 @@ class CompetitionService
 
     public function allCompetitions( $request )
     {
-        return $this->competitionRepository->all( $request );
+        return $this->competitionRepository->all( $request, auth()->user()->club->id );
     }
 
     public function showCompetition( $id ) {

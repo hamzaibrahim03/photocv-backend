@@ -163,6 +163,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId, null),
+                'latestResults'        => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
             ]
         ], 200);
     }

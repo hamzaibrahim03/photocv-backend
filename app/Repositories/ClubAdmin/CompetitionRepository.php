@@ -25,10 +25,9 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         $this->competitionGlobalSettingRepository = $competitionGlobalSettingRepository;
     }
 
-    public function all($request)
+    public function all($request, $clubId = null)
     {
         try {
-            $clubId = auth()->user()->club->id;
             $query = Competition::where('club_id', $clubId)->with([
                 'judgingType',
                 'competitionType',
@@ -41,7 +40,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
             $competitionArr = [
                 'competitions' => $this->getAllCompetitionsData($request, $query, 'name'),
-                'globalSettings' => $this->competitionGlobalSettingRepository->getFirst(),
+                'globalSettings' => $this->competitionGlobalSettingRepository->getFirst($clubId),
             ];
             
             return CompetitionResponse::success('Competitions retrieved successfully.', $competitionArr);
