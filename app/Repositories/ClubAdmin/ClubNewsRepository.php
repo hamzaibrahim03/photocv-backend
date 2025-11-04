@@ -35,11 +35,6 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
                 return ClubNewsResponse::error('Unauthorized to view this event.', 403);
             }
 
-            // Transform the featured_image to full URL
-            $clubNews->featured_image = $clubNews->featured_image 
-                ? asset('storage/' . $clubNews->featured_image) 
-                : null;
-
             return ClubNewsResponse::success('Club news retrieved successfully.', $clubNews);
         } catch (\Exception $e) {
             return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);

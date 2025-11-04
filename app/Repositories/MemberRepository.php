@@ -531,6 +531,7 @@ class MemberRepository implements MemberRepositoryInterface
                         'photo_id' => $photo->id,
                         'title' => $photo->title,
                         'image' => asset('storage/' . $photo->image),
+                        'created_at' => $photo->created_at,
                         'comments' => $comments,
                         'likes' => $likes,
                         'comments_count' => $comments->count(),
@@ -549,6 +550,7 @@ class MemberRepository implements MemberRepositoryInterface
                     'total_photos' => $totalGalleryPhotos,
                     'total_comments' => $totalGalleryComments,
                     'total_likes' => $totalGalleryLikes,
+                    'created_at' => $gallery->created_at,
                     'photos' => $photos,
                 ];
             });

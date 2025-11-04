@@ -122,6 +122,11 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                     'title' => $photo->title,
                     'image' => asset('storage/' . $photo->image),
                     'uploaded_by' => $photo->uploadedBy->username ?? 'Unknown',
+                    'uploaded_by_first_name' => $photo->uploadedBy->first_name ?? 'Unknown',
+                    'uploaded_by_last_name' => $photo->uploadedBy->last_name ?? 'Unknown',
+                    'uploaded_by_profile_image' => $photo->uploadedBy && $photo->uploadedBy->profile_image
+                    ? url('storage/' . ltrim($photo->uploadedBy->profile_image, '/'))
+                    : null,
                     'comments' => $comments,
                     'likes' => $likes,
                     'comments_count' => $comments->count(),
