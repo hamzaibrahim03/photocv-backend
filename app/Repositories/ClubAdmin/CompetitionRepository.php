@@ -80,6 +80,9 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             // Transform entries (like getCompetitionEntryData does)
             $entries = [];
             foreach ($competition->competitionMembers as $memberComp) {
+                if (!$memberComp->member) {
+                    continue;
+                }
                 foreach ($memberComp->entries as $entry) {
                     $totalScore = $entry->scores->sum('score');
                     $entries[] = [
