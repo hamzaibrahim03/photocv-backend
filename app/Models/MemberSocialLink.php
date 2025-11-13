@@ -46,6 +46,11 @@ class MemberSocialLink extends Model
 		'social_link'
 	];
 
+	public function user()
+	{
+		return $this->belongsTo(User::class, 'member_id');
+	}
+
 	public function member()
 	{
 		return $this->belongsTo(User::class, 'member_id');

@@ -95,4 +95,10 @@ class Member extends Model
         return $this->hasMany(MemberCoverImage::class);
     }
 
+	public function socialLinks()
+	{
+		return $this->hasMany(MemberSocialLink::class, 'member_id', 'user_id');
+	}
+
+
 }

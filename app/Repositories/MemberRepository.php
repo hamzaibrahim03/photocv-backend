@@ -555,8 +555,26 @@ class MemberRepository implements MemberRepositoryInterface
                 ];
             });
 
+
             $data = [
-                'member' => $member->only(['id', 'username', 'first_name', 'last_name', 'profile_image', 'email']),
+                'member' => [
+                    'username'      => $member->username,
+                    'first_name'    => $member->first_name,
+                    'last_name'     => $member->last_name,
+                    'email'         => $member->email,
+                    'profile_image' => $member->profile_image,
+
+                    // Role (Spatie)
+                    'role' => $member->roles->pluck('name')->first(),
+
+                    // Social Links
+                    'social_links' =>  ($member->socialLinks ?? collect())->map(function ($link) {
+                        return [
+                            'platform' => $link->social_media_name,
+                            'url'      => $link->social_link,
+                        ];
+                    }),
+                ],
                 'gallery_count' => $galleryCount,
                 'total_photos' => $totalPhotos,
                 'average_photos_per_gallery' => $averagePhotos,
