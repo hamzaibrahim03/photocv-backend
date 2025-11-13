@@ -92,6 +92,25 @@ class PublicClubController extends Controller
     }
 
     /**
+     * Method to get random club galleries
+     * @param \Illuminate\Http\Request $request
+     */
+    public function randomClubGalleries(Request $request)
+    {
+        return $this->publicClubService->getRandomClubGalleries($request);
+    }
+
+    /**
+     * Method to get random member galleries
+     * @param \Illuminate\Http\Request $request
+     */
+    public function randomMemberGalleries(Request $request)
+    {
+        return $this->publicClubService->getRandomMemberGalleries($request);
+    }
+
+
+    /**
      * Method to get club public news data
      * @param \Illuminate\Http\Request $request
      */

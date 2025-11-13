@@ -247,6 +247,91 @@ class PublicClubRepository implements PublicClubRepositoryInterface
     }
 
     /**
+     * Return random club galleries for public view
+     */
+    public function getRandomClubGalleries($request)
+    {
+        $username = $request->route('username');
+        $user     = User::where('username', $username)->firstOrFail();
+        $limit    = $request->query('limit', 10);
+
+        // Fetch JsonResponse and convert it to array
+        $response      = $this->repos->clubGalleryRepo->getClubGalleries($user->id);
+        $responseArray = $response->getData(true);
+
+        // Extract the galleries list from result
+        $galleries = collect($responseArray['data'] ?? []);
+
+        $randomGalleries = $galleries->shuffle()->take($limit)->values();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Random club galleries retrieved successfully',
+            'data'    => [
+                'clubSettings'    => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'randomGalleries' => $randomGalleries,
+            ]
+        ]);
+    }
+
+
+
+    /**
+     * Return random member galleries for public view
+     */
+    public function getRandomMemberGalleries($request)
+    {
+        $username = $request->route('username');
+        $user     = User::where('username', $username)->firstOrFail();
+        $clubId   = $user->club->id;
+
+        $limit = $request->query('limit', 10);
+
+        // Fetch response from repo
+        $response = $this->repos->clubDashboardRepo->getMembersGallerries($clubId);
+
+        // Extract data safely
+        $responseArray = $this->extractData($response);
+
+        // Usually member galleries are inside "data" or root
+        $galleries = collect($responseArray['data'] ?? $responseArray);
+
+        $randomGalleries = $galleries->shuffle()->take($limit)->values();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Random member galleries retrieved successfully',
+            'data'    => [
+                'clubSettings'    => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'randomGalleries' => $randomGalleries,
+            ]
+        ]);
+    }
+
+
+    private function extractData($response)
+    {
+        // If it's a JsonResponse, decode it
+        if ($response instanceof \Illuminate\Http\JsonResponse) {
+            return $response->getData(true); // returns array
+        }
+
+        // If it’s an Eloquent Collection or array, wrap it
+        if ($response instanceof \Illuminate\Support\Collection) {
+            return $response->toArray();
+        }
+
+        // If already array
+        if (is_array($response)) {
+            return $response;
+        }
+
+        return [];
+    }
+
+
+
+    /**
      * Method to get single member galleries
      * @param mixed $request
      * @param mixed $username

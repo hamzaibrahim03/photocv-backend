@@ -89,6 +89,24 @@ class PublicClubService
     }
 
     /**
+     * Method to get random club galleries
+     * @param mixed $request
+     */
+    public function getRandomClubGalleries($request)
+    {
+        return $this->publicClubRepository->getRandomClubGalleries($request);
+    }
+
+    /**
+     * Method to get random member galleries
+     * @param mixed $request
+     */
+    public function getRandomMemberGalleries($request)
+    {
+        return $this->publicClubRepository->getRandomMemberGalleries($request);
+    }
+
+    /**
      * Method to get club public news data
      * @param mixed $request
      */

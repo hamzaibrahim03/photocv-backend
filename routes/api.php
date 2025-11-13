@@ -60,6 +60,8 @@ Route::prefix('v1')->group(function() {
             Route::get('/galleries', [PublicClubController::class, 'galleries']);
             Route::get('/gallery/{id}', [PublicClubController::class, 'clubGallery']);
             Route::get('/member/{id}/galleries', [PublicClubController::class, 'memberGalleries']);
+            Route::get('/random-club-galleries', [PublicClubController::class, 'randomClubGalleries']);
+            Route::get('/random-member-galleries', [PublicClubController::class, 'randomMemberGalleries']);
 
             Route::get('/news', [PublicClubController::class, 'newsIndex']);
             Route::post('/news', [PublicClubController::class, 'newsSingle']);
