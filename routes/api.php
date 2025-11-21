@@ -51,11 +51,11 @@ Route::prefix('v1')->group(function() {
         ->name('club.public.')
         ->group(function () {
             Route::get('/home', [PublicClubController::class, 'home']);
-            Route::get('/event', [PublicClubController::class, 'eventIndex']);
-            Route::post('/event', [PublicClubController::class, 'event']);
+            Route::get('/events', [PublicClubController::class, 'eventIndex']);
+            Route::get('/event/{id}', [PublicClubController::class, 'event']);
 
             Route::get('/competitions', [PublicClubController::class, 'competitionIndex']);
-            Route::post('/competition', [PublicClubController::class, 'competition']);
+            Route::get('/competition/{id}', [PublicClubController::class, 'competition']);
 
             Route::get('/galleries', [PublicClubController::class, 'galleries']);
             Route::get('/gallery/{id}', [PublicClubController::class, 'clubGallery']);
@@ -64,7 +64,7 @@ Route::prefix('v1')->group(function() {
             Route::get('/random-member-galleries', [PublicClubController::class, 'randomMemberGalleries']);
 
             Route::get('/news', [PublicClubController::class, 'newsIndex']);
-            Route::post('/news', [PublicClubController::class, 'newsSingle']);
+            Route::get('/news/{id}', [PublicClubController::class, 'newsSingle']);
 
             Route::get('/about-us', [PublicClubController::class, 'aboutUs']);
 

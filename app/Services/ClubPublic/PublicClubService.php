@@ -34,9 +34,9 @@ class PublicClubService
      * Method to get club public single event data
      * @param mixed $request
      */
-    public function getClubSingleEventData($request)
+    public function getClubSingleEventData($request, $username, $id)
     {
-        return $this->publicClubRepository->getClubSingleEventData($request);
+        return $this->publicClubRepository->getClubSingleEventData($request, $username, $id);
     }
 
     /**
@@ -52,9 +52,9 @@ class PublicClubService
      * Method to get club public single competition data
      * @param mixed $request
      */
-    public function getClubSingleCompetitionData($request)
+    public function getClubSingleCompetitionData($request, $username, $id)
     {
-        return $this->publicClubRepository->getClubSingleCompetitionData($request);
+        return $this->publicClubRepository->getClubSingleCompetitionData($request, $username, $id);
     }
 
     /**
@@ -119,9 +119,9 @@ class PublicClubService
      * Method to get club public single news data
      * @param mixed $request
      */
-    public function getClubSingleNewsData($request)
+    public function getClubSingleNewsData($request, $username, $id)
     {
-        return $this->publicClubRepository->getClubSingleNewsData($request);
+        return $this->publicClubRepository->getClubSingleNewsData($request, $username, $id);
     }
 
     /**

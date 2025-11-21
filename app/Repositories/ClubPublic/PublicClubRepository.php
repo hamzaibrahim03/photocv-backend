@@ -126,11 +126,9 @@ class PublicClubRepository implements PublicClubRepositoryInterface
      * @param mixed $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getClubSingleEventData($request)
+    public function getClubSingleEventData($request, $username, $id)
     {
-        $username = $request->route('username');
         $user     = User::where('username', $username)->firstOrFail();
-        $eventId  = $request->event_id;
         $clubId   = $user->club->id;
 
         return response()->json([
@@ -138,7 +136,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'message' => 'Event data retrieved successfully',
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'event'        => $this->repos->eventRepo->getEventById($eventId, $user->id),
+                'event'        => $this->repos->eventRepo->getEventById($id, $user->id),
                 'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
             ]
         ], 200);
@@ -173,11 +171,9 @@ class PublicClubRepository implements PublicClubRepositoryInterface
      * @param mixed $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getClubSingleCompetitionData($request)
+    public function getClubSingleCompetitionData($request, $username, $id)
     {
-        $username      = $request->route('username');
         $user          = User::where('username', $username)->firstOrFail();
-        $competitionId = $request->competition_id;
         $clubId        = $user->club->id;
 
         return response()->json([
@@ -186,7 +182,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
-                'competition'  => $this->repos->competitionRepo->show($competitionId, $user->id),
+                'competition'  => $this->repos->competitionRepo->show($id, $user->id),
             ]
         ], 200);
     }
@@ -378,19 +374,17 @@ class PublicClubRepository implements PublicClubRepositoryInterface
      * @param mixed $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function getClubSingleNewsData($request)
+    public function getClubSingleNewsData($request, $username, $id)
     {
-        $username = $request->route('username');
         $user     = User::where('username', $username)->firstOrFail();
         $clubId   = $user->club->id;
-        $newsId   = $request->news_id;
 
         return response()->json([
             'success' => true,
             'message' => 'News data retrieved successfully',
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'news'         => $this->repos->clubNewsRepo->getNewsById($newsId, $user->id),
+                'news'         => $this->repos->clubNewsRepo->getNewsById($id, $user->id),
                 'clubNotices'  => $this->repos->noticeRepository->getLatestNoticeWithLimit($clubId, 3),
             ]
         ], 200);

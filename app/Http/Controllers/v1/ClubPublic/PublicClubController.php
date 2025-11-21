@@ -37,9 +37,9 @@ class PublicClubController extends Controller
      * Method to get club public event data
      * @param \Illuminate\Http\Request $request
      */
-    public function event(Request $request, $id)
+    public function event(Request $request, $username, $id)
     {
-        return $this->publicClubService->getClubSingleEventData($request);
+        return $this->publicClubService->getClubSingleEventData($request, $username, $id);
     }
 
     /**
@@ -55,9 +55,9 @@ class PublicClubController extends Controller
      * Method to get club public single competition data
      * @param \Illuminate\Http\Request $request
      */
-    public function competition(Request $request)
+    public function competition(Request $request, $username, $id)
     {
-        return $this->publicClubService->getClubSingleCompetitionData($request);
+        return $this->publicClubService->getClubSingleCompetitionData($request, $username, $id);
     }
 
     /**
@@ -123,9 +123,9 @@ class PublicClubController extends Controller
      * Method to get club public single news data
      * @param \Illuminate\Http\Request $request
      */
-    public function newsSingle(Request $request)
+    public function newsSingle(Request $request, $username, $id)
     {
-        return $this->publicClubService->getClubSingleNewsData($request);
+        return $this->publicClubService->getClubSingleNewsData($request, $username, $id);
     }
 
     /**
