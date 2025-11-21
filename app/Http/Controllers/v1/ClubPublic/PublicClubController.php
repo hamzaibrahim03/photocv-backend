@@ -137,4 +137,22 @@ class PublicClubController extends Controller
         return $this->publicClubService->aboutUs($request);
     }
 
+    /**
+     * Method to get club public notices data
+     * @param \Illuminate\Http\Request $request
+     */
+    public function noticeIndex(Request $request)
+    {
+        return $this->publicClubService->getClubNoticesData($request);
+    }
+
+    /**
+     * Method to get club public single notice data
+     * @param \Illuminate\Http\Request $request
+     */
+    public function noticeSingle(Request $request, $username, $id)
+    {
+        return $this->publicClubService->getClubSingleNotice($request, $username, $id);
+    }
+
 }

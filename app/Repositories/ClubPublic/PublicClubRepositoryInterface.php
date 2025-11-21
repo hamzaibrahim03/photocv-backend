@@ -17,4 +17,6 @@ interface PublicClubRepositoryInterface
     public function getClubNewsData($request);
     public function getClubSingleNewsData($request);
     public function aboutUs($request);
+    public function getClubNoticesData($request);
+    public function getClubSingleNotice($request, $username, $id);
 }

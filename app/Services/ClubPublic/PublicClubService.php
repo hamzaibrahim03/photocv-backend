@@ -133,4 +133,24 @@ class PublicClubService
         return $this->publicClubRepository->aboutUs($request);
     }
 
+    /**
+     * Method to get club public notices data
+     * @param mixed $request
+     */
+    public function getClubNoticesData($request)
+    {
+        return $this->publicClubRepository->getClubNoticesData($request);
+    }
+
+    /**
+     * Method to get club public single notice data
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $id
+     */
+    public function getClubSingleNotice($request, $username, $id)
+    {
+        return $this->publicClubRepository->getClubSingleNotice($request, $username, $id);
+    }
+
 }

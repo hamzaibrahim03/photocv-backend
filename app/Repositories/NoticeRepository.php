@@ -13,17 +13,17 @@ class NoticeRepository implements NoticeRepositoryInterface
 {
     use NoticeDataTableTrait;
 
-    public function all( $request )
+    public function all( $request, $userId )
     {
         try {
-            $notices = $this->getAllNotices($request);
+            $notices = $this->getAllNotices($request, $userId);
             return NoticeResponse::success('Notices retrieved successfully.', $notices);
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
 
-    public function show( $id )
+    public function show( $id, $userId )
     {
         try {
             $notice = MemberNotice::with('comments', 'noticeType')->findOrFail($id);
@@ -32,7 +32,7 @@ class NoticeRepository implements NoticeRepositoryInterface
             }
 
             // Get logged-in user's club
-            $club = Club::where('user_id', auth()->id())->first();
+            $club = Club::where('user_id', $userId)->first();
 
             // Check if the event belongs to the user's club
             if (!$club || $notice->club_id !== $club->id) {
@@ -269,5 +269,35 @@ class NoticeRepository implements NoticeRepositoryInterface
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
+    public function getLatestNoticeWithLimit($clubId, $limit = 3)
+    {
+        try {
+            // Fetch top 3 latest notices
+            $latestNotices = MemberNotice::where('club_id', $clubId)
+                ->latest('created_at')
+                ->take($limit)
+                ->get();
+
+            if ($latestNotices->isEmpty()) {
+                return NoticeResponse::error('No notices found for this club.', 404);
+            }
+
+            // Transform images to full URLs
+            $latestNotices->transform(function ($item) {
+                $item->featured_image = $item->featured_image
+                    ? asset('storage/' . $item->featured_image)
+                    : null;
+
+                return $item;
+            });
+
+            return NoticeResponse::success('Latest notices retrieved successfully.', $latestNotices);
+
+        } catch (\Exception $e) {
+            return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
 
 }

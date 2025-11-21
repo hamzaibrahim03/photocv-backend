@@ -73,12 +73,11 @@ trait NoticeDataTableTrait
     /**
      * Get all notice data for DataTable
      */
-    public function getAllNotices($request)
+    public function getAllNotices($request, $userId)
     {
         $query = MemberNotice::with([ 'noticeType', 'files', 'comments', 'club', 'member',]);
 
-        $club = Club::where('user_id', auth()->id())->first();
-        $userId = auth()->id();
+        $club = Club::where('user_id', $userId)->first();
 
         if ($club) {
             $query->where('club_id', $club->id);

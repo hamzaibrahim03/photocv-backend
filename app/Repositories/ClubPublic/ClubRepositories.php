@@ -13,6 +13,7 @@ use App\Repositories\NoticeRepositoryInterface;
 use App\Repositories\MemberRepositoryInterface;
 use App\Repositories\ClubAdmin\PagesRepository;
 use App\Repositories\UserRepository;
+use App\Repositories\NoticeRepository;
 
 class ClubRepositories
 {
@@ -28,5 +29,6 @@ class ClubRepositories
         public MemberRepositoryInterface $memberRepository,
         public PagesRepository $pageRepo,
         public UserRepository $userRepo,
+        public NoticeRepository $noticeRepo,
     ) {}
 }

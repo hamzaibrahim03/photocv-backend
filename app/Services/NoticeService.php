@@ -14,11 +14,11 @@ class NoticeService
 
     public function allNotices( $request )
     {
-        return $this->noticeRepository->all( $request );
+        return $this->noticeRepository->all( $request, auth()->id() );
     }
 
     public function showNotice( $id ) {
-        return $this->noticeRepository->show( $id );
+        return $this->noticeRepository->show( $id, auth()->id() );
     }
 
     public function createNotice(array $data, $images, $document)

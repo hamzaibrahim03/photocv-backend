@@ -274,8 +274,6 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         ]);
     }
 
-
-
     /**
      * Return random member galleries for public view
      */
@@ -308,7 +306,9 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         ]);
     }
 
-
+    /**
+     * Helper to extract data from various response types
+     */
     private function extractData($response)
     {
         // If it's a JsonResponse, decode it
@@ -328,8 +328,6 @@ class PublicClubRepository implements PublicClubRepositoryInterface
 
         return [];
     }
-
-
 
     /**
      * Method to get single member galleries
@@ -367,9 +365,10 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'success' => true,
             'message' => 'News data retrieved successfully',
             'data' => [
-                'clubSettings'   => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'clubNews'       => $this->repos->clubNewsRepo->index($request, $clubId),
-                'upcomingEvents' => $this->repos->eventRepo->getUpcomingEvents($clubId),
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubNews'     => $this->repos->clubNewsRepo->index($request, $clubId),
+                'clubNotices'  => $this->repos->noticeRepository->getLatestNoticeWithLimit($user->club->id, 3),
+                // 'upcomingEvents' => $this->repos->eventRepo->getUpcomingEvents($clubId),
             ]
         ], 200);
     }
@@ -392,7 +391,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'news'         => $this->repos->clubNewsRepo->getNewsById($newsId, $user->id),
-                'upcomingEvents' => $this->repos->eventRepo->getUpcomingEvents($clubId),
+                'clubNotices'  => $this->repos->noticeRepository->getLatestNoticeWithLimit($clubId, 3),
             ]
         ], 200);
     }
@@ -415,6 +414,65 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'aboutUs'      => $this->repos->pageRepo->getBySlug('about-us'),
                 'clubOfficials'      => $this->repos->memberRepository->getMembersByClub($clubId),
+            ]
+        ], 200);
+    }
+
+    /**
+     * Method to get club public notices data
+     * @param mixed $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getClubNoticesData($request)
+    {
+        $username = $request->route('username');
+        $user     = User::where('username', $username)->firstOrFail();
+
+        if(!$user->club) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Club not found for the specified user.',
+                'data'    => []
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notices data retrieved successfully',
+            'data' => [
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubNotices'  => $this->repos->noticeRepository->all($request, $user->id),
+                'clubNews'     => $this->repos->clubNewsRepo->getClubNews($user->club->id),
+            ]
+        ], 200);
+    }
+
+    /**
+     * Method to get club public single notice data
+     * @param mixed $request
+     * @param mixed $username
+     * @param mixed $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getClubSingleNotice($request, $username, $id)
+    {
+        $user = User::where('username', $username)->firstOrFail();
+
+        if(!$user->club) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Club not found for the specified user.',
+                'data'    => []
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Notice data retrieved successfully',
+            'data' => [
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubNotice'   => $this->repos->noticeRepository->show($id, $user->id),
+                'clubNews'     => $this->repos->clubNewsRepo->getClubNews($user->club->id),
             ]
         ], 200);
     }
