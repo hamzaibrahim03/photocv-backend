@@ -20,6 +20,7 @@ use App\Models\Event;
 use Spatie\Permission\Models\Role;
 use App\Models\MemberSocialLink;
 use App\Models\ClubUser;
+use Illuminate\Support\Facades\URL;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -555,6 +556,11 @@ class MemberRepository implements MemberRepositoryInterface
                 ];
             });
 
+            $storedPath = $member->profile_image;
+
+            if ($storedPath && !str_contains($storedPath, 'profile_images/')) {
+                $storedPath = 'profile_images/' . $storedPath;
+            }
 
             $data = [
                 'member' => [
@@ -562,7 +568,9 @@ class MemberRepository implements MemberRepositoryInterface
                     'first_name'    => $member->first_name,
                     'last_name'     => $member->last_name,
                     'email'         => $member->email,
-                    'profile_image' => $member->profile_image,
+                    'profile_image' => $storedPath
+                        ? URL::to('storage/' . $storedPath)
+                        : null,
 
                     // Role (Spatie)
                     'role' => $member->roles->pluck('name')->first(),

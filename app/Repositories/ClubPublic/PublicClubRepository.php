@@ -339,8 +339,8 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'success' => true,
             'message' => 'Data retrieved successfully',
             'data' => [
-                'clubSettings'   => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'memberGalleries'       => $this->repos->memberRepository->memberGalleryDetails($memberId),
+                'clubSettings'    => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'memberGalleries' => $this->repos->memberRepository->memberGalleryDetails($memberId),
             ]
         ], 200);
     }
