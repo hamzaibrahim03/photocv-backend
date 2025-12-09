@@ -90,17 +90,45 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                         'entry_image' => asset('storage/' . $entry->entry_image),
                         'entry_image_title' => $entry->entry_image_title,
                         'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+
+                        // EXIF DATA
+                        'exif' => [
+                            'camera_model'  => $entry->camera_model,
+                            'lens'          => $entry->lens,
+                            'focal_length'  => $entry->focal_length,
+                            'aperture'      => $entry->aperture,
+                            'shutter_speed' => $entry->shutter_speed,
+                            'iso'           => $entry->iso,
+                            'captured_at'   => $entry->captured_at,
+                        ],
+
+                        // BASIC IMAGE PROPERTIES
+                        'metadata' => [
+                            'image_width'  => $entry->image_width,
+                            'image_height' => $entry->image_height,
+                            'mime_type'    => $entry->mime_type,
+                            'file_size'    => $entry->file_size,
+                            'color_type'   => $entry->color_type,
+                            'bit_depth'    => $entry->bit_depth,
+                        ],
+
+                        // SCORING DETAILS
                         'scores' => $entry->scores->map(function ($score) {
                             return [
                                 'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
-                                'score' => $score->score,
-                                'comment' => $score->comment
+                                'score'      => $score->score,
+                                'comment'    => $score->comment
                             ];
                         }),
+
+                        // PUBLISHING INFO
                         'is_published' => $entry->is_published,
-                        'position' => $entry->position,
-                        'total_score' => $totalScore
+                        'position'      => $entry->position,
+
+                        // TOTAL SCORE (SUM OF ALL SCORES)
+                        'total_score' => $totalScore,
                     ];
+
                 }
             }
 

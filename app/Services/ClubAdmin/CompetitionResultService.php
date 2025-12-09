@@ -14,12 +14,12 @@ class CompetitionResultService
 
     public function index($request)
     {
-        return $this->competitionResultRepository->index($request);
+        return $this->competitionResultRepository->index($request, auth()->user());
     }
 
     public function show($id, $request)
     {
-        return $this->competitionResultRepository->getCompetitionEntriesWithScores($id, $request);
+        return $this->competitionResultRepository->getCompetitionEntriesWithScores($id, $request, auth()->user());
     }
 
     public function assignPositionsAndPublish($data, $competitionId)

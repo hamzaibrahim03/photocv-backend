@@ -9,6 +9,8 @@ interface PublicClubRepositoryInterface
     public function getClubSingleEventData($request, $username, $id);
     public function getClubCompetitionData($request);
     public function getClubSingleCompetitionData($request, $username, $id);
+    public function getClubCompetitionResults($request, $username);
+    public function getClubSingleCompetitionResults($request, $username, $id);
     public function getClubGalleries($request);
     public function clubGallery($request, $username, $galleryId);
     public function getRandomClubGalleries($request);

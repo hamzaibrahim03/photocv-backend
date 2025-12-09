@@ -194,6 +194,46 @@ class PublicClubRepository implements PublicClubRepositoryInterface
         ], 200);
     }
 
+    public function getClubCompetitionResults($request, $username)
+    {
+        $user          = User::where('username', $username)->firstOrFail();
+        $clubId        = $user->club->id;
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Competition Results data retrieved successfully',
+            'data' => [
+                'competitionResults'   => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
+                'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
+                'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),
+                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId),
+            ]
+        ], 200);
+    }
+
+    public function getClubSingleCompetitionResults($request, $username, $id)
+    {
+        $user   = User::where('username', $username)->firstOrFail();
+        $clubId = $user->club->id;
+
+        // Convert JsonResponse → array
+        $randomGalleryResponse = $this->getRandomClubGalleries($request)->getData(true);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Single Competition Results data retrieved successfully',
+            'data' => [
+                'competitionResult'    => $this->repos->competitionRepo->show($id, $user->id),
+                'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'clubGalleries'        => $randomGalleryResponse['data']['randomGalleries'] ?? [],
+                'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),
+                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId),
+            ]
+        ]);
+    }
+
+
     /**
      * Method to get club & member galleries for public view
      * @param mixed $request

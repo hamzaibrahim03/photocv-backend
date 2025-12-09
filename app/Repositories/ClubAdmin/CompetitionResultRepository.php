@@ -12,11 +12,9 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
 {
     use CompetitionDataTableTrait;
 
-    public function index($request)
+    public function index($request, $user)
     {
-
         try {
-            $user = auth()->user();
 
             // Base query with eager-loaded relationships
             $query = Competition::with([
@@ -48,11 +46,10 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
-    public function getCompetitionEntriesWithScores($id, $request)
+    public function getCompetitionEntriesWithScores($id, $request, $user)
     {
         try {
-            $user = auth()->user();
-
+            
             $query = Competition::with([
                 'judgingType',
                 'competitionType',

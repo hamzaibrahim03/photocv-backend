@@ -106,12 +106,28 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
             // Handle file upload
             if (isset($data['entry_image']) && $data['entry_image']->isValid()) {
                 $path = $data['entry_image']->store('competition_entries', 'public');
+                $absolutePath = storage_path('app/public/' . $path);
+
+                // Extract EXIF + fallback metadata
+                $exifData = $this->extractExif($absolutePath);
+                $basicData = $this->extractBasicMetadata($absolutePath);
+
+                $metadata = array_filter($exifData) ?: $basicData;
+
+                // Save entry
+                $entry = new CompetitionMembersEntry();
+                $entry->member_comp_id = $competitionMember->id;
+                $entry->entry_type = $data['entry_type'];
                 $entry->entry_image = $path;
+
+                foreach ($metadata as $key => $value) {
+                    $entry->$key = $value;
+                }
+
+                $entry->save();
             } else {
                 return CompetitionResponse::error('Invalid or missing entry image.', 400);
             }
-
-            $entry->save();
 
             $response = CompetitionResponse::success('Competition entry submitted successfully.', $entry, 201);
         } catch (\Exception $e) {
@@ -120,5 +136,62 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
 
         return $response;
     }
+
+
+    private function extractExif($imagePath)
+    {
+        try {
+            $exif = @exif_read_data($imagePath);
+
+            if (!$exif) return [];
+
+            return [
+                'camera_model'  => $exif['Model'] ?? null,
+                'lens'          => $exif['UndefinedTag:0xA434'] ?? null,
+                'focal_length'  => isset($exif['FocalLength']) ? $this->formatFocalLength($exif['FocalLength']) : null,
+                'aperture'      => isset($exif['FNumber']) ? $this->formatAperture($exif['FNumber']) : null,
+                'shutter_speed' => isset($exif['ExposureTime']) ? $exif['ExposureTime'] . 's' : null,
+                'iso'           => $exif['ISOSpeedRatings'] ?? null,
+                'captured_at'   => $exif['DateTimeOriginal'] ?? null,
+            ];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    private function extractBasicMetadata($absolutePath)
+    {
+        $info = @getimagesize($absolutePath);
+
+        return [
+            'image_width'  => $info[0] ?? null,
+            'image_height' => $info[1] ?? null,
+            'mime_type'    => $info['mime'] ?? null,
+            'file_size'    => @filesize($absolutePath) ?: null,
+            'color_type'   => isset($info['channels'])
+                                ? ($info['channels'] == 4 ? 'RGBA' : 'RGB')
+                                : null,
+            'bit_depth'    => $info['bits'] ?? null,
+        ];
+    }
+
+    private function formatFocalLength($value)
+    {
+        if (str_contains($value, '/')) {
+            [$num, $den] = explode('/', $value);
+            return intval($num / $den) . 'mm';
+        }
+        return null;
+    }
+
+    private function formatAperture($value)
+    {
+        if (str_contains($value, '/')) {
+            [$num, $den] = explode('/', $value);
+            return 'f/' . round($num / $den, 1);
+        }
+        return null;
+    }
+
 
 }

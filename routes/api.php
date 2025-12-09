@@ -56,6 +56,8 @@ Route::prefix('v1')->group(function() {
 
             Route::get('/competitions', [PublicClubController::class, 'competitionIndex']);
             Route::get('/competition/{id}', [PublicClubController::class, 'competition']);
+            Route::get('/competition-results', [PublicClubController::class, 'competitionResults']);
+            Route::get('/competition-results/{id}', [PublicClubController::class, 'singleCompetitionResults']);
 
             Route::get('/galleries', [PublicClubController::class, 'galleries']);
             Route::get('/gallery/{id}', [PublicClubController::class, 'clubGallery']);

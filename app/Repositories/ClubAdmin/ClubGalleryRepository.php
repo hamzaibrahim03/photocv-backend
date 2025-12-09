@@ -121,17 +121,43 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                     'photo_id' => $photo->id,
                     'title' => $photo->title,
                     'image' => asset('storage/' . $photo->image),
+
+                    // Uploader details
                     'uploaded_by' => $photo->uploadedBy->username ?? 'Unknown',
                     'uploaded_by_first_name' => $photo->uploadedBy->first_name ?? 'Unknown',
                     'uploaded_by_last_name' => $photo->uploadedBy->last_name ?? 'Unknown',
                     'uploaded_by_profile_image' => $photo->uploadedBy && $photo->uploadedBy->profile_image
-                    ? url('storage/' . ltrim($photo->uploadedBy->profile_image, '/'))
-                    : null,
+                        ? url('storage/' . ltrim($photo->uploadedBy->profile_image, '/'))
+                        : null,
+
+                    // EXIF metadata
+                    'exif' => [
+                        'camera_model'  => $photo->camera_model,
+                        'lens'          => $photo->lens,
+                        'focal_length'  => $photo->focal_length,
+                        'aperture'      => $photo->aperture,
+                        'shutter_speed' => $photo->shutter_speed,
+                        'iso'           => $photo->iso,
+                        'captured_at'   => $photo->captured_at,
+                    ],
+
+                    // Fallback metadata
+                    'metadata' => [
+                        'image_width'  => $photo->image_width,
+                        'image_height' => $photo->image_height,
+                        'mime_type'    => $photo->mime_type,
+                        'file_size'    => $photo->file_size,
+                        'color_type'   => $photo->color_type,
+                        'bit_depth'    => $photo->bit_depth,
+                    ],
+
+                    // Comments & likes
                     'comments' => $comments,
                     'likes' => $likes,
                     'comments_count' => $comments->count(),
                     'likes_count' => $likes->count(),
                 ];
+
             });
 
             $galleryData = [

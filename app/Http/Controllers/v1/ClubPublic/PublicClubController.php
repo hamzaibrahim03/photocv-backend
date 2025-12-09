@@ -60,6 +60,17 @@ class PublicClubController extends Controller
         return $this->publicClubService->getClubSingleCompetitionData($request, $username, $id);
     }
 
+    public function competitionResults(Request $request, $username)
+    {
+        return $this->publicClubService->getClubCompetitionResults($request, $username);
+    }
+
+    public function singleCompetitionResults(Request $request, $username, $id)
+    {
+        // Assuming you have a method in the service to get single competition results
+        return $this->publicClubService->getClubSingleCompetitionResults($request, $username, $id);
+    }
+
     /**
      * Method to get club public galleries data
      * @param \Illuminate\Http\Request $request

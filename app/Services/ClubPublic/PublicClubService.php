@@ -57,6 +57,16 @@ class PublicClubService
         return $this->publicClubRepository->getClubSingleCompetitionData($request, $username, $id);
     }
 
+    public function getClubCompetitionResults($request, $username)
+    {
+        return $this->publicClubRepository->getClubCompetitionResults($request, $username);
+    }
+
+    public function getClubSingleCompetitionResults($request, $username, $id)
+    {
+        return $this->publicClubRepository->getClubSingleCompetitionResults($request, $username, $id);
+    }
+
     /**
      * Method to get club public galleries
      * @param mixed $request

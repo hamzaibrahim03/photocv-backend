@@ -42,14 +42,16 @@ class Photo extends Model
 	];
 
 	protected $fillable = [
-		'gallery_id',
-		'title',
-		'image',
-		'description',
-		'is_active',
-		'club_admin_notes',
-		'allow_cc',
-		'uploaded_by',
+		'gallery_id', 'title', 'image', 'description', 'is_active',
+		'club_admin_notes', 'allow_cc', 'uploaded_by',
+
+		// EXIF fields
+		'camera_model', 'lens', 'focal_length', 'aperture',
+		'shutter_speed', 'iso', 'captured_at',
+
+		// Fallback metadata
+		'image_width', 'image_height', 'mime_type',
+		'file_size', 'color_type', 'bit_depth'
 	];
 
 	public function gallery()

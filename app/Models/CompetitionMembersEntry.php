@@ -41,6 +41,23 @@ class CompetitionMembersEntry extends Model
 		'position',
 		'total_score',
     	'is_published',
+
+		// EXIF fields
+		'camera_model',
+		'lens',
+		'focal_length',
+		'aperture',
+		'shutter_speed',
+		'iso',
+		'captured_at',
+
+		// Fallback metadata
+		'image_width',
+		'image_height',
+		'mime_type',
+		'file_size',
+		'color_type',
+		'bit_depth',
 	];
 
 	public function competitionMember()

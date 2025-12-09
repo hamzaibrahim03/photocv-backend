@@ -341,6 +341,68 @@ class MemberRepository implements MemberRepositoryInterface
         }
     }
 
+    private function extractBasicMetadata($absolutePath)
+    {
+        $info = @getimagesize($absolutePath);
+
+        return [
+            'image_width'  => $info[0] ?? null,
+            'image_height' => $info[1] ?? null,
+            'mime_type'    => $info['mime'] ?? null,
+            'file_size'    => @filesize($absolutePath) ?: null,
+
+            // Safe fallback handling
+            'color_type'   => isset($info['channels'])
+                                ? ($info['channels'] == 4 ? 'RGBA' : 'RGB')
+                                : null,
+
+            'bit_depth'    => $info['bits'] ?? null,
+        ];
+    }
+
+
+
+    private function extractExif($imagePath)
+    {
+        try {
+            $exif = @exif_read_data($imagePath);
+
+            if (!$exif) return [];
+
+            return [
+                'camera_model'  => $exif['Model'] ?? null,
+                'lens'          => $exif['UndefinedTag:0xA434'] ?? null,
+                'focal_length'  => isset($exif['FocalLength']) ? $this->formatFocalLength($exif['FocalLength']) : null,
+                'aperture'      => isset($exif['FNumber']) ? $this->formatAperture($exif['FNumber']) : null,
+                'shutter_speed' => isset($exif['ExposureTime']) ? $exif['ExposureTime'] . 's' : null,
+                'iso'           => $exif['ISOSpeedRatings'] ?? null,
+                'captured_at'   => $exif['DateTimeOriginal'] ?? null,
+            ];
+        } catch (\Exception $e) {
+            return [];
+        }
+    }
+
+    private function formatFocalLength($value)
+    {
+        // focal length comes as fraction "100/1"
+        if (str_contains($value, '/')) {
+            [$num, $den] = explode('/', $value);
+            return intval($num / $den) . 'mm';
+        }
+        return null;
+    }
+
+    private function formatAperture($value)
+    {
+        if (str_contains($value, '/')) {
+            [$num, $den] = explode('/', $value);
+            return 'f/' . round($num / $den, 1);
+        }
+        return null;
+    }
+
+
     /**
      * Process member gallery images.
      *
@@ -359,17 +421,26 @@ class MemberRepository implements MemberRepositoryInterface
 
             foreach ($images as $index => $image) {
                 // Store the image
-                $path = $image->store('member-galleries', 'public');
+                // $path = $image->store('member-galleries', 'public');
 
-                // Create entry in member_photos
-                Photo::create([
+                $storedPath = $image->store('member-galleries', 'public');
+                $absolutePath = storage_path('app/public/' . $storedPath);
+
+                $exifData = $this->extractExif($absolutePath);
+                $basicData = $this->extractBasicMetadata($absolutePath);
+
+                // If EXIF is completely empty, fallback to basic metadata
+                $metadata = array_filter($exifData) ?: $basicData;
+
+                Photo::create(array_merge([
                     'gallery_id'  => $galleryId,
                     'title'       => $titles[$index] ?? null,
                     'description' => $descriptions[$index] ?? null,
-                    'image'       => $path,
+                    'image'       => $storedPath,
                     'is_active'   => $isActive,
-                    'uploaded_by' => $userId
-                ]);
+                    'uploaded_by' => $userId,
+                ], $metadata));
+
             }
 
             return MemberResponse::success('Images uploaded successfully.');
