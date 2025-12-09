@@ -227,8 +227,6 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'competitionResult'    => $this->repos->competitionRepo->show($id, $user->id),
                 'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'clubGalleries'        => $randomGalleryResponse['data']['randomGalleries'] ?? [],
-                'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),
-                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId),
             ]
         ]);
     }
