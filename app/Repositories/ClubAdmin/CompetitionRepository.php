@@ -114,7 +114,6 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         }
     }
 
-
     public function create(array $data)
     {
         try {
@@ -362,6 +361,20 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
         return $query->get();
     }
+
+
+    public function getCompetitionsByLimit(int $clubId, ?int $limit = 3)
+    {
+        $query = Competition::where('club_id', $clubId)->with('judges')
+            ->orderBy('start_date', 'asc');
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
 
     /**
      * Method to return events and competitions for calander

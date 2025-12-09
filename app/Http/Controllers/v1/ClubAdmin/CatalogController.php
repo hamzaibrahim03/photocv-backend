@@ -44,4 +44,13 @@ class CatalogController extends Controller
     {
         return response()->json($this->catalogService->deleteCatalog( $id ) );
     }
+
+    public function getAllGrouped()
+    {
+        return response()->json([
+            'success' => true,
+            'data' => $this->catalogService->getAllCatalogGrouped(),
+        ]);
+    }
+
 }

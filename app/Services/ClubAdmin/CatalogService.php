@@ -33,4 +33,10 @@ class CatalogService
     {
         return $this->catalogRepository->delete($id);
     }
+
+    public function getAllCatalogGrouped()
+    {
+        return $this->catalogRepository->getAllGrouped();
+    }
+
 }

@@ -70,6 +70,8 @@ Route::prefix('v1')->group(function() {
 
             Route::get('/notices', [PublicClubController::class, 'noticeIndex']);
             Route::get('/notice/{id}', [PublicClubController::class, 'noticeSingle']);
+
+            Route::get('catalog/all-grouped', [CatalogController::class, 'getAllGrouped']);
         });
 
     Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');

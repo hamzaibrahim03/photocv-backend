@@ -50,7 +50,7 @@ class Catalog extends Model
 		}
 
 		// Otherwise, prepend the public storage path
-		return asset('storage/catalog_icons/' . $this->icon);
+		return asset('storage/' . $this->icon);
 	}
 
 	public function pages()

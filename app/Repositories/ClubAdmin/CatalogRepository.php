@@ -60,4 +60,31 @@ class CatalogRepository implements CatalogRepositoryInterface
         return $catalog;
     }
 
+    public function getAllGrouped()
+    {
+        $catalogs = Catalog::orderBy('catalog_type')
+            ->orderBy('name')
+            ->get()
+            ->map(function ($catalog) {
+                // Let model's accessor generate proper URL
+                $catalog->icon_url = $catalog->icon_url;
+                return $catalog;
+            });
+
+        // Group by catalog_type → clean final output
+        $grouped = $catalogs->groupBy('catalog_type')->map(function ($items) {
+            return $items->map(function ($item) {
+                return [
+                    'id'         => $item->id,
+                    'name'       => $item->name,
+                    'icon'       => $item->icon,
+                    'icon_url'   => $item->icon_url,
+                ];
+            })->values();
+        });
+
+        return $grouped;
+    }
+
+
 }

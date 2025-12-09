@@ -8,4 +8,5 @@ interface CatalogRepositoryInterface
     public function create(array $data, $file);
     public function update($id, array $data, $file);
     public function delete($id);
+    public function getAllGrouped();
 }

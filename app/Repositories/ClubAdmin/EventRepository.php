@@ -348,6 +348,20 @@ class EventRepository implements EventRepositoryInterface
             ->get();
     }
 
+    public function getEventsByLlimit($clubId, $limit = null)
+    {
+        $query = Event::with('images')
+            ->where('club_id', $clubId)
+            ->orderBy('event_date', 'asc');
+
+        if (!is_null($limit)) {
+            $query->limit((int) $limit);
+        }
+
+        return $query->get();
+    }
+
+
     /**
      * Method to get upcoming events for all clubs the user is associated with.
      * @param mixed $userId

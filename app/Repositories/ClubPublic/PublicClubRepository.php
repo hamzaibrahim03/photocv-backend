@@ -116,6 +116,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'events'       => $this->repos->eventRepo->all($request, $user->id),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
                 'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
             ]
         ], 200);
@@ -137,6 +138,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'data' => [
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'event'        => $this->repos->eventRepo->getEventById($id, $user->id),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
                 'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
             ]
         ], 200);
@@ -158,10 +160,14 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'success' => true,
             'message' => 'Competition data retrieved successfully',
             'data' => [
-                'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
-                'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
-                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId, null),
-                'latestResults'        => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
+                'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
+                'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
+                'competitions' => $this->repos->competitionRepo->all($request, $clubId),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
+
+
+                // 'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId, null),
+                // 'latestResults'        => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
             ]
         ], 200);
     }
@@ -183,6 +189,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'calendar'     => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'competition'  => $this->repos->competitionRepo->show($id, $user->id),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
             ]
         ], 200);
     }
@@ -364,6 +371,8 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'clubNews'     => $this->repos->clubNewsRepo->index($request, $clubId),
                 'clubNotices'  => $this->repos->noticeRepository->getLatestNoticeWithLimit($user->club->id, 3),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
                 // 'upcomingEvents' => $this->repos->eventRepo->getUpcomingEvents($clubId),
             ]
         ], 200);
@@ -386,6 +395,8 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'news'         => $this->repos->clubNewsRepo->getNewsById($id, $user->id),
                 'clubNotices'  => $this->repos->noticeRepository->getLatestNoticeWithLimit($clubId, 3),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
             ]
         ], 200);
     }
@@ -421,6 +432,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
     {
         $username = $request->route('username');
         $user     = User::where('username', $username)->firstOrFail();
+        $clubId   = $user->club->id;
 
         if(!$user->club) {
             return response()->json([
@@ -437,6 +449,8 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'clubNotices'  => $this->repos->noticeRepository->all($request, $user->id),
                 'clubNews'     => $this->repos->clubNewsRepo->getClubNews($user->club->id),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
             ]
         ], 200);
     }
@@ -451,6 +465,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
     public function getClubSingleNotice($request, $username, $id)
     {
         $user = User::where('username', $username)->firstOrFail();
+        $clubId   = $user->club->id;
 
         if(!$user->club) {
             return response()->json([
@@ -467,6 +482,8 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'clubSettings' => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'clubNotice'   => $this->repos->noticeRepository->show($id, $user->id),
                 'clubNews'     => $this->repos->clubNewsRepo->getClubNews($user->club->id),
+                'competitions' => $this->repos->competitionRepo->getCompetitionsByLimit($clubId, 6),
+                'events'       => $this->repos->eventRepo->getEventsByLlimit($clubId, 6),
             ]
         ], 200);
     }
