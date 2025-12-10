@@ -23,7 +23,7 @@ class StoreCatalogRequest extends FormRequest
     {
         return [
             'name' => 'required|string|max:50',
-            'catalog_type' => 'required|string|in:competition_type,event_type,event_tag,judging_type,competition_theme,competition_catagories,competition_voting_method,competition_result_method,max_image_per_gallery,max_image_file_size,max_image_width,max_image_height',
+            'catalog_type' => 'required|string|in:competition_type,event_type,event_tag,judging_type,competition_theme,competition_catagories,competition_voting_method,competition_result_method,max_image_per_gallery,max_image_file_size,max_image_width,max_image_height,news_type,notice_type',
             'icon' => 'nullable|image|mimes:jpg,jpeg,png,svg|max:2048',
         ];
     }
