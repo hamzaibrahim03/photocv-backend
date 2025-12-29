@@ -146,4 +146,88 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
+
+
+    public function getAllPublishedResultsForHome($clubId = null)
+    {
+        try {
+
+            if (!$clubId) {
+                $clubId = auth()->user()->club->id ?? null;
+            }
+
+            if (!$clubId) {
+                return CompetitionResponse::error(
+                    'Club not found for this admin.',
+                    404
+                );
+            }
+
+            $competitions = Competition::query()
+                ->select([
+                    'id',
+                    'name',
+                    'club_id',
+                ])
+                ->with([
+                    'competitionMembers' => function ($memberQuery) {
+                        $memberQuery
+                            ->select([
+                                'id',
+                                'comp_id',
+                                'member_id',
+                            ])
+                            ->with([
+                                'entries' => function ($entryQuery) {
+                                    $entryQuery
+                                        ->where('is_published', true)
+                                        ->where('position', 1) // ✅ ONLY WINNERS
+                                        ->select([
+                                            'id',
+                                            'member_comp_id',
+                                            'entry_image_title',
+                                            'entry_image',
+                                        ])
+                                        ->limit(1); // ✅ SINGLE IMAGE
+                                },
+                            ]);
+                    },
+                ])
+                ->where('club_id', $clubId)
+                ->whereHas('competitionMembers.entries', function ($q) {
+                    $q->where('is_published', true)
+                    ->where('position', 1);
+                })
+                ->orderBy('id', 'desc')
+                ->limit(3) // HOME preview limit
+                ->get();
+
+            /**
+             * 🔥 CRITICAL STEP
+             * Remove competition members that have NO winning entries
+             */
+            $competitions->each(function ($competition) {
+                $competition->setRelation(
+                    'competitionMembers',
+                    $competition->competitionMembers
+                        ->filter(fn ($member) => $member->entries->isNotEmpty())
+                        ->values()
+                );
+
+            });
+
+            return CompetitionResponse::success(
+                'Club published results fetched successfully.',
+                $competitions
+            );
+
+        } catch (\Exception $e) {
+            return CompetitionResponse::error(
+                $e->getMessage(),
+                $e->getCode() ?: 500
+            );
+        }
+    }
+
+
 }

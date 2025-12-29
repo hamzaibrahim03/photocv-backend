@@ -348,6 +348,25 @@ class EventRepository implements EventRepositoryInterface
             ->get();
     }
 
+
+    public function getUpcomingEventsForHome($clubId)
+    {
+        return Event::query()
+        ->select([
+            'id',
+            'featured_image',
+            'name',
+            'event_date',
+            'speaker',
+            'created_at',
+        ])
+        ->where('club_id', $clubId)
+        ->whereDate('event_date', '>=', now())
+        ->orderBy('event_date', 'asc')
+        ->limit(3)
+        ->get();
+    }
+
     public function getEventsByLlimit($clubId, $limit = null)
     {
         $query = Event::with('images')

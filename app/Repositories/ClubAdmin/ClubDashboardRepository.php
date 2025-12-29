@@ -97,6 +97,43 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
     }
 
     /**
+     * Method to return latest members for club public home
+     * @param int $clubId
+     * @param int $limit
+     * @return array{members: \Illuminate\Database\Eloquent\Collection<int, User>, total_count: int}
+     */
+    public function getLatestMembersForHome(int $clubId, int $limit = 6)
+    {
+        // Base query (approved members of the given club)
+        $baseQuery = User::query()
+            ->select([
+                'id',
+                'first_name',
+                'last_name',
+                'profile_image',
+            ])
+            ->whereHas('clubs', function ($query) use ($clubId) {
+                $query->where('club_id', $clubId)
+                    ->where('status', 'approved');
+            });
+
+        // Latest members
+        $members = (clone $baseQuery)
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+
+        // Total approved members count
+        // $totalCount = (clone $baseQuery)->count();
+
+        return [
+            'members' => $members,
+            // 'total_count' => $totalCount,
+        ];
+    }
+
+
+    /**
      * Method to return all members galleries
      * @param int $clubId
      * @param int $limit
@@ -121,6 +158,53 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
             ->limit($limit)
             ->get();
     }
+
+
+    /**
+     * Method to return all members galleries for club public home
+     * @param int $clubId
+     * @param int $limit
+     * @return \Illuminate\Database\Eloquent\Collection<int, User>
+     */
+    public function getMembersGallerriesForHome(int $clubId, int $limit = 10)
+    {
+        return User::query()
+            ->select([
+                'id',        // required for relations
+                'username',  // required by frontend
+            ])
+            ->whereHas('clubs', function ($query) use ($clubId) {
+                $query->where('club_id', $clubId);
+            })
+            ->with([
+                'galleries' => function ($galleryQuery) {
+                    $galleryQuery
+                        ->select([
+                            'id',          // required for relation
+                            'member_id',   // required for relation
+                            'gallery_name'
+                        ])
+                        ->where('is_active', true)
+                        ->with([
+                            'photos' => function ($photoQuery) {
+                                $photoQuery
+                                    ->select([
+                                        'id',          // required
+                                        'gallery_id',  // required
+                                        'image'
+                                    ])
+                                    ->where('is_active', true)
+                                    ->orderBy('created_at', 'desc')
+                                    ->limit(1); // 🔥 first image only
+                            }
+                        ]);
+                }
+            ])
+            ->orderBy('created_at', 'desc')
+            ->limit($limit)
+            ->get();
+    }
+
 
     public function getCurrentMonthActivities(int $clubId)
     {

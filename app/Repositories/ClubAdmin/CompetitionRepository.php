@@ -458,4 +458,33 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     }
 
 
+    /**
+     * Method to get latest competitions for home page
+     * @param int $clubId
+     * @param int|null $limit
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function getLatestCompetitionsForHome(int $clubId, ?int $limit = 3)
+    {
+        $query = Competition::query()
+            ->select([
+                'id',
+                'featured_image',
+                'name',
+                'start_date',
+                'status',
+            ])
+            ->where('club_id', $clubId)
+            ->whereDate('start_date', '>=', now())
+            ->orderBy('start_date', 'asc');
+
+        if ($limit) {
+            $query->limit($limit);
+        }
+
+        return $query->get();
+    }
+
+
+
 }

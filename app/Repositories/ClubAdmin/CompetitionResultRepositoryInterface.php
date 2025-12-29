@@ -8,5 +8,7 @@ interface CompetitionResultRepositoryInterface
     public function getCompetitionEntriesWithScores( $id, $request, $user );
     public function assignPositionsAndPublish( $data, $competitionId );
     public function getAllPublishedResults($clubId = null);
+
+    public function getAllPublishedResultsForHome($clubId = null);
     
 }

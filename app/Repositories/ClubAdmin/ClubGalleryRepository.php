@@ -80,6 +80,51 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
     }
 
     /**
+     * Method to get club galleries for club home
+     * @param mixed $clubAdminId
+     */
+    public function getClubGalleriesForHome($clubAdminId)
+    {
+        try {
+            $galleries = Gallery::query()
+                ->select('id', 'gallery_name') // id REQUIRED for redirect
+                ->where('member_id', $clubAdminId)
+                ->with([
+                    'photos' => function ($q) {
+                        $q->select('id', 'gallery_id', 'image')
+                        ->whereNull('deleted_at')
+                        ->orderBy('id', 'asc')
+                        ->limit(1); // 🔥 first image only
+                    }
+                ])
+                ->orderBy('id', 'desc')
+                ->limit(6)
+                ->get();
+
+            $formattedGalleries = $galleries->map(function ($gallery) {
+                return [
+                    'gallery_id'   => $gallery->id,
+                    'gallery_name' => $gallery->gallery_name,
+                    'photos' => $gallery->photos->map(function ($photo) {
+                        return [
+                            'image' => asset('storage/' . $photo->image),
+                        ];
+                    })->values(),
+                ];
+            });
+
+            return MemberResponse::success(
+                'Club galleries retrieved successfully.',
+                $formattedGalleries,
+                200
+            );
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+
+    }
+
+    /**
      * Method to get club gallery information
      * @param mixed $galleryId
      */

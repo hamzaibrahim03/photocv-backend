@@ -53,4 +53,11 @@ class Gallery extends Model
 		return $this->belongsTo(User::class, 'member_id');
 	}
 
+	public function firstPhoto()
+	{
+		return $this->hasOne(Photo::class)
+			->whereNull('deleted_at')
+			->orderBy('id', 'asc'); // or created_at
+	}
+
 }

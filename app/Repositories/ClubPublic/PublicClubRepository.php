@@ -22,7 +22,14 @@ class PublicClubRepository implements PublicClubRepositoryInterface
     public function getClubHomeData($request)
     {
         $username = $request->route('username');
-        $user = User::where('username', $username)->firstOrFail();
+        $user = User::query()
+            ->select([
+                'id',
+                'email',
+            ])
+            ->where('username', $username)
+        ->firstOrFail();
+
 
         $clubId = $user->club->id;
 
@@ -51,12 +58,12 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'message' => 'Data retreived successfully',
             'data' => [
                 'user'                 => $user,
-                'clubGalleries'        => $this->repos->clubGalleryRepo->getClubGalleries($user->id),
-                'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),
-                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsByLimit($clubId),
+                'clubGalleries'        => $this->repos->clubGalleryRepo->getClubGalleriesForHome($user->id),
+                'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEventsForHome($clubId),
+                'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsForHome($clubId),
                 'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
-                'memberGalleries'      => $this->repos->clubDashboardRepo->getMembersGallerries($clubId),
-                'latestMembers'        => $this->repos->clubDashboardRepo->getLatestMembers($clubId),
+                'memberGalleries'      => $this->repos->clubDashboardRepo->getMembersGallerriesForHome($clubId),
+                'latestMembers'        => $this->repos->clubDashboardRepo->getLatestMembersForHome($clubId),
                 'latestInteractions'   => $photos->map(function ($photo) {
                     return [
                         'id'           => $photo->id,
@@ -93,7 +100,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 }),
                 'clubNews'      => $this->repos->clubNewsRepo->getClubNews($clubId),
                 'latest_notice' => $this->repos->noticeRepository->getLatestNotice($clubId),
-                'latestResults' => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
+                'latestResults' => $this->repos->competitionResultRepository->getAllPublishedResultsForHome($clubId),
                 'clubSettings'  => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
             ]
         ], 200);

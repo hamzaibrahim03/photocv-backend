@@ -482,6 +482,7 @@ class MemberRepository implements MemberRepositoryInterface
             }
 
             $data['interacted_by'] = auth()->id();
+            $data['is_viewed'] = 0;
             $comment = Comment::create($data);
 
             return MemberResponse::success('Comment saved successfully.', $comment, 201);

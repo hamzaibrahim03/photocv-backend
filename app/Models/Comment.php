@@ -44,7 +44,8 @@ class Comment extends Model
 		'comment',
 		'interacted_by',
 		'is_published',
-		'admin_notes'
+		'admin_notes',
+		'is_viewed',
 	];
 
 
