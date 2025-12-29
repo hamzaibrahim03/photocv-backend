@@ -147,8 +147,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
     }
 
 
-
-    public function getAllPublishedResultsForHome($clubId = null)
+   public function getAllPublishedResultsForHome($clubId = null)
     {
         try {
 
@@ -187,8 +186,10 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                                             'member_comp_id',
                                             'entry_image_title',
                                             'entry_image',
+                                            'position',
+                                            'is_published',
                                         ])
-                                        ->limit(1); // ✅ SINGLE IMAGE
+                                        ->limit(1); // ✅ SINGLE IMAGE ONLY
                                 },
                             ]);
                     },
@@ -199,12 +200,12 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                     ->where('position', 1);
                 })
                 ->orderBy('id', 'desc')
-                ->limit(3) // HOME preview limit
+                ->limit(3) // ✅ HOME PAGE PREVIEW LIMIT
                 ->get();
 
             /**
-             * 🔥 CRITICAL STEP
-             * Remove competition members that have NO winning entries
+             * 🔥 REMOVE MEMBERS WITH EMPTY ENTRIES
+             * (must use setRelation to avoid duplicate keys)
              */
             $competitions->each(function ($competition) {
                 $competition->setRelation(
@@ -213,7 +214,6 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                         ->filter(fn ($member) => $member->entries->isNotEmpty())
                         ->values()
                 );
-
             });
 
             return CompetitionResponse::success(
@@ -228,6 +228,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
             );
         }
     }
+
 
 
 }
