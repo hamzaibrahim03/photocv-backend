@@ -21,6 +21,7 @@ use Spatie\Permission\Models\Role;
 use App\Models\MemberSocialLink;
 use App\Models\ClubUser;
 use Illuminate\Support\Facades\URL;
+use App\Services\Image\ImageResizeService;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -409,7 +410,7 @@ class MemberRepository implements MemberRepositoryInterface
      * @param  array  $data
      * @return void
      */
-    public function memberGalleryImages( $data )
+    public function memberGalleryImages($data)
     {
         try {
             $galleryId = $data['gallery_id'];
@@ -417,33 +418,39 @@ class MemberRepository implements MemberRepositoryInterface
             $titles = $data['title'] ?? [];
             $descriptions = $data['description'] ?? [];
             $isActive = isset($data['is_active']) ? (bool) $data['is_active'] : true;
-            $userId = auth()->user()->id;
+            $userId = auth()->id();
 
             foreach ($images as $index => $image) {
-                // Store the image
-                // $path = $image->store('member-galleries', 'public');
 
-                $storedPath = $image->store('member-galleries', 'public');
-                $absolutePath = storage_path('app/public/' . $storedPath);
+                // 1️⃣ Store ORIGINAL
+                $originalPath = $image->store('member-galleries/original', 'public');
 
-                $exifData = $this->extractExif($absolutePath);
-                $basicData = $this->extractBasicMetadata($absolutePath);
+                // 2️⃣ Generate sizes (ONCE)
+                $paths = ImageResizeService::generateSizes($originalPath);
 
-                // If EXIF is completely empty, fallback to basic metadata
-                $metadata = array_filter($exifData) ?: $basicData;
-
-                Photo::create(array_merge([
+                // 3️⃣ Save DB record
+                Photo::create([
                     'gallery_id'  => $galleryId,
                     'title'       => $titles[$index] ?? null,
                     'description' => $descriptions[$index] ?? null,
-                    'image'       => $storedPath,
+
+                    // store ORIGINAL path as primary
+                    'image'       => $paths['original'],
+
+                    // optional: store JSON sizes (recommended)
+                    'image_sizes' => json_encode([
+                        'thumb'  => $paths['thumb'],
+                        'medium' => $paths['medium'],
+                        'large'  => $paths['large'],
+                    ]),
+
                     'is_active'   => $isActive,
                     'uploaded_by' => $userId,
-                ], $metadata));
-
+                ]);
             }
 
             return MemberResponse::success('Images uploaded successfully.');
+
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
@@ -604,6 +611,10 @@ class MemberRepository implements MemberRepositoryInterface
                         'photo_id' => $photo->id,
                         'title' => $photo->title,
                         'image' => asset('storage/' . $photo->image),
+                        'thumb_url'    => $photo->thumb_url,
+                        'medium_url'   => $photo->medium_url,
+                        'large_url'    => $photo->large_url,
+                        'original_url' => $photo->original_url,
                         'created_at' => $photo->created_at,
                         'comments' => $comments,
                         'likes' => $likes,

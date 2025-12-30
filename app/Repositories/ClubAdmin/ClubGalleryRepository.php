@@ -55,6 +55,10 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                         'photo_id' => $photo->id,
                         'title' => $photo->title,
                         'image' => asset('storage/' . $photo->image),
+                        'thumb_url'    => $photo->thumb_url,
+                        'medium_url'   => $photo->medium_url,
+                        'large_url'    => $photo->large_url,
+                        'original_url' => $photo->original_url,
                         'uploaded_by' => $photo->uploadedBy->username ?? 'Unknown',
                         'comments' => $comments,
                         'likes' => $likes,
@@ -94,11 +98,11 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                         $q->select('id', 'gallery_id', 'image')
                         ->whereNull('deleted_at')
                         ->orderBy('id', 'asc')
-                        ->limit(1); // 🔥 first image only
+                        ->limit(1); // first image only
                     }
                 ])
                 ->orderBy('id', 'desc')
-                ->limit(6)
+                ->limit(10)
                 ->get();
 
             $formattedGalleries = $galleries->map(function ($gallery) {
@@ -108,6 +112,10 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                     'photos' => $gallery->photos->map(function ($photo) {
                         return [
                             'image' => asset('storage/' . $photo->image),
+                            'thumb_url'    => $photo->thumb_url,
+                            'medium_url'   => $photo->medium_url,
+                            'large_url'    => $photo->large_url,
+                            'original_url' => $photo->original_url,
                         ];
                     })->values(),
                 ];
@@ -166,6 +174,10 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                     'photo_id' => $photo->id,
                     'title' => $photo->title,
                     'image' => asset('storage/' . $photo->image),
+                    'thumb_url'    => $photo->thumb_url,
+                    'medium_url'   => $photo->medium_url,
+                    'large_url'    => $photo->large_url,
+                    'original_url' => $photo->original_url,
 
                     // Uploader details
                     'uploaded_by' => $photo->uploadedBy->username ?? 'Unknown',

@@ -60,6 +60,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'user'                 => $user,
                 'clubGalleries'        => $this->repos->clubGalleryRepo->getClubGalleriesForHome($user->id),
                 'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEventsForHome($clubId),
+                'singleEvent'          => $this->repos->eventRepo->getEventsByLlimit($clubId, 1),
                 'upcomingCompetitions' => $this->repos->competitionRepo->getLatestCompetitionsForHome($clubId),
                 'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'memberGalleries'      => $this->repos->clubDashboardRepo->getMembersGallerriesForHome($clubId),

@@ -9,6 +9,7 @@
         "php": "^8.2",
         "aws/aws-sdk-php": "^3.338",
         "guzzlehttp/guzzle": "^7.9",
+        "intervention/image": "^3.11",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9",
