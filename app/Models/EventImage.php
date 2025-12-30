@@ -10,6 +10,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Class EventImage
@@ -28,7 +29,13 @@ class EventImage extends Model
 {
 	use SoftDeletes;
 	protected $table = 'event_images';
-	protected $appends = ['image_url'];
+	protected $appends = [
+		'image_url',
+		'thumb_url',
+		'medium_url',
+		'large_url',
+		'original_url',
+	];
 	public $incrementing = false;
 
 	protected $casts = [
@@ -57,4 +64,47 @@ class EventImage extends Model
     {
         return $this->belongsTo(Event::class, 'event_id');
     }
+
+	public function getThumbUrlAttribute()
+	{
+		if (!$this->image) return null;
+
+		$filename = basename($this->image);
+		$path = "event_images/thumb/{$filename}";
+
+		return Storage::disk('public')->exists($path)
+			? URL::to('storage/' . $path)
+			: null;
+	}
+
+	public function getMediumUrlAttribute()
+	{
+		if (!$this->image) return null;
+
+		$filename = basename($this->image);
+		$path = "event_images/medium/{$filename}";
+
+		return Storage::disk('public')->exists($path)
+			? URL::to('storage/' . $path)
+			: null;
+	}
+
+	public function getLargeUrlAttribute()
+	{
+		if (!$this->image) return null;
+
+		$filename = basename($this->image);
+		$path = "event_images/large/{$filename}";
+
+		return Storage::disk('public')->exists($path)
+			? URL::to('storage/' . $path)
+			: null;
+	}
+
+	public function getOriginalUrlAttribute()
+	{
+		return $this->image && Storage::disk('public')->exists($this->image)
+			? URL::to('storage/' . $this->image)
+			: null;
+	}
 }

@@ -10,6 +10,9 @@ use App\Traits\DataTables\EventDataTableTrait;
 use Carbon\Carbon;
 use App\Http\Responses\EventResponse;
 use App\Models\User;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
+use Illuminate\Support\Facades\Storage;
 
 class EventRepository implements EventRepositoryInterface
 {
@@ -42,24 +45,19 @@ class EventRepository implements EventRepositoryInterface
         try {
             $event = Event::with(['types', 'tags', 'comments', 'images'])->findOrFail($id);
 
-            // Get logged-in user's club
             $club = Club::where('user_id', $userId)->first();
 
-            // Check ownership
             if (!$club || $event->club_id !== $club->id) {
                 return EventResponse::error('Unauthorized to view this event.', 403);
             }
 
-            // Featured image full URL
-            $event->featured_image = $event->featured_image
-                ? asset('storage/' . $event->featured_image)
-                : null;
-
             return EventResponse::success('Event retrieved successfully.', $event);
+
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }
+
 
 
     /**
@@ -72,26 +70,21 @@ class EventRepository implements EventRepositoryInterface
     public function create(array $data, $files = null)
     {
         try {
-            // Get the authenticated user's club
             $club = Club::where('user_id', auth()->id())->first();
 
             if (!$club) {
                 return EventResponse::error('No club found for the current user.', 404);
             }
 
-            // Inject club_id
             $data['club_id'] = $club->id;
 
-            // Extract event types & tags
             $eventTypes = $data['event_types'] ?? [];
             $eventTags  = $data['event_tags'] ?? [];
 
             unset($data['event_types'], $data['event_tags']);
 
-            // Create event
             $event = Event::create($data);
 
-            // Attach event types and tags
             if (!empty($eventTypes)) {
                 $event->types()->sync($eventTypes);
             }
@@ -100,21 +93,60 @@ class EventRepository implements EventRepositoryInterface
                 $event->tags()->sync($eventTags);
             }
 
-            // Handle file uploads
-            if ($files) {
-                foreach ($files as $file) {
-                    if ($file->isValid()) {
-                        $path = $file->store('event_images', 'public');
+            /* ================= IMAGE HANDLING ================= */
 
-                        EventImage::create([
-                            'event_id' => $event->id,
-                            'image' => $path,
-                        ]);
+            if ($files) {
+
+                $manager = new ImageManager(new Driver());
+
+                foreach ($files as $file) {
+
+                    if (!$file->isValid()) {
+                        continue;
                     }
+
+                    $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    /** 1️⃣ Store ORIGINAL */
+                    $originalPath = "event_images/original/{$filename}";
+                    Storage::disk('public')->put(
+                        $originalPath,
+                        file_get_contents($file->getRealPath())
+                    );
+
+                    $image = $manager->read($file->getRealPath());
+
+                    /** 2️⃣ Generate sizes */
+                    $sizes = [
+                        'thumb'  => 300,
+                        'medium' => 800,
+                        'large'  => 1600,
+                    ];
+
+                    foreach ($sizes as $folder => $width) {
+                        $resized = clone $image;
+                        $resized->scale(width: $width);
+
+                        Storage::disk('public')->put(
+                            "event_images/{$folder}/{$filename}",
+                            $resized->toJpeg(85)
+                        );
+                    }
+
+                    /** 3️⃣ Save DB record */
+                    EventImage::create([
+                        'event_id' => $event->id,
+                        'image'    => $originalPath, // 🔥 original only
+                    ]);
                 }
             }
 
-            return EventResponse::success('Event created successfully.', $event->load(['types', 'tags', 'images']), 201);
+            return EventResponse::success(
+                'Event created successfully.',
+                $event->load(['types', 'tags', 'images']),
+                201
+            );
+
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
@@ -134,22 +166,18 @@ class EventRepository implements EventRepositoryInterface
         try {
             $event = Event::findOrFail($id);
 
-            // Validate ownership via club -> user
             $club = Club::where('user_id', auth()->id())->first();
             if (!$club || $event->club_id !== $club->id) {
                 return EventResponse::error('Unauthorized access to update event.', 403);
             }
 
-            // Extract event types & tags
             $eventTypes = $data['event_types'] ?? [];
             $eventTags  = $data['event_tags'] ?? [];
 
             unset($data['event_types'], $data['event_tags']);
 
-            // Update base event data
             $event->update($data);
 
-            // Sync event types & tags
             if (!empty($eventTypes)) {
                 $event->types()->sync($eventTypes);
             }
@@ -158,17 +186,51 @@ class EventRepository implements EventRepositoryInterface
                 $event->tags()->sync($eventTags);
             }
 
-            // Handle file uploads
-            if ($files) {
-                foreach ($files as $file) {
-                    if ($file->isValid()) {
-                        $path = $file->store('event_images', 'public');
+            /* ================= IMAGE HANDLING ================= */
 
-                        EventImage::create([
-                            'event_id' => $event->id,
-                            'image' => $path,
-                        ]);
+            if ($files) {
+
+                $manager = new ImageManager(new Driver());
+
+                foreach ($files as $file) {
+
+                    if (!$file->isValid()) {
+                        continue;
                     }
+
+                    $filename = uniqid() . '.' . $file->getClientOriginalExtension();
+
+                    /** ORIGINAL */
+                    $originalPath = "event_images/original/{$filename}";
+                    Storage::disk('public')->put(
+                        $originalPath,
+                        file_get_contents($file->getRealPath())
+                    );
+
+                    $image = $manager->read($file->getRealPath());
+
+                    /** SIZES */
+                    $sizes = [
+                        'thumb'  => 300,
+                        'medium' => 800,
+                        'large'  => 1600,
+                    ];
+
+                    foreach ($sizes as $folder => $width) {
+                        $resized = clone $image;
+                        $resized->scale(width: $width);
+
+                        Storage::disk('public')->put(
+                            "event_images/{$folder}/{$filename}",
+                            $resized->toJpeg(85)
+                        );
+                    }
+
+                    /** DB */
+                    EventImage::create([
+                        'event_id' => $event->id,
+                        'image'    => $originalPath,
+                    ]);
                 }
             }
 
@@ -176,6 +238,7 @@ class EventRepository implements EventRepositoryInterface
                 'Event updated successfully.',
                 $event->load(['types', 'tags', 'images'])
             );
+
         } catch (\Exception $e) {
             return EventResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }

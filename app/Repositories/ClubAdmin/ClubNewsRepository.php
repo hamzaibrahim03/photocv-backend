@@ -44,13 +44,11 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
     public function create(array $data, $file = null)
     {
         try {
-            // if ($file) {
-            //     $imagePath = $file->store('news_images', 'public');
-            //     $data['thumb_image'] = $imagePath;
-            // }
-
             if (!empty($data['publish_date'])) {
-                $data['publish_date'] = Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
+                $data['publish_date'] = Carbon::createFromFormat(
+                    'd-m-Y',
+                    $data['publish_date']
+                )->format('Y-m-d');
             }
 
             $club = Club::where('user_id', auth()->id())->first();
@@ -58,42 +56,82 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
                 $data['club_id'] = $club->id;
             }
 
+            // 🔥 FEATURED IMAGE
+            if ($file && $file->isValid()) {
+                $path = $file->store('news/featured/original', 'public');
+
+                // Generate sizes
+                app(\App\Services\Image\ImageResizeService::class)
+                    ->resize(storage_path('app/public/' . $path), 'news/featured');
+
+                $data['featured_image'] = $path;
+            }
+
             $clubNews = ClubNews::create($data);
 
-            return ClubNewsResponse::success('Club news created successfully.', $clubNews, 201);
+            return ClubNewsResponse::success(
+                'Club news created successfully.',
+                $clubNews,
+                201
+            );
+
         } catch (\Exception $e) {
-            return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
+            return ClubNewsResponse::error(
+                $e->getMessage(),
+                is_int($e->getCode()) ? $e->getCode() : 500
+            );
         }
     }
+
 
     public function update($id, array $data, $file = null)
     {
         try {
             $clubNews = ClubNews::findOrFail($id);
 
-            // Delete old image if a new file is uploaded
-            // if ($file) {
-            //     if ($clubNews->thumb_image && \Storage::disk('public')->exists($clubNews->thumb_image)) {
-            //         \Storage::disk('public')->delete($clubNews->thumb_image);
-            //     }
-
-            //     // Store new image and update data
-            //     $imagePath = $file->store('news_images', 'public');
-            //     $data['thumb_image'] = $imagePath;
-            // }
-
-            // Handle publish_date format conversion
             if (!empty($data['publish_date'])) {
-                $data['publish_date'] = \Carbon\Carbon::createFromFormat('d-m-Y', $data['publish_date'])->format('Y-m-d');
+                $data['publish_date'] = Carbon::createFromFormat(
+                    'd-m-Y',
+                    $data['publish_date']
+                )->format('Y-m-d');
+            }
+
+            // 🔥 Replace featured image
+            if ($file && $file->isValid()) {
+
+                // Delete old images
+                if ($clubNews->featured_image) {
+                    $filename = basename($clubNews->featured_image);
+                    foreach (['original', 'thumb', 'medium', 'large'] as $size) {
+                        \Storage::disk('public')->delete(
+                            "news/featured/{$size}/{$filename}"
+                        );
+                    }
+                }
+
+                $path = $file->store('news/featured/original', 'public');
+
+                app(\App\Services\Image\ImageResizeService::class)
+                    ->resize(storage_path('app/public/' . $path), 'news/featured');
+
+                $data['featured_image'] = $path;
             }
 
             $clubNews->update($data);
 
-            return ClubNewsResponse::success('Club news updated successfully.', $clubNews);
+            return ClubNewsResponse::success(
+                'Club news updated successfully.',
+                $clubNews
+            );
+
         } catch (\Exception $e) {
-            return ClubNewsResponse::error($e->getMessage(), is_int($e->getCode()) ? $e->getCode() : 500);
+            return ClubNewsResponse::error(
+                $e->getMessage(),
+                is_int($e->getCode()) ? $e->getCode() : 500
+            );
         }
     }
+
 
     public function delete($id)
     {

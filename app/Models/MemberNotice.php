@@ -1,9 +1,5 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
 use Carbon\Carbon;
@@ -22,52 +18,62 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string|null $tags
  * @property string|null $link_page_url
  * @property string|null $status
- * @property string|null $notice_image
  * @property bool|null $is_active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property string|null $deleted_at
- *
- * @package App\Models
  */
 class MemberNotice extends Model
 {
-	use SoftDeletes;
-	protected $table = 'member_notices';
-	protected $appends = ['featured_image_url'];
-	protected $hidden = ['featured_image'];
+    use SoftDeletes;
 
-	protected $casts = [
-		'member_id' => 'int',
-		'notice_type_id' => 'int',
-		'is_active' => 'bool'
-	];
+    protected $table = 'member_notices';
 
-	protected $fillable = [
-		'club_id',
-		'featured_image',
-		'member_id',
-		'notice_type_id',
-		'title',
-		'description',
-		'tags',
-		'location',
-		'link_page_url',
-		'status',
-		'poll',
-		'urgency_importance',
-		'comment_allowed',
-		'notice_image',
-		'notice_document',
-		'is_active'
-	];
+    protected $appends = [
+        'featured_image_url',
+		'featured_image_thumb',
+		'featured_image_medium',
+		'featured_image_large',
+		'featured_image_url',
+    ];
 
-	public function files()
-	{
-		return $this->hasMany(MemberNoticeFile::class, 'member_notice_id');
-	}
+    protected $hidden = [
+        'featured_image',
+    ];
 
-	public function comments()
+    protected $casts = [
+        'member_id'       => 'int',
+        'notice_type_id'  => 'int',
+        'is_active'       => 'bool',
+    ];
+
+    protected $fillable = [
+        'club_id',
+        'featured_image',
+        'member_id',
+        'notice_type_id',
+        'title',
+        'description',
+        'tags',
+        'location',
+        'link_page_url',
+        'status',
+        'poll',
+        'urgency_importance',
+        'comment_allowed',
+        'notice_image',
+        'notice_document',
+        'is_active',
+    ];
+
+    /* ================= RELATIONSHIPS ================= */
+
+    public function files()
+    {
+        return $this->hasMany(MemberNoticeFile::class, 'member_notice_id');
+    }
+
+    public function comments()
     {
         return $this->hasMany(Comment::class, 'record_id')
             ->where('record_type', 'notice')
@@ -75,41 +81,71 @@ class MemberNotice extends Model
             ->with('user');
     }
 
-	public function likes()
+    public function likes()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'notice')
+            ->where('comment_type', 'like')
+            ->where('is_published', true);
+    }
+
+    public function club()
+    {
+        return $this->belongsTo(Club::class, 'club_id');
+    }
+
+    public function member()
+    {
+        return $this->belongsTo(User::class, 'member_id');
+    }
+
+    public function noticeType()
+    {
+        return $this->belongsTo(Catalog::class, 'notice_type_id', 'id');
+    }
+
+    /* ================= ACCESSORS ================= */
+
+    public function getFeaturedImageUrlAttribute(): ?string
+    {
+        if (!$this->featured_image) {
+            return null;
+        }
+
+        if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
+            return $this->featured_image;
+        }
+
+        return asset('storage/' . $this->featured_image);
+    }
+
+	public function getFeaturedImageThumbAttribute()
 	{
-		return $this->hasMany(Comment::class, 'record_id')
-			->where('record_type', 'notice')
-			->where('comment_type', 'like')
-			->where('is_published', true);
+		return $this->resolveFeaturedImage('thumb');
 	}
 
-	public function getFeaturedImageUrlAttribute()
+	public function getFeaturedImageMediumAttribute()
+	{
+		return $this->resolveFeaturedImage('medium');
+	}
+
+	public function getFeaturedImageLargeAttribute()
+	{
+		return $this->resolveFeaturedImage('large');
+	}
+
+	protected function resolveFeaturedImage(string $size)
 	{
 		if (!$this->featured_image) {
 			return null;
 		}
 
-		// If already a full URL, return as is
-		if (Str::startsWith($this->featured_image, ['http://', 'https://'])) {
-			return $this->featured_image;
-		}
+		$filename = basename($this->featured_image);
+		$path = "featured_images/{$size}/{$filename}";
 
-		// Otherwise, prepend storage path
-		return asset('storage/' . $this->featured_image);
+		return \Storage::disk('public')->exists($path)
+			? asset('storage/' . $path)
+			: null;
 	}
 
-	public function club()
-	{
-		return $this->belongsTo(Club::class, 'club_id');
-	}
-
-	public function member()
-	{
-		return $this->belongsTo(User::class, 'user_id');
-	}
-
-	public function noticeType()
-    {
-        return $this->belongsTo(Catalog::class, 'notice_type_id', 'id');
-    }
 }

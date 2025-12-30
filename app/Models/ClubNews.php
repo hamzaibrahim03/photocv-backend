@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class ClubNews extends Model
 {
     use HasFactory;
 
     protected $table = 'club_news';
-    protected $appends = ['featured_image_url'];
-	protected $hidden = ['featured_image'];
 
     protected $fillable = [
         'club_id',
@@ -23,9 +22,17 @@ class ClubNews extends Model
         'publish_date',
     ];
 
-    /**
-     * Relationship: Page belongs to a catalog (page type).
-     */
+    protected $hidden = ['featured_image'];
+
+    protected $appends = [
+        'featured_image_url',
+        'featured_image_thumb',
+        'featured_image_medium',
+        'featured_image_large',
+    ];
+
+    /* ================= RELATIONS ================= */
+
     public function clubNewsType()
     {
         return $this->belongsTo(Catalog::class, 'news_type_id');
@@ -36,13 +43,42 @@ class ClubNews extends Model
         return $this->hasMany(Comment::class, 'record_id')
             ->where('record_type', 'news')
             ->where('is_published', true)
-            ->with('user'); // Eager load user
+            ->with('user');
     }
 
+    /* ================= ACCESSORS ================= */
+
     public function getFeaturedImageUrlAttribute()
-	{
-		return $this->featured_image
-			? asset('storage/' . $this->featured_image)
-			: null;
-	}
+    {
+        return $this->resolveFeaturedImage('original');
+    }
+
+    public function getFeaturedImageThumbAttribute()
+    {
+        return $this->resolveFeaturedImage('thumb');
+    }
+
+    public function getFeaturedImageMediumAttribute()
+    {
+        return $this->resolveFeaturedImage('medium');
+    }
+
+    public function getFeaturedImageLargeAttribute()
+    {
+        return $this->resolveFeaturedImage('large');
+    }
+
+    protected function resolveFeaturedImage(string $size): ?string
+    {
+        if (!$this->featured_image) {
+            return null;
+        }
+
+        $filename = basename($this->featured_image);
+        $path = "news/featured/{$size}/{$filename}";
+
+        return Storage::disk('public')->exists($path)
+            ? asset('storage/' . $path)
+            : null;
+    }
 }

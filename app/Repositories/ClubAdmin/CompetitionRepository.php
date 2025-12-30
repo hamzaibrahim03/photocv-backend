@@ -64,34 +64,34 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'competitionMembers.member'
             ])->findOrFail($id);
 
-            // Get logged-in user's club
             $club = Club::where('user_id', $userId)->first();
 
-            // Check if the event belongs to the user's club
             if (!$club || $competition->club_id !== $club->id) {
-                return CompetitionResponse::error('Unauthorized to view this competition.', 403);
+                return CompetitionResponse::error(
+                    'Unauthorized to view this competition.',
+                    403
+                );
             }
 
-            // Transform the featured_image to full URL
-            $competition->featured_image = $competition->featured_image 
-                ? asset('storage/' . $competition->featured_image)
-                : null;
-
-            // Transform entries (like getCompetitionEntryData does)
+            // build entries (unchanged)
             $entries = [];
             foreach ($competition->competitionMembers as $memberComp) {
                 if (!$memberComp->member) {
                     continue;
                 }
+
                 foreach ($memberComp->entries as $entry) {
                     $totalScore = $entry->scores->sum('score');
+
                     $entries[] = [
                         'entry_id' => $entry->id,
+
+                        // 🔥 USE ACCESSOR (see note below)
                         'entry_image' => asset('storage/' . $entry->entry_image),
+
                         'entry_image_title' => $entry->entry_image_title,
                         'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
 
-                        // EXIF DATA
                         'exif' => [
                             'camera_model'  => $entry->camera_model,
                             'lens'          => $entry->lens,
@@ -102,7 +102,6 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                             'captured_at'   => $entry->captured_at,
                         ],
 
-                        // BASIC IMAGE PROPERTIES
                         'metadata' => [
                             'image_width'  => $entry->image_width,
                             'image_height' => $entry->image_height,
@@ -112,35 +111,34 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                             'bit_depth'    => $entry->bit_depth,
                         ],
 
-                        // SCORING DETAILS
-                        'scores' => $entry->scores->map(function ($score) {
-                            return [
-                                'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
-                                'score'      => $score->score,
-                                'comment'    => $score->comment
-                            ];
-                        }),
+                        'scores' => $entry->scores->map(fn ($score) => [
+                            'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
+                            'score'      => $score->score,
+                            'comment'    => $score->comment,
+                        ]),
 
-                        // PUBLISHING INFO
                         'is_published' => $entry->is_published,
-                        'position'      => $entry->position,
-
-                        // TOTAL SCORE (SUM OF ALL SCORES)
-                        'total_score' => $totalScore,
+                        'position'     => $entry->position,
+                        'total_score'  => $totalScore,
                     ];
-
                 }
             }
 
-            // Attach entries to competition response
             $competition->entries = $entries;
 
-            return CompetitionResponse::success('Competition retrieved successfully.', $competition);
+            return CompetitionResponse::success(
+                'Competition retrieved successfully.',
+                $competition
+            );
 
         } catch (\Exception $e) {
-            return CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
+            return CompetitionResponse::error(
+                $e->getMessage(),
+                $e->getCode() ?: 500
+            );
         }
     }
+
 
     public function create(array $data)
     {

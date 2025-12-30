@@ -10,6 +10,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 /**
  * Class Event
@@ -43,7 +45,13 @@ class Event extends Model
 {
 	use SoftDeletes;
 	protected $table = 'events';
-	protected $appends = ['featured_image_url'];
+	protected $appends = [
+		'featured_image_url',
+		'featured_thumb_url',
+		'featured_medium_url',
+		'featured_large_url',
+		'featured_original_url',
+	];
 	// protected $hidden = ['featured_image'];
 
 	protected $casts = [
@@ -131,5 +139,42 @@ class Event extends Model
     {
         return $this->belongsTo(Catalog::class, 'event_tag_id', 'id');
     }
+
+	public function getFeaturedThumbUrlAttribute()
+	{
+		return $this->getFeaturedImageBySize('thumb');
+	}
+
+	public function getFeaturedMediumUrlAttribute()
+	{
+		return $this->getFeaturedImageBySize('medium');
+	}
+
+	public function getFeaturedLargeUrlAttribute()
+	{
+		return $this->getFeaturedImageBySize('large');
+	}
+
+	public function getFeaturedOriginalUrlAttribute()
+	{
+		return $this->getFeaturedImageBySize('original');
+	}
+
+	protected function getFeaturedImageBySize(string $size)
+	{
+		if (!$this->featured_image) {
+			return null;
+		}
+
+		$filename = basename($this->featured_image);
+
+		$path = $size === 'original'
+			? $this->featured_image
+			: "featured_images/{$size}/{$filename}";
+
+		return Storage::disk('public')->exists($path)
+			? URL::to('storage/' . $path)
+			: null;
+	}
 
 }

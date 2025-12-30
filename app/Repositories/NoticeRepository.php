@@ -8,6 +8,9 @@ use App\Models\MemberNoticeFile;
 use App\Traits\DataTables\NoticeDataTableTrait;
 use App\Http\Responses\NoticeResponse;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\ImageManager;
+use Intervention\Image\Drivers\Gd\Driver;
 
 class NoticeRepository implements NoticeRepositoryInterface
 {
@@ -23,31 +26,35 @@ class NoticeRepository implements NoticeRepositoryInterface
         }
     }
 
-    public function show( $id, $userId )
+    public function show($id, $userId)
     {
         try {
-            $notice = MemberNotice::with('comments', 'noticeType')->findOrFail($id);
-            if (!$notice) {
-                return NoticeResponse::error('Notice not found.', 404);
-            }
+            $notice = MemberNotice::with([
+                'comments.user:id,username',
+                'noticeType',
+                'files' // 🔥 IMPORTANT
+            ])->findOrFail($id);
 
-            // Get logged-in user's club
+            // Logged-in user's club
             $club = Club::where('user_id', $userId)->first();
 
-            // Check if the event belongs to the user's club
             if (!$club || $notice->club_id !== $club->id) {
-                return NoticeResponse::error('Unauthorized to view this notice.', 403);
+                return NoticeResponse::error(
+                    'Unauthorized to view this notice.',
+                    403
+                );
             }
 
-            $notice->load('files');
-            // Transform the featured_image to full URL
-            $notice->featured_image = $notice->featured_image 
-                ? asset('storage/' . $notice->featured_image) 
-                : null;
+            return NoticeResponse::success(
+                'Notice retrieved successfully.',
+                $notice
+            );
 
-            return NoticeResponse::success('Notice retrieved successfully.', $notice);
         } catch (\Exception $e) {
-            return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
+            return NoticeResponse::error(
+                $e->getMessage(),
+                $e->getCode() ?: 500
+            );
         }
     }
 
@@ -58,52 +65,90 @@ class NoticeRepository implements NoticeRepositoryInterface
             $club = Club::where('user_id', $userId)->first();
 
             if ($club) {
-                // Inject club_id into the data array
                 $data['club_id'] = $club->id;
             } else {
-                // Fallback: set member_id if no club found
                 $data['member_id'] = $userId;
             }
 
-            // Create the notice
             $notice = MemberNotice::create($data);
 
-            // Handle Image Uploads
+            /* ================= IMAGE UPLOAD ================= */
+
             if (!empty($images) && is_array($images)) {
+
+                $manager = new ImageManager(new Driver());
+
                 foreach ($images as $image) {
-                    if ($image) {
-                        $imagePath = $image->store('notices/images', 'public');
-                        MemberNoticeFile::create([
-                            'member_notice_id' => $notice->id,
-                            'file_name' => $image->getClientOriginalName(),
-                            'file_type' => 'image',
-                            'file_path' => $imagePath,
-                        ]);
+                    if (!$image || !$image->isValid()) {
+                        continue;
                     }
+
+                    $filename = uniqid('notice_', true) . '.' . $image->getClientOriginalExtension();
+
+                    /** ORIGINAL */
+                    $originalPath = "notices/images/original/{$filename}";
+                    Storage::disk('public')->put(
+                        $originalPath,
+                        file_get_contents($image->getRealPath())
+                    );
+
+                    $img = $manager->read($image->getRealPath());
+
+                    /** SIZES */
+                    $sizes = [
+                        'thumb'  => 300,
+                        'medium' => 800,
+                        'large'  => 1600,
+                    ];
+
+                    foreach ($sizes as $folder => $width) {
+                        $resized = clone $img;
+                        $resized->scale(width: $width);
+
+                        Storage::disk('public')->put(
+                            "notices/images/{$folder}/{$filename}",
+                            $resized->toJpeg(85)
+                        );
+                    }
+
+                    /** DB */
+                    MemberNoticeFile::create([
+                        'member_notice_id' => $notice->id,
+                        'file_name'        => $image->getClientOriginalName(),
+                        'file_type'        => 'image',
+                        'file_path'        => $originalPath, // 🔥 original only
+                    ]);
                 }
             }
 
-            // Handle Document Uploads
+            /* ================= DOCUMENT UPLOAD ================= */
+
             if (!empty($documents) && is_array($documents)) {
                 foreach ($documents as $document) {
-                    if ($document) {
-                        $documentPath = $document->store('notices/documents', 'public');
-                        MemberNoticeFile::create([
-                            'member_notice_id' => $notice->id,
-                            'file_name' => $document->getClientOriginalName(),
-                            'file_type' => 'document',
-                            'file_path' => $documentPath,
-                        ]);
+                    if (!$document) {
+                        continue;
                     }
+
+                    $documentPath = $document->store('notices/documents', 'public');
+
+                    MemberNoticeFile::create([
+                        'member_notice_id' => $notice->id,
+                        'file_name'        => $document->getClientOriginalName(),
+                        'file_type'        => 'document',
+                        'file_path'        => $documentPath,
+                    ]);
                 }
             }
 
-            return NoticeResponse::success('Notice created successfully.', $notice, 201);
+            return NoticeResponse::success(
+                'Notice created successfully.',
+                $notice,
+                201
+            );
 
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
-
     }
 
 
@@ -112,40 +157,81 @@ class NoticeRepository implements NoticeRepositoryInterface
         try {
             $notice = MemberNotice::findOrFail($id);
 
-            // Update notice details
             $notice->update($data);
 
-            // Handle Image Uploads
+            /* ================= IMAGE UPLOAD ================= */
+
             if (!empty($images) && is_array($images)) {
+
+                $manager = new ImageManager(new Driver());
+
                 foreach ($images as $image) {
-                    if ($image) {
-                        $imagePath = $image->store('notices/images', 'public'); 
-                        MemberNoticeFile::create([
-                            'member_notice_id' => $notice->id,
-                            'file_name' => $image->getClientOriginalName(),
-                            'file_type' => 'image',
-                            'file_path' => $imagePath,
-                        ]);
+                    if (!$image || !$image->isValid()) {
+                        continue;
                     }
+
+                    $filename = uniqid('notice_', true) . '.' . $image->getClientOriginalExtension();
+
+                    /** ORIGINAL */
+                    $originalPath = "notices/images/original/{$filename}";
+                    Storage::disk('public')->put(
+                        $originalPath,
+                        file_get_contents($image->getRealPath())
+                    );
+
+                    $img = $manager->read($image->getRealPath());
+
+                    /** SIZES */
+                    $sizes = [
+                        'thumb'  => 300,
+                        'medium' => 800,
+                        'large'  => 1600,
+                    ];
+
+                    foreach ($sizes as $folder => $width) {
+                        $resized = clone $img;
+                        $resized->scale(width: $width);
+
+                        Storage::disk('public')->put(
+                            "notices/images/{$folder}/{$filename}",
+                            $resized->toJpeg(85)
+                        );
+                    }
+
+                    /** DB */
+                    MemberNoticeFile::create([
+                        'member_notice_id' => $notice->id,
+                        'file_name'        => $image->getClientOriginalName(),
+                        'file_type'        => 'image',
+                        'file_path'        => $originalPath,
+                    ]);
                 }
             }
 
-            // Handle Document Uploads
+            /* ================= DOCUMENT UPLOAD ================= */
+
             if (!empty($documents) && is_array($documents)) {
                 foreach ($documents as $document) {
-                    if ($document) {
-                        $documentPath = $document->store('notices/documents', 'public');
-                        MemberNoticeFile::create([
-                            'member_notice_id' => $notice->id,
-                            'file_name' => $document->getClientOriginalName(),
-                            'file_type' => 'document',
-                            'file_path' => $documentPath,
-                        ]);
+                    if (!$document) {
+                        continue;
                     }
+
+                    $documentPath = $document->store('notices/documents', 'public');
+
+                    MemberNoticeFile::create([
+                        'member_notice_id' => $notice->id,
+                        'file_name'        => $document->getClientOriginalName(),
+                        'file_type'        => 'document',
+                        'file_path'        => $documentPath,
+                    ]);
                 }
             }
 
-            return NoticeResponse::success('Notice updated successfully.', $notice);
+            return NoticeResponse::success(
+                'Notice updated successfully.',
+                $notice
+            );
+
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
