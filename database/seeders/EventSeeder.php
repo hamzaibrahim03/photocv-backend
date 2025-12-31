@@ -6,6 +6,9 @@ use App\Models\Event;
 use App\Models\EventImage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use App\Services\Image\ImageResizeService;
 
 class EventSeeder extends Seeder
 {
@@ -30,8 +33,8 @@ class EventSeeder extends Seeder
                 'enable_dropbox_upload' => true,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'event_types' => [1, 2], // multiple types
-                'event_tags'  => [3, 4], // multiple tags
+                'event_types' => [1, 2],
+                'event_tags'  => [3, 4],
             ],
             [
                 'club_id' => 1,
@@ -51,7 +54,7 @@ class EventSeeder extends Seeder
                 'enable_dropbox_upload' => false,
                 'created_by' => 1,
                 'updated_by' => 1,
-                'event_types' => [2], // one type
+                'event_types' => [2],
                 'event_tags'  => [5, 6],
             ],
             [
@@ -77,7 +80,10 @@ class EventSeeder extends Seeder
             ]
         ];
 
+        $resizeService = app(ImageResizeService::class);
+
         foreach ($events as $eventData) {
+
             $types = $eventData['event_types'] ?? [];
             $tags  = $eventData['event_tags'] ?? [];
 
@@ -85,20 +91,46 @@ class EventSeeder extends Seeder
 
             $event = Event::create($eventData);
 
-            if (!empty($types)) {
+            if ($types) {
                 $event->types()->sync($types);
             }
 
-            if (!empty($tags)) {
+            if ($tags) {
                 $event->tags()->sync($tags);
             }
 
-            // Add 2 images for each event
+            /**
+             * 📸 ADD EVENT IMAGES WITH SIZES
+             */
             for ($i = 1; $i <= 2; $i++) {
+
+                // Source seed image
+                $sourcePath = database_path("seeders/data/events/event{$i}.jpg");
+
+                if (!File::exists($sourcePath)) {
+                    continue; // safe skip
+                }
+
+                // Store ORIGINAL
+                $filename = uniqid('event_') . '.jpg';
+                $originalPath = "events/original/{$filename}";
+
+                Storage::disk('public')->put(
+                    $originalPath,
+                    File::get($sourcePath)
+                );
+
+                // Generate sizes (thumb / medium / large)
+                $resizeService->generateSizes(
+                    $originalPath,
+                    'events'
+                );
+
+                // Save DB record
                 EventImage::create([
-                    'event_id' => $event->id,
-                    'image' => "events/event{$event->id}_image{$i}.jpg",
-                    'created_by' => 1
+                    'event_id'   => $event->id,
+                    'image'      => $originalPath,
+                    'created_by' => 1,
                 ]);
             }
         }

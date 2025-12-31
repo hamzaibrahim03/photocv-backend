@@ -474,6 +474,9 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ])
             ->where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
+            ->with([
+                'judges'
+            ])
             ->orderBy('start_date', 'asc');
 
         if ($limit) {
@@ -482,7 +485,5 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
         return $query->get();
     }
-
-
 
 }
