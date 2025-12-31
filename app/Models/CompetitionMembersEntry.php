@@ -1,69 +1,80 @@
 <?php
 
-/**
- * Created by Reliese Model.
- */
-
 namespace App\Models;
 
-use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
-/**
- * Class CompetitionMembersEntry
- * 
- * @property int $id
- * @property int|null $member_comp_id
- * @property string|null $entry_type
- * @property string|null $entry_image
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property string|null $deleted_at
- *
- * @package App\Models
- */
 class CompetitionMembersEntry extends Model
 {
-	use SoftDeletes;
-	protected $table = 'competition_members_entries';
-	protected $appends = ['entry_image_url'];
+    use SoftDeletes;
 
-	protected $casts = [
-		'member_comp_id' => 'int'
-	];
+    protected $table = 'competition_members_entries';
 
-	protected $fillable = [
-		'member_comp_id',
-		'entry_type',
-		'entry_image_title',
-		'entry_image',
-		'position',
-		'total_score',
-    	'is_published',
+    protected $appends = [
+		'entry_image_url',
+        'entry_image_original_url',
+        'entry_image_thumb',
+        'entry_image_medium',
+        'entry_image_large',
+    ];
 
-		// EXIF fields
-		'camera_model',
-		'lens',
-		'focal_length',
-		'aperture',
-		'shutter_speed',
-		'iso',
-		'captured_at',
+    protected $hidden = [
+        'entry_image',
+    ];
 
-		// Fallback metadata
-		'image_width',
-		'image_height',
-		'mime_type',
-		'file_size',
-		'color_type',
-		'bit_depth',
-	];
+    protected $casts = [
+        'member_comp_id' => 'int',
+        'is_published'   => 'bool',
+    ];
 
-	public function competitionMember()
-	{
-		return $this->belongsTo(CompetitionMember::class, 'member_comp_id');
-	}
+    protected $fillable = [
+        'member_comp_id',
+        'entry_type',
+        'entry_image_title',
+        'entry_image',
+        'position',
+        'total_score',
+        'is_published',
+
+        // EXIF
+        'camera_model',
+        'lens',
+        'focal_length',
+        'aperture',
+        'shutter_speed',
+        'iso',
+        'captured_at',
+
+        // Fallback metadata
+        'image_width',
+        'image_height',
+        'mime_type',
+        'file_size',
+        'color_type',
+        'bit_depth',
+    ];
+
+    /* ================= RELATIONS ================= */
+
+    public function competitionMember()
+    {
+        return $this->belongsTo(
+            CompetitionMember::class,
+            'member_comp_id'
+        );
+    }
+
+    public function scores()
+    {
+        return $this->hasMany(
+            CompetitionEntryScore::class,
+            'entry_id'
+        );
+    }
+
+    /* ================= ACCESSORS ================= */
 
 	public function getEntryImageUrlAttribute()
 	{
@@ -72,14 +83,37 @@ class CompetitionMembersEntry extends Model
 		}
 	}
 
-	public function scores()
-	{
-		return $this->hasMany(CompetitionEntryScore::class, 'entry_id');
-	}
-
-	public function competition()
+    public function getEntryImageOriginalUrlAttribute()
     {
-        return $this->belongsTo(Competition::class, 'comp_id');
+        return $this->resolveImage('original');
     }
 
+    public function getEntryImageThumbAttribute()
+    {
+        return $this->resolveImage('thumb');
+    }
+
+    public function getEntryImageMediumAttribute()
+    {
+        return $this->resolveImage('medium');
+    }
+
+    public function getEntryImageLargeAttribute()
+    {
+        return $this->resolveImage('large');
+    }
+
+    protected function resolveImage(string $size): ?string
+    {
+        if (!$this->entry_image) {
+            return null;
+        }
+
+        $filename = basename($this->entry_image);
+        $path = "competition_entries/{$size}/{$filename}";
+
+        return Storage::disk('public')->exists($path)
+            ? asset('storage/' . $path)
+            : null;
+    }
 }

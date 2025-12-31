@@ -65,18 +65,30 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                 'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'memberGalleries'      => $this->repos->clubDashboardRepo->getMembersGallerriesForHome($clubId),
                 'latestMembers'        => $this->repos->clubDashboardRepo->getLatestMembersForHome($clubId),
-                'latestInteractions'   => $photos->map(function ($photo) {
-                    return [
-                        'id'           => $photo->id,
-                        'title'        => $photo->title,
+                'latestInteractions' => $photos->map(function ($photo) {
+                return [
+                    'id'          => $photo->id,
+                    'title'       => $photo->title,
+                    'description' => $photo->description,
+
+                    // 🔥 IMAGE SIZES
+                    'images' => [
                         'image_url'    => $photo->image_url,
-                        'description'  => $photo->description,
-                        'uploaded_by'  => [
-                            'id'       => $photo->uploadedBy?->id,
-                            'username' => $photo->uploadedBy?->username,
-                            'email'    => $photo->uploadedBy?->email,
-                        ],
-                        'comments' => $photo->comments->sortByDesc('created_at')->map(function ($comment) {
+                        'original_url' => $photo->image_url,
+                        'thumb_url'    => $photo->thumb_url,
+                        'medium_url'   => $photo->medium_url,
+                        'large_url'    => $photo->large_url,
+                    ],
+
+                    'uploaded_by' => [
+                        'id'       => $photo->uploadedBy?->id,
+                        'username' => $photo->uploadedBy?->username,
+                        'email'    => $photo->uploadedBy?->email,
+                    ],
+
+                    'comments' => $photo->comments
+                        ->sortByDesc('created_at')
+                        ->map(function ($comment) {
                             return [
                                 'id'      => $comment->id,
                                 'comment' => $comment->comment,
@@ -86,19 +98,25 @@ class PublicClubRepository implements PublicClubRepositoryInterface
                                 ],
                                 'created_at' => $comment->created_at,
                             ];
-                        }),
-                        'likes' => $photo->likes->sortByDesc('created_at')->map(function ($like) {
+                        })
+                        ->values(),
+
+                    'likes' => $photo->likes
+                        ->sortByDesc('created_at')
+                        ->map(function ($like) {
                             return [
-                                'id'            => $like->id,
+                                'id' => $like->id,
                                 'interacted_by' => [
                                     'id'       => $like->user?->id,
                                     'username' => $like->user?->username,
                                 ],
                                 'created_at' => $like->created_at,
                             ];
-                        }),
+                        })
+                        ->values(),
                     ];
                 }),
+
                 'clubNews'      => $this->repos->clubNewsRepo->getClubNews($clubId),
                 'latest_notice' => $this->repos->noticeRepository->getLatestNotice($clubId),
                 'latestResults' => $this->repos->competitionResultRepository->getAllPublishedResultsForHome($clubId),

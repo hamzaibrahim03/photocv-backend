@@ -41,17 +41,20 @@ class PhotoSeeder extends Seeder
 
                 $filename = basename($file);
 
-                /** -------------------------------
-                 * 1️⃣ Store ORIGINAL
-                 * -------------------------------- */
+                /* ===============================
+                 * 1️⃣ STORE ORIGINAL
+                 * =============================== */
                 $originalPath = "member-galleries/original/{$filename}";
-                Storage::disk('public')->put($originalPath, file_get_contents($file));
+                Storage::disk('public')->put(
+                    $originalPath,
+                    file_get_contents($file)
+                );
 
                 $image = $manager->read($file);
 
-                /** -------------------------------
-                 * 2️⃣ Generate sizes
-                 * -------------------------------- */
+                /* ===============================
+                 * 2️⃣ GENERATE IMAGE SIZES
+                 * =============================== */
                 $sizes = [
                     'thumb'  => 300,
                     'medium' => 800,
@@ -64,20 +67,43 @@ class PhotoSeeder extends Seeder
                     $resized->scale(width: $width);
 
                     $path = "member-galleries/{$folder}/{$filename}";
-                    Storage::disk('public')->put($path, $resized->toJpeg(85));
+                    Storage::disk('public')->put(
+                        $path,
+                        $resized->toJpeg(85)
+                    );
                 }
 
-                /** -------------------------------
-                 * 3️⃣ Save DB record
-                 * -------------------------------- */
+                /* ===============================
+                 * 3️⃣ DUMMY EXIF + METADATA
+                 * =============================== */
+                $width  = $image->width();
+                $height = $image->height();
+
                 Photo::create([
                     'gallery_id'  => $gallery->id,
                     'title'       => pathinfo($file, PATHINFO_FILENAME),
-                    'image'       => $originalPath, // 🔥 original only
+                    'image'       => $originalPath, // 🔥 ORIGINAL ONLY
                     'description' => 'Uploaded sample photo for ' . $gallery->gallery_name,
                     'is_active'   => true,
                     'allow_cc'    => false,
                     'uploaded_by' => $gallery->member_id ?? 1,
+
+                    /* ---------- EXIF ---------- */
+                    'camera_model'  => 'Canon EOS 5D Mark IV',
+                    'lens'          => 'EF 24-70mm f/2.8L II USM',
+                    'focal_length'  => '35mm',
+                    'aperture'      => 'f/8',
+                    'shutter_speed' => '1/125',
+                    'iso'           => '200',
+                    'captured_at'   => now()->subDays(rand(5, 180)),
+
+                    /* ------ FALLBACK META ----- */
+                    'image_width'  => $width,
+                    'image_height' => $height,
+                    'mime_type'    => mime_content_type($file),
+                    'file_size'    => filesize($file),
+                    'color_type'   => 'RGB',
+                    'bit_depth'    => 8,
                 ]);
             }
         }

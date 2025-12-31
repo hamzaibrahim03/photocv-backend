@@ -147,7 +147,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
     }
 
 
-   public function getAllPublishedResultsForHome($clubId = null)
+    public function getAllPublishedResultsForHome($clubId = null)
     {
         try {
 

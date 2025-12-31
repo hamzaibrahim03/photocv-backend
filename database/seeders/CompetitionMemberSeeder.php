@@ -8,66 +8,110 @@ use App\Models\Competition;
 use App\Models\CompetitionMember;
 use App\Models\CompetitionMembersEntry;
 use Illuminate\Support\Facades\File;
+use App\Services\Image\ImageResizeService;
 
 class CompetitionMemberSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
         $competitions = Competition::all();
 
         foreach ($competitions as $competition) {
-            // Get some random members (exclude admin/judges if needed)
+
             $members = User::whereNotIn('id', [1, 2])
                 ->inRandomOrder()
                 ->take(5)
                 ->get();
 
             foreach ($members as $member) {
-                // Create competition membership
+
                 $compMember = CompetitionMember::create([
                     'comp_id'   => $competition->id,
                     'member_id' => $member->id,
                 ]);
 
-                // Source entries folder for this competition
-                $entryPath = database_path("seeders/data/ryton-club-data/entries/{$competition->id}");
+                $entryPath = database_path(
+                    "seeders/data/ryton-club-data/entries/{$competition->id}"
+                );
 
-                if (File::exists($entryPath)) {
-                    $images = File::files($entryPath);
+                if (!File::exists($entryPath)) {
+                    continue;
+                }
 
-                    // Limit to max allowed entries
-                    $maxEntries = $competition->max_entries_print + $competition->max_entries_digital;
-                    $images = collect($images)->take($maxEntries);
+                $images = collect(File::files($entryPath));
 
-                    foreach ($images as $image) {
-                        $entryType = $competition->max_entries_digital > 0 ? 'digital' : 'print';
+                $maxEntries = $competition->max_entries_print
+                            + $competition->max_entries_digital;
 
-                        // Destination in storage/app/public/competition_entries/
-                        $fileName = uniqid() . '_' . $image->getFilename();
-                        $destinationPath = storage_path("app/public/competition_entries/{$fileName}");
+                $images = $images->take($maxEntries);
 
-                        // Ensure directory exists
-                        File::ensureDirectoryExists(dirname($destinationPath));
+                foreach ($images as $image) {
 
-                        // Copy image if not already there
-                        if (! File::exists($destinationPath)) {
-                            File::copy($image->getPathname(), $destinationPath);
-                        }
+                    $entryType = $competition->max_entries_digital > 0
+                        ? 'digital'
+                        : 'print';
 
-                        // Save entry record (public path will be /storage/competition_entries/...)
-                        CompetitionMembersEntry::create([
-                            'member_comp_id'    => $compMember->id,
-                            'entry_type'        => $entryType,
-                            'entry_image_title' => pathinfo($image->getFilename(), PATHINFO_FILENAME),
-                            'entry_image'       => "competition_entries/{$fileName}",
-                            'position'          => null,
-                            'total_score'       => 0,
-                            'is_published'      => false,
-                        ]);
-                    }
+                    /* ================= ORIGINAL PATH ================= */
+
+                    $fileName = uniqid() . '_' . $image->getFilename();
+
+                    $relativeOriginalPath =
+                        "competition_entries/original/{$fileName}";
+
+                    $absoluteOriginalPath =
+                        storage_path("app/public/{$relativeOriginalPath}");
+
+                    File::ensureDirectoryExists(
+                        dirname($absoluteOriginalPath)
+                    );
+
+                    File::copy(
+                        $image->getPathname(),
+                        $absoluteOriginalPath
+                    );
+
+                    /* ================= GENERATE SIZES ================= */
+
+                    app(ImageResizeService::class)
+                        ->resize($absoluteOriginalPath, 'competition_entries');
+
+                    /* ================= SAVE ENTRY ================= */
+
+                    CompetitionMembersEntry::create([
+                        'member_comp_id'    => $compMember->id,
+                        'entry_type'        => $entryType,
+                        'entry_image_title' => pathinfo(
+                            $image->getFilename(),
+                            PATHINFO_FILENAME
+                        ),
+                        'entry_image'       => $relativeOriginalPath,
+
+                        /* ================= DUMMY EXIF ================= */
+
+                        'camera_model'  => 'Canon EOS 5D Mark IV',
+                        'lens'          => 'EF 24-70mm f/2.8L II USM',
+                        'focal_length'  => '50mm',
+                        'aperture'      => 'f/8',
+                        'shutter_speed' => '1/125',
+                        'iso'           => '200',
+                        'captured_at'   => now()->subDays(rand(10, 120)),
+
+                        /* ================= FALLBACK METADATA ================= */
+
+                        'image_width'  => rand(3000, 6000),
+                        'image_height' => rand(2000, 4000),
+                        'mime_type'    => 'image/jpeg',
+                        'file_size'    => rand(350000, 5500000), // bytes
+                        'color_type'   => 'RGB',
+                        'bit_depth'    => 8,
+
+                        /* ================= COMPETITION DATA ================= */
+
+                        'position'     => null,
+                        'total_score'  => 0,
+                        'is_published' => false,
+                    ]);
+
                 }
             }
         }

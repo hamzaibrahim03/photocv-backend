@@ -87,55 +87,78 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
     
     public function submitCompetitionEntry($data)
     {
-        $response = null;
-
         try {
             $user = auth()->user();
+
             $competitionMember = CompetitionMember::findOrFail($data['member_comp_id']);
 
-            // Ensure the competition member belongs to the user
+            // Ensure ownership
             if ($competitionMember->member_id !== $user->id) {
-                return CompetitionResponse::error('Unauthorized to submit entry for this competition.', 403);
+                return CompetitionResponse::error(
+                    'Unauthorized to submit entry for this competition.',
+                    403
+                );
             }
 
-            // Create a new entry
+            if (
+                !isset($data['entry_image']) ||
+                !$data['entry_image']->isValid()
+            ) {
+                return CompetitionResponse::error(
+                    'Invalid or missing entry image.',
+                    400
+                );
+            }
+
+            /* ================= STORE ORIGINAL ================= */
+
+            $path = $data['entry_image']->store(
+                'competition_entries/original',
+                'public'
+            );
+
+            $absolutePath = storage_path('app/public/' . $path);
+
+            /* ================= GENERATE SIZES ================= */
+
+            app(\App\Services\Image\ImageResizeService::class)
+                ->resize($absolutePath, 'competition_entries');
+
+            /* ================= METADATA ================= */
+
+            $exifData  = $this->extractExif($absolutePath);
+            $basicData = $this->extractBasicMetadata($absolutePath);
+            $metadata  = array_filter($exifData) ?: $basicData;
+
+            /* ================= SAVE ENTRY ================= */
+
             $entry = new CompetitionMembersEntry();
             $entry->member_comp_id = $competitionMember->id;
-            $entry->entry_type = $data['entry_type'];
-            
-            // Handle file upload
-            if (isset($data['entry_image']) && $data['entry_image']->isValid()) {
-                $path = $data['entry_image']->store('competition_entries', 'public');
-                $absolutePath = storage_path('app/public/' . $path);
+            $entry->entry_type     = $data['entry_type'];
+            $entry->entry_image    = $path;
 
-                // Extract EXIF + fallback metadata
-                $exifData = $this->extractExif($absolutePath);
-                $basicData = $this->extractBasicMetadata($absolutePath);
-
-                $metadata = array_filter($exifData) ?: $basicData;
-
-                // Save entry
-                $entry = new CompetitionMembersEntry();
-                $entry->member_comp_id = $competitionMember->id;
-                $entry->entry_type = $data['entry_type'];
-                $entry->entry_image = $path;
-
-                foreach ($metadata as $key => $value) {
-                    $entry->$key = $value;
-                }
-
-                $entry->save();
-            } else {
-                return CompetitionResponse::error('Invalid or missing entry image.', 400);
+            foreach ($metadata as $key => $value) {
+                $entry->$key = $value;
             }
 
-            $response = CompetitionResponse::success('Competition entry submitted successfully.', $entry, 201);
-        } catch (\Exception $e) {
-            $response = CompetitionResponse::error($e->getMessage(), $e->getCode() ?: 500);
-        }
+            $entry->save();
 
-        return $response;
+            return CompetitionResponse::success(
+                'Competition entry submitted successfully.',
+                $entry,
+                201
+            );
+
+        } catch (\Exception $e) {
+            return CompetitionResponse::error(
+                $e->getMessage(),
+                is_int($e->getCode()) && $e->getCode() > 0
+                    ? $e->getCode()
+                    : 500
+            );
+        }
     }
+
 
 
     private function extractExif($imagePath)
