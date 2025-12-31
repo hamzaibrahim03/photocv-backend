@@ -75,7 +75,9 @@ class ClubNews extends Model
         }
 
         $filename = basename($this->featured_image);
-        $path = "news/featured/{$size}/{$filename}";
+
+        // ✅ FIXED PATH
+        $path = "featured_images/{$size}/{$filename}";
 
         return Storage::disk('public')->exists($path)
             ? asset('storage/' . $path)
