@@ -3,6 +3,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\URL;
 
 class ClubSetting extends Model
 {
@@ -16,12 +18,25 @@ class ClubSetting extends Model
 	];
 
     protected $appends = [
-		'header_img_url',
-		'footer_img_url',
-		'logo_url',
+        'header_img_url',
+        'header_img_thumb_url',
+        'header_img_medium_url',
+        'header_img_large_url',
+        'footer_img_url',
+        'footer_img_thumb_url',
+        'footer_img_medium_url',
+        'footer_img_large_url',
+        'logo_url',
+        'logo_thumb_url',
+        'logo_medium_url',
+        'logo_large_url',
         'favicon_url',
-		// 'cover_image_url',
-	];
+        'favicon_thumb_url',
+        'club_banner_url',
+        'club_banner_thumb_url',
+        'club_banner_medium_url',
+        'club_banner_large_url',
+    ];
 
     protected $fillable = [
         'club_id',
@@ -67,30 +82,142 @@ class ClubSetting extends Model
         'allow_reporting_description',
     ];
 
+    /**
+     * Helper method to get image URL for specific size
+     */
+    private function getSizeUrl($path, $size = 'original')
+    {
+        if (!$path) {
+            return null;
+        }
 
+        $filename = basename($path);
+        
+        // Determine base folder from the path
+        $dir = dirname($path);
+        
+        // Handle different image types
+        if (str_contains($path, 'club_logos')) {
+            $baseFolder = 'club_logos';
+        } elseif (str_contains($path, 'club_banners')) {
+            $baseFolder = 'club_banners';
+        } elseif (str_contains($path, 'uploads/clubs/footer')) {
+            $baseFolder = 'uploads/clubs/footer';
+        } elseif (str_contains($path, 'uploads/clubs/header')) {
+            $baseFolder = 'uploads/clubs/header';
+        } elseif (str_contains($path, 'uploads/clubs/favicon')) {
+            $baseFolder = 'uploads/clubs/favicon';
+        } elseif (str_contains($path, 'uploads/clubs/cover')) {
+            $baseFolder = 'uploads/clubs/cover';
+        } else {
+            $baseFolder = dirname($path);
+        }
+        
+        // For original size, use the stored path
+        if ($size === 'original') {
+            $sizePath = $path;
+        } else {
+            $sizePath = $baseFolder . '/' . $size . '/' . $filename;
+        }
+        
+        return Storage::disk('public')->exists($sizePath)
+            ? URL::to('storage/' . $sizePath)
+            : null;
+    }
+
+    // Header Image URLs
     public function getHeaderImgUrlAttribute()
-	{
-		return $this->header_img ? asset('storage/' . $this->header_img) : null;
-	}
+    {
+        return $this->getSizeUrl($this->header_img);
+    }
+    
+    public function getHeaderImgThumbUrlAttribute()
+    {
+        return $this->getSizeUrl($this->header_img, 'thumb');
+    }
+    
+    public function getHeaderImgMediumUrlAttribute()
+    {
+        return $this->getSizeUrl($this->header_img, 'medium');
+    }
+    
+    public function getHeaderImgLargeUrlAttribute()
+    {
+        return $this->getSizeUrl($this->header_img, 'large');
+    }
 
-	public function getFooterImgUrlAttribute()
-	{
-		return $this->footer_img ? asset('storage/' . $this->footer_img) : null;
-	}
+    // Footer Image URLs
+    public function getFooterImgUrlAttribute()
+    {
+        return $this->getSizeUrl($this->footer_img);
+    }
+    
+    public function getFooterImgThumbUrlAttribute()
+    {
+        return $this->getSizeUrl($this->footer_img, 'thumb');
+    }
+    
+    public function getFooterImgMediumUrlAttribute()
+    {
+        return $this->getSizeUrl($this->footer_img, 'medium');
+    }
+    
+    public function getFooterImgLargeUrlAttribute()
+    {
+        return $this->getSizeUrl($this->footer_img, 'large');
+    }
 
-	public function getLogoUrlAttribute()
-	{
-		return $this->logo ? asset('storage/' . $this->logo) : null;
-	}
+    // Logo URLs
+    public function getLogoUrlAttribute()
+    {
+        return $this->getSizeUrl($this->logo);
+    }
+    
+    public function getLogoThumbUrlAttribute()
+    {
+        return $this->getSizeUrl($this->logo, 'thumb');
+    }
+    
+    public function getLogoMediumUrlAttribute()
+    {
+        return $this->getSizeUrl($this->logo, 'medium');
+    }
+    
+    public function getLogoLargeUrlAttribute()
+    {
+        return $this->getSizeUrl($this->logo, 'large');
+    }
 
-	public function getCoverImageUrlAttribute()
-	{
-		return $this->cover_image ? asset('storage/' . $this->cover_image) : null;
-	}
-
+    // Favicon URLs
     public function getFaviconUrlAttribute()
     {
-        return $this->favicon ? asset('storage/' . $this->favicon) : null;
+        return $this->getSizeUrl($this->favicon);
+    }
+    
+    public function getFaviconThumbUrlAttribute()
+    {
+        return $this->getSizeUrl($this->favicon, 'thumb');
+    }
+
+    // Club Banner URLs
+    public function getClubBannerUrlAttribute()
+    {
+        return $this->getSizeUrl($this->club_banner);
+    }
+    
+    public function getClubBannerThumbUrlAttribute()
+    {
+        return $this->getSizeUrl($this->club_banner, 'thumb');
+    }
+    
+    public function getClubBannerMediumUrlAttribute()
+    {
+        return $this->getSizeUrl($this->club_banner, 'medium');
+    }
+    
+    public function getClubBannerLargeUrlAttribute()
+    {
+        return $this->getSizeUrl($this->club_banner, 'large');
     }
 
     public function club()

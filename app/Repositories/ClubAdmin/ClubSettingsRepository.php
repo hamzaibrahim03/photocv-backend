@@ -10,9 +10,18 @@ use App\Models\ClubSeason;
 use App\Http\Responses\ClubSettingResponse;
 use App\Models\ClubCoverImage;
 use App\Models\Competition;
+use App\Services\Image\ImageResizeService;
 
 class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 {
+
+    protected $imageResizeService;
+
+    public function __construct(ImageResizeService $imageResizeService)
+    {
+        $this->imageResizeService = $imageResizeService;
+    }
+
     public function getAllClubSettings($userId = null)
     {
         try {
@@ -90,9 +99,6 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
     }
 
 
-    /**
-     * Store or update club settings.
-     */
     public function save(array $data, $logo = null, $clubBanner = null, $id = null)
     {
         try {
@@ -103,14 +109,24 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 return ClubSettingResponse::error('User has no associated club.', 404);
             }
 
-            // Handle logo
+            // Handle logo with sizes
             if ($logo) {
-                $data['logo'] = $logo->store('club_logos', 'public');
+                // Store logo
+                $logoPath = $logo->store('club_logos', 'public');
+                
+                // Generate sizes using your existing service
+                $logoPaths = $this->imageResizeService::generateSizes($logoPath, 'club_logos');
+                $data['logo'] = $logoPaths['original'];
             }
 
-            // Handle club banner
+            // Handle club banner with sizes
             if ($clubBanner) {
-                $data['club_banner'] = $clubBanner->store('club_banners', 'public');
+                // Store banner
+                $bannerPath = $clubBanner->store('club_banners', 'public');
+                
+                // Generate sizes
+                $bannerPaths = $this->imageResizeService::generateSizes($bannerPath, 'club_banners');
+                $data['club_banner'] = $bannerPaths['original'];
             }
 
             // Update user's phone and address
@@ -121,22 +137,40 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
 
             unset($data['phone'], $data['address']);
 
+            // Handle footer image with sizes
             if (!empty($data['footer_img'])) {
-                $data['footer_img'] = $data['footer_img']->store('uploads/clubs/footer', 'public');
+                $footerImg = $data['footer_img'];
+                $footerPath = $footerImg->store('uploads/clubs/footer', 'public');
+                
+                // Generate sizes
+                $footerPaths = $this->imageResizeService::generateSizes($footerPath, 'uploads/clubs/footer');
+                $data['footer_img'] = $footerPaths['original'];
             }
 
+            // Handle header image with sizes
             if (!empty($data['header_img'])) {
-                $data['header_img'] = $data['header_img']->store('uploads/clubs/header', 'public');
+                $headerImg = $data['header_img'];
+                $headerPath = $headerImg->store('uploads/clubs/header', 'public');
+                
+                // Generate sizes
+                $headerPaths = $this->imageResizeService::generateSizes($headerPath, 'uploads/clubs/header');
+                $data['header_img'] = $headerPaths['original'];
             }
 
+            // Handle favicon with sizes
             if (!empty($data['favicon'])) {
-                $data['favicon'] = $data['favicon']->store('uploads/clubs/favicon', 'public');
+                $favicon = $data['favicon'];
+                $faviconPath = $favicon->store('uploads/clubs/favicon', 'public');
+                
+                // Generate sizes (using member-galleries as base folder for consistency)
+                $faviconPaths = $this->imageResizeService::generateSizes($faviconPath, 'uploads/clubs/favicon');
+                $data['favicon'] = $faviconPaths['original'];
             }
 
             // Separate Club vs ClubSetting fields
             $clubFields = [
                 'club_name', 'tag_line', 'about', 'contact_details',
-                'domain_type', 'domain_name',
+                'domain_type', 'domain_name', 'logo', 'club_banner'
             ];
 
             $clubData = array_filter($data, fn($key) => in_array($key, $clubFields), ARRAY_FILTER_USE_KEY);
@@ -154,15 +188,20 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
                 $clubSetting = ClubSetting::create($settingData);
             }
 
+            // Handle cover images with sizes
             if (!empty($data['cover_images']) && is_array($data['cover_images'])) {
                 // If replacing, delete old ones
                 ClubCoverImage::where('club_setting_id', $clubSetting->id)->delete();
 
                 foreach ($data['cover_images'] as $image) {
-                    $path = $image->store('uploads/clubs/cover', 'public');
+                    $coverPath = $image->store('uploads/clubs/cover', 'public');
+                    
+                    // Generate sizes
+                    $coverPaths = $this->imageResizeService::generateSizes($coverPath, 'uploads/clubs/cover');
+                    
                     ClubCoverImage::create([
                         'club_setting_id' => $clubSetting->id,
-                        'image_path'      => $path,
+                        'image_path'      => $coverPaths['original'],
                     ]);
                 }
             }
@@ -192,5 +231,109 @@ class ClubSettingsRepository implements ClubSettingsRepositoryInterface
             return ClubSettingResponse::error($e->getMessage(), $statusCode);
         }
     }
+
+
+    /**
+     * Store or update club settings.
+     */
+    // public function save(array $data, $logo = null, $clubBanner = null, $id = null)
+    // {
+    //     try {
+    //         $user = auth()->user();
+    //         $club = $user->club;
+
+    //         if (!$club) {
+    //             return ClubSettingResponse::error('User has no associated club.', 404);
+    //         }
+
+    //         // Handle logo
+    //         if ($logo) {
+    //             $data['logo'] = $logo->store('club_logos', 'public');
+    //         }
+
+    //         // Handle club banner
+    //         if ($clubBanner) {
+    //             $data['club_banner'] = $clubBanner->store('club_banners', 'public');
+    //         }
+
+    //         // Update user's phone and address
+    //         $user->update([
+    //             'phone' => $data['phone'] ?? $user->phone,
+    //             'address' => $data['address'] ?? $user->address,
+    //         ]);
+
+    //         unset($data['phone'], $data['address']);
+
+    //         if (!empty($data['footer_img'])) {
+    //             $data['footer_img'] = $data['footer_img']->store('uploads/clubs/footer', 'public');
+    //         }
+
+    //         if (!empty($data['header_img'])) {
+    //             $data['header_img'] = $data['header_img']->store('uploads/clubs/header', 'public');
+    //         }
+
+    //         if (!empty($data['favicon'])) {
+    //             $data['favicon'] = $data['favicon']->store('uploads/clubs/favicon', 'public');
+    //         }
+
+    //         // Separate Club vs ClubSetting fields
+    //         $clubFields = [
+    //             'club_name', 'tag_line', 'about', 'contact_details',
+    //             'domain_type', 'domain_name',
+    //         ];
+
+    //         $clubData = array_filter($data, fn($key) => in_array($key, $clubFields), ARRAY_FILTER_USE_KEY);
+    //         $settingData = array_diff_key($data, $clubData);
+
+    //         // Update Club
+    //         $club->update($clubData);
+
+    //         // Update ClubSetting where club_id = $club->id
+    //         $clubSetting = ClubSetting::where('club_id', $club->id)->first();
+    //         if ($clubSetting) {
+    //             $clubSetting->update($settingData);
+    //         } else {
+    //             $settingData['club_id'] = $club->id;
+    //             $clubSetting = ClubSetting::create($settingData);
+    //         }
+
+    //         if (!empty($data['cover_images']) && is_array($data['cover_images'])) {
+    //             // If replacing, delete old ones
+    //             ClubCoverImage::where('club_setting_id', $clubSetting->id)->delete();
+
+    //             foreach ($data['cover_images'] as $image) {
+    //                 $path = $image->store('uploads/clubs/cover', 'public');
+    //                 ClubCoverImage::create([
+    //                     'club_setting_id' => $clubSetting->id,
+    //                     'image_path'      => $path,
+    //                 ]);
+    //             }
+    //         }
+
+    //         // Handle seasons
+    //         if (!empty($data['seasons']) && is_array($data['seasons'])) {
+    //             ClubSeason::where('club_id', $club->id)->delete();
+
+    //             foreach ($data['seasons'] as $season) {
+    //                 ClubSeason::create([
+    //                     'club_id'    => $club->id,
+    //                     'name'       => $season['name'] ?? null,
+    //                     'status'     => $season['status'] ?? 'inactive',
+    //                     'start_date' => $season['start_date'] ?? null,
+    //                     'end_date'   => $season['end_date'] ?? null,
+    //                 ]);
+    //             }
+    //         }
+
+    //         return ClubSettingResponse::success('Club Settings Saved Successfully.', $clubSetting, 201);
+
+    //     } catch (\Exception $e) {
+    //         $statusCode = ($e->getCode() && is_int($e->getCode()) && $e->getCode() >= 100 && $e->getCode() < 600)
+    //             ? $e->getCode()
+    //             : 500;
+
+    //         return ClubSettingResponse::error($e->getMessage(), $statusCode);
+    //     }
+    // }
 
 }
