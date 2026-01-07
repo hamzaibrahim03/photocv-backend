@@ -27,7 +27,7 @@ class StoreMemberRequest extends FormRequest
         if ($route === 'postCommentOrLikes') {
             return [
                 'record_id'     => 'required|integer',
-                'record_type'   => 'required|in:page,news,notice,event,photo',
+                'record_type'   => 'required|in:page,news,notice,event,photo,competition_entry',
                 'comment_type'   => 'required|in:comment,liking',
                 'comment'       => 'nullable|string',
                 'interacted_by' => 'nullable|integer|exists:users,id',

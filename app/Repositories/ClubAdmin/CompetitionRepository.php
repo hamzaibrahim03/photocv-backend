@@ -61,7 +61,9 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'competitionTheme',
                 'judges',
                 'competitionMembers.entries.scores.judge',
-                'competitionMembers.member'
+                'competitionMembers.member',
+                'competitionMembers.entries.comments.user',
+                'competitionMembers.entries.likes',
             ])->findOrFail($id);
 
             $club = Club::where('user_id', $userId)->first();
@@ -91,6 +93,21 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
                         'entry_image_title' => $entry->entry_image_title,
                         'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+
+                        'comments' => $entry->comments->map(fn ($c) => [
+                            'id' => $c->id,
+                            'comment' => $c->comment,
+                            'created_at' => $c->created_at,
+                            'user' => $c->user ? [
+                                'id' => $c->user->id,
+                                'first_name' => $c->user->first_name,
+                                'last_name' => $c->user->last_name,
+                                'email' => $c->user->email,
+                            ] : null,
+                        ]),
+
+                        // ✅ LIKES (count + optionally who liked)
+                        'likes_count' => $entry->likes->count(),
 
                         'exif' => [
                             'camera_model'  => $entry->camera_model,

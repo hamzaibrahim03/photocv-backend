@@ -22,6 +22,7 @@ use App\Models\MemberSocialLink;
 use App\Models\ClubUser;
 use Illuminate\Support\Facades\URL;
 use App\Services\Image\ImageResizeService;
+use App\Models\CompetitionMembersEntry;
 
 class MemberRepository implements MemberRepositoryInterface
 {
@@ -361,8 +362,6 @@ class MemberRepository implements MemberRepositoryInterface
         ];
     }
 
-
-
     private function extractExif($imagePath)
     {
         try {
@@ -482,6 +481,9 @@ class MemberRepository implements MemberRepositoryInterface
                 case 'photo':
                     $recordExists = Photo::where('id', $data['record_id'])->exists();
                     break;
+                case 'competition_entry':
+                    $recordExists = CompetitionMembersEntry::where('id', $data['record_id'])->exists();
+                    break;
             }
 
             if (! $recordExists) {
@@ -494,6 +496,11 @@ class MemberRepository implements MemberRepositoryInterface
 
             return MemberResponse::success('Comment saved successfully.', $comment, 201);
         } catch (\Exception $e) {
+            \Log::error('Post comment error', [
+                'message' => $e->getMessage(),
+                'code'    => $e->getCode(),
+                'trace'   => $e->getTraceAsString(),
+            ]);
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
     }

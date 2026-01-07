@@ -130,7 +130,23 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 'competitionMembers.member:id,first_name,last_name,email',
                 'competitionMembers.entries' => function ($q) {
                     $q->where('is_published', true)
-                    ->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type', 'position', 'total_score', 'is_published');
+                    ->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type', 'position', 'total_score', 'is_published')->with([
+                        'comments' => function ($cq) {
+                            $cq->select(
+                                    'id',
+                                    'record_id',
+                                    'record_type',
+                                    'comment_type',
+                                    'comment',
+                                    'interacted_by',
+                                    'is_published',
+                                    'created_at'
+                                )
+                                ->where('record_type', 'competition_entry')
+                                ->with('user:id,first_name,last_name,email')
+                                ->latest();
+                        },
+                    ]);
                 }
             ])
             ->where('club_id', $clubId)
@@ -188,8 +204,28 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                                             'entry_image',
                                             'position',
                                             'is_published',
+                                        ])->with([
+                                            'comments' => function ($commentQuery) {
+                                                $commentQuery
+                                                    ->select([
+                                                        'id',
+                                                        'record_id',
+                                                        'record_type',
+                                                        'comment_type',
+                                                        'comment',
+                                                        'interacted_by',
+                                                        'created_at',
+                                                    ])
+                                                    ->where('record_type', 'competition_entry')
+                                                    // ->where('comment_type', 'comment')
+                                                    ->with([
+                                                        'user:id,first_name,last_name,profile_image'
+                                                    ])
+                                                    ->latest();
+                                                    // ->limit(10);
+                                            },
                                         ])
-                                        ->limit(1); // ✅ SINGLE IMAGE ONLY
+                                        ->limit(1);
                                 },
                             ]);
                     },

@@ -116,4 +116,21 @@ class CompetitionMembersEntry extends Model
             ? asset('storage/' . $path)
             : null;
     }
+
+    public function comments()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'competition_entry')
+            ->where('comment_type', 'comment')
+            ->latest();
+    }
+
+    // optional (if you also want likes)
+    public function likes()
+    {
+        return $this->hasMany(Comment::class, 'record_id')
+            ->where('record_type', 'competition_entry')
+            ->where('comment_type', 'liking');
+    }
+
 }

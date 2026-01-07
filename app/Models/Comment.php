@@ -74,30 +74,10 @@ class Comment extends Model
 		return $this->belongsTo(Event::class, 'record_id');
 	}
 
+	public function competitionEntry()
+	{
+		return $this->belongsTo(CompetitionMembersEntry::class, 'record_id');
+	}
 
 
-	// public function event()
-	// {
-	// 	return $this->belongsTo(Event::class);
-	// }
-
-	// public function page()
-	// {
-	// 	return $this->belongsTo(Page::class, 'record_id')->where('record_type', 'page');
-	// }
-
-	// public function clubNews()
-	// {
-	// 	return $this->belongsTo(ClubNews::class, 'record_id')->where('record_type', 'news');
-	// }
-
-	// public function memberNotice()
-	// {
-	// 	return $this->belongsTo(MemberNotice::class, 'record_id')->where('record_type', 'notice');
-	// }
-
-	// public function event()
-	// {
-	// 	return $this->belongsTo(Event::class, 'record_id')->where('record_type', 'event');
-	// }
 }

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comments', function (Blueprint $table) {
             $table->id();
             $table->bigInteger('record_id')->nullable();
-            $table->enum('record_type', ['page', 'news', 'notice', 'event', 'photo']);
+            $table->enum('record_type', ['page', 'news', 'notice', 'event', 'photo', 'competition_entry']);
             $table->enum('comment_type', ['comment', 'liking'])->nullable()->default('liking');
             $table->text('comment')->nullable();
             $table->bigInteger('interacted_by')->nullable()->comment('the user who commented');
