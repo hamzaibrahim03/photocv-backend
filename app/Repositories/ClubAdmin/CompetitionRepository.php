@@ -13,6 +13,7 @@ use App\Models\CompetitionMembersEntry;
 use App\Models\CompetitionGlobalSetting;
 use Illuminate\Support\Facades\Storage;
 use App\Repositories\ClubAdmin\CompetitionGlobalSettingRepository;
+use App\Models\ClubSeason;
 
 class CompetitionRepository implements CompetitionRepositoryInterface
 {
@@ -142,6 +143,21 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             }
 
             $competition->entries = $entries;
+
+            $seasons = ClubSeason::where('club_id', $competition->club_id)
+                ->get(['name', 'start_date', 'end_date']);
+
+            $created = $competition->created_at
+                ? Carbon::parse($competition->created_at)->toDateString()
+                : null;
+
+            $season = $created
+                ? $seasons->first(function ($s) use ($created) {
+                    return $created >= $s->start_date && $created <= $s->end_date;
+                })
+                : null;
+
+            $competition->season_name = $season->name ?? null;
 
             return CompetitionResponse::success(
                 'Competition retrieved successfully.',

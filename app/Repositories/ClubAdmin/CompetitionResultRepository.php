@@ -7,6 +7,8 @@ use App\Traits\DataTables\CompetitionDataTableTrait;
 use App\Http\Responses\CompetitionResponse;
 use Illuminate\Support\Facades\DB;
 use App\Models\CompetitionMembersEntry;
+use App\Models\ClubSeason;
+use Carbon\Carbon;
 
 class CompetitionResultRepository implements CompetitionResultRepositoryInterface
 {
@@ -123,6 +125,11 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
             if (!$clubId) {
                 return CompetitionResponse::error('Club not found for this admin.', 404);
             }
+
+            // ✅ Fetch seasons once
+            $seasons = ClubSeason::where('club_id', $clubId)
+                ->get(['name', 'start_date', 'end_date']);
+
             $competitions = Competition::with([
                 'competitionMembers' => function ($q) {
                     $q->select('id', 'comp_id', 'member_id');
@@ -154,6 +161,21 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 $q->where('is_published', true);
             })
             ->get();
+
+            // ✅ Attach season_name (and optionally season object)
+            $competitions->each(function ($comp) use ($seasons) {
+                $created = $comp->created_at ? Carbon::parse($comp->created_at)->toDateString() : null;
+
+                $season = $created
+                    ? $seasons->first(function ($s) use ($created) {
+                        return $created >= $s->start_date && $created <= $s->end_date;
+                    })
+                    : null;
+
+                // add custom fields to response
+                $comp->season_name = $season->name ?? null;
+
+            });
 
             return CompetitionResponse::success('Club published results fetched successfully.', $competitions);
 
@@ -204,27 +226,28 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                                             'entry_image',
                                             'position',
                                             'is_published',
-                                        ])->with([
-                                            'comments' => function ($commentQuery) {
-                                                $commentQuery
-                                                    ->select([
-                                                        'id',
-                                                        'record_id',
-                                                        'record_type',
-                                                        'comment_type',
-                                                        'comment',
-                                                        'interacted_by',
-                                                        'created_at',
-                                                    ])
-                                                    ->where('record_type', 'competition_entry')
-                                                    // ->where('comment_type', 'comment')
-                                                    ->with([
-                                                        'user:id,first_name,last_name,profile_image'
-                                                    ])
-                                                    ->latest();
-                                                    // ->limit(10);
-                                            },
                                         ])
+                                        // ->with([
+                                        //     'comments' => function ($commentQuery) {
+                                        //         $commentQuery
+                                        //             ->select([
+                                        //                 'id',
+                                        //                 'record_id',
+                                        //                 'record_type',
+                                        //                 'comment_type',
+                                        //                 'comment',
+                                        //                 'interacted_by',
+                                        //                 'created_at',
+                                        //             ])
+                                        //             ->where('record_type', 'competition_entry')
+                                        //             // ->where('comment_type', 'comment')
+                                        //             ->with([
+                                        //                 'user:id,first_name,last_name,profile_image'
+                                        //             ])
+                                        //             ->latest();
+                                        //             // ->limit(10);
+                                        //     },
+                                        // ])
                                         ->limit(1);
                                 },
                             ]);
