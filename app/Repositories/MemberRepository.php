@@ -623,6 +623,28 @@ class MemberRepository implements MemberRepositoryInterface
                         'large_url'    => $photo->large_url,
                         'original_url' => $photo->original_url,
                         'created_at' => $photo->created_at,
+
+                        // ✅ EXIF DETAILS
+                        'exif' => [
+                            'camera_model'  => $photo->camera_model,
+                            'lens'          => $photo->lens,
+                            'focal_length'  => $photo->focal_length,
+                            'aperture'      => $photo->aperture,
+                            'shutter_speed' => $photo->shutter_speed,
+                            'iso'           => $photo->iso,
+                            'captured_at'   => $photo->captured_at,
+                        ],
+
+                        // ✅ Optional: fallback metadata (since your model has these too)
+                        'metadata' => [
+                            'image_width'  => $photo->image_width,
+                            'image_height' => $photo->image_height,
+                            'mime_type'    => $photo->mime_type,
+                            'file_size'    => $photo->file_size,
+                            'color_type'   => $photo->color_type,
+                            'bit_depth'    => $photo->bit_depth,
+                        ],
+
                         'comments' => $comments,
                         'likes' => $likes,
                         'comments_count' => $comments->count(),
