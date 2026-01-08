@@ -93,7 +93,10 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                         'entry_image' => asset('storage/' . $entry->entry_image),
 
                         'entry_image_title' => $entry->entry_image_title,
-                        'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+                        'member_name'       => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+                        'profile_image_url' => $memberComp->member->profile_image
+                            ? asset('storage/' . $memberComp->member->profile_image)
+                            : null,
 
                         'comments' => $entry->comments->map(fn ($c) => [
                             'id' => $c->id,
@@ -410,8 +413,12 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
     public function getLatestCompetitionsByLimit(int $clubId, ?int $limit = 3)
     {
-        $query = Competition::where('club_id', $clubId)
+        $query = Competition::query()
+            ->where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
+            ->with([
+                'judges:id,first_name,last_name,email',
+            ])
             ->orderBy('start_date', 'asc');
 
         if ($limit) {
@@ -420,6 +427,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
         return $query->get();
     }
+
 
 
     public function getCompetitionsByLimit(int $clubId, ?int $limit = 3)
