@@ -227,7 +227,7 @@ class ClubNewsRepository implements ClubNewsRepositoryInterface
 
     public function getClubNews($clubId)
     {
-        return ClubNews::where('club_id', $clubId)
+        return ClubNews::with('clubNewsType')->where('club_id', $clubId)
         ->latest()
         ->take(5)
         ->get();

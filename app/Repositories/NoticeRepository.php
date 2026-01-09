@@ -337,7 +337,7 @@ class NoticeRepository implements NoticeRepositoryInterface
     public function getLatestNotice($clubId)
     {
         try {
-            $latestNotice = MemberNotice::where('club_id', $clubId)
+            $latestNotice = MemberNotice::with('noticeType')->where('club_id', $clubId)
                 ->latest('created_at')
                 ->first();
 

@@ -432,7 +432,7 @@ class EventRepository implements EventRepositoryInterface
 
     public function getEventsByLlimit($clubId, $limit = null)
     {
-        $query = Event::with('images')
+        $query = Event::with(['types', 'tags', 'comments', 'images'])
             ->where('club_id', $clubId)
             ->orderBy('event_date', 'asc');
 
