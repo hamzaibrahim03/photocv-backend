@@ -169,7 +169,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                         'id' => $like->id,
                         'liked_by' => $like->user->username ?? 'Unknown',
                         'liked_by_id' => $like->user->id ?? null,
-                        'liked_at' => $like->created_at->toDateTimeString(),
+                        // 'liked_at' => $like->created_at->toDateTimeString(),
                     ];
                 })->values();
 
