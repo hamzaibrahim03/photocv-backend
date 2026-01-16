@@ -583,7 +583,10 @@ class MemberRepository implements MemberRepositoryInterface
                                     'comments' => function ($q) {
                                         $q->where('is_published', true)->orderBy('created_at', 'desc');
                                     },
-                                    'comments.user:id,username'
+                                    'comments.user:id,username',
+                                    'likes' => function ($q) {
+                                        $q->where('is_published', true)->orderBy('created_at', 'desc')->with('user:id,username');
+                                    },
                                 ]);
                         }]);
                 }
@@ -605,7 +608,7 @@ class MemberRepository implements MemberRepositoryInterface
                         ];
                     })->values();
 
-                    $likes = $photo->comments->where('comment_type', 'liking')->map(function ($like) {
+                    $likes = $photo->likes->map(function ($like) {
                         return [
                             'id' => $like->id,
                             'liked_by' => $like->user->username ?? 'Unknown',

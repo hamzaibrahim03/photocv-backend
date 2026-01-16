@@ -145,7 +145,10 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                         'uploadedBy',
                         'comments' => function ($commentQuery) {
                             $commentQuery->where('is_published', true)->with('user');
-                        }
+                        },
+                        'likes' => function ($lq) {
+                            $lq->with('user');
+                        },
                     ]);
                 }
             ])->findOrFail($galleryId);
@@ -161,7 +164,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                     ];
                 })->values();
 
-                $likes = $photo->comments->where('comment_type', 'liking')->map(function ($like) {
+                $likes = $photo->likes->map(function ($like) {
                     return [
                         'id' => $like->id,
                         'liked_by' => $like->user->username ?? 'Unknown',
