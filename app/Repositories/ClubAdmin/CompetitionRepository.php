@@ -112,6 +112,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
                         // ✅ LIKES (count + optionally who liked)
                         'likes_count' => $entry->likes->count(),
+                        'comment_count' => $entry->comments->count(),
 
                         'exif' => [
                             'camera_model'  => $entry->camera_model,
