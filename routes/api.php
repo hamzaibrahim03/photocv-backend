@@ -32,6 +32,7 @@ use App\Http\Controllers\v1\Member\BookingController;
 use App\Http\Controllers\v1\Member\PlannedLocationController;
 use App\Http\Controllers\v1\GlobalSearchController;
 use App\Http\Controllers\v1\Member\PlannedDayOutController;
+use App\Http\Controllers\v1\ClubAdmin\NotificationController;
 
 Route::prefix('v1')->group(function() {
 
@@ -44,6 +45,14 @@ Route::prefix('v1')->group(function() {
 
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
     Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
+
+
+    // Route::middleware('auth:sanctum')->group(function () {
+    //     Route::get('/notifications', [NotificationController::class, 'index']);
+    //     Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+    //     Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+    //     Route::patch('/notifications/read-all', [NotificationController::class, 'readAll']);
+    // });
 
     // Public club routes
     Route::domain('{username}-staging.cameraclub.website')
@@ -74,6 +83,16 @@ Route::prefix('v1')->group(function() {
             Route::get('/notice/{id}', [PublicClubController::class, 'noticeSingle']);
 
             Route::get('catalog/all-grouped', [CatalogController::class, 'getAllGrouped']);
+
+
+            Route::middleware('auth:sanctum')->group(function () {
+                Route::get('/notifications', [NotificationController::class, 'index']);
+                Route::get('/notifications/unread-count', [NotificationController::class, 'unreadCount']);
+                Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markRead']);
+                Route::patch('/notifications/read-all', [NotificationController::class, 'readAll']);
+                Route::get('/notifications/filters', [NotificationController::class, 'filters']);
+            });
+
         });
 
     Route::get('/search', [GlobalSearchController::class, 'search'])->name('global.search');

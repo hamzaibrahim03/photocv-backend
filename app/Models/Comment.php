@@ -79,5 +79,10 @@ class Comment extends Model
 		return $this->belongsTo(CompetitionMembersEntry::class, 'record_id');
 	}
 
+	public function photo()
+	{
+		return $this->belongsTo(Photo::class, 'record_id');
+	}
+
 
 }

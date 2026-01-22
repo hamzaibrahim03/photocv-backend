@@ -77,7 +77,7 @@ class CompetitionMemberSeeder extends Seeder
 
                     /* ================= SAVE ENTRY ================= */
 
-                    CompetitionMembersEntry::create([
+                    $entry = CompetitionMembersEntry::create([
                         'member_comp_id'    => $compMember->id,
                         'entry_type'        => $entryType,
                         'entry_image_title' => pathinfo(
@@ -111,6 +111,9 @@ class CompetitionMemberSeeder extends Seeder
                         'total_score'  => 0,
                         'is_published' => false,
                     ]);
+
+
+                    event(new \App\Events\CompetitionEntryAdded($entry, auth()->user()));
 
                 }
             }

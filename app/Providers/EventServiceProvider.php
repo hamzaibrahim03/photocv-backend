@@ -50,6 +50,13 @@ class EventServiceProvider extends ServiceProvider
         UserRegistered::class => [
             SendUserRegisteredEmail::class,
         ],
+
+        \App\Events\ContentInteracted::class => [
+            \App\Listeners\CreateInteractionNotification::class,
+        ],
+        \App\Events\CompetitionEntryAdded::class => [
+            \App\Listeners\CreateCompetitionEntryNotification::class,
+        ],
     ];
 
     /**
