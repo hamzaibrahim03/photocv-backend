@@ -145,6 +145,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
                 $query->where('club_id', $clubId);
             })
             ->with([
+                'roles:id,name',
                 'galleries' => function ($galleryQuery) {
                     $galleryQuery->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
