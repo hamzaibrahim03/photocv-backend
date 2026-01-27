@@ -8,21 +8,65 @@ use Illuminate\Http\Request;
 
 class NotificationController extends Controller
 {
+
+    /**
+     * Display a listing of the notifications.
+     */
     public function index(Request $request)
     {
         $q = Notification::where('user_id', $request->user()->id)
-            ->with(['actor:id,username'])
+            ->with(['actor:id,first_name,last_name'])
             ->latest();
 
-        if ($request->filled('category')) $q->where('category', $request->string('category'));
-        if ($request->boolean('unread')) $q->whereNull('read_at');
+        if ($request->filled('category')) {
+            $q->where('category', $request->string('category'));
+        }
+
         if ($request->filled('type')) {
             $q->where('type', $request->string('type'));
         }
 
-        return response()->json($q->paginate(20));
+        if ($request->boolean('unread')) {
+            $q->whereNull('read_at');
+        }
+
+        $notifications = $q->paginate(20);
+
+        $notifications->getCollection()->transform(function ($notification) {
+
+            $actorName = $notification->actor
+                ? trim(($notification->actor->first_name ?? '') . ' ' . ($notification->actor->last_name ?? ''))
+                : 'Someone';
+
+            if ($actorName === '') $actorName = 'Someone';
+
+            // ✅ IMPORTANT: modify data via temp variable
+            $data = $notification->data ?? [];
+
+            if (!empty($data['body'])) {
+                // Replace leading "username" portion with full name
+                $data['body'] = preg_replace(
+                    '/^.+?(?=\s(liked|commented|submitted|added))/i',
+                    $actorName,
+                    $data['body']
+                );
+            }
+
+            $data['actor_name'] = $actorName;
+
+            // assign back
+            $notification->data = $data;
+
+            return $notification;
+        });
+
+        return response()->json($notifications);
     }
 
+
+    /**
+     * Get the count of unread notifications.
+     */
     public function unreadCount(Request $request)
     {
         $count = Notification::where('user_id', $request->user()->id)
@@ -32,6 +76,10 @@ class NotificationController extends Controller
         return response()->json(['unread_count' => $count]);
     }
 
+
+    /**
+     * Mark a specific notification as read.
+     */
     public function markRead(Request $request, Notification $notification)
     {
         abort_unless($notification->user_id === $request->user()->id, 403);
@@ -43,6 +91,10 @@ class NotificationController extends Controller
         return response()->json(['ok' => true]);
     }
 
+
+    /**
+     * Mark all notifications as read.
+     */
     public function readAll(Request $request)
     {
         Notification::where('user_id', $request->user()->id)
@@ -53,6 +105,9 @@ class NotificationController extends Controller
     }
 
 
+    /**
+     * Get available notification filters (categories and types).
+     */
     public function filters()
     {
         return response()->json([
