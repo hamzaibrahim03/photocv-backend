@@ -15,7 +15,7 @@ class NotificationController extends Controller
     public function index(Request $request)
     {
         $q = Notification::where('user_id', $request->user()->id)
-            ->with(['actor:id,first_name,last_name'])
+            ->with(['actor:id,first_name,last_name', 'notifiable'])
             ->latest();
 
         if ($request->filled('category')) {
@@ -34,17 +34,44 @@ class NotificationController extends Controller
 
         $notifications->getCollection()->transform(function ($notification) {
 
+            // Actor full name
             $actorName = $notification->actor
                 ? trim(($notification->actor->first_name ?? '') . ' ' . ($notification->actor->last_name ?? ''))
                 : 'Someone';
 
-            if ($actorName === '') $actorName = 'Someone';
+            if ($actorName === '') {
+                $actorName = 'Someone';
+            }
 
-            // ✅ IMPORTANT: modify data via temp variable
+            // Work on data safely
             $data = $notification->data ?? [];
 
+            // ---------- PHOTO TITLE HANDLING ----------
+            if (
+                $notification->notifiable_type === \App\Models\Photo::class
+                && $notification->notifiable
+            ) {
+                $photoTitle = $notification->notifiable->title;
+
+                if (!empty($photoTitle)) {
+                    // Replace body intelligently
+                    // Example: "liked your photo" -> "liked your photo “Grace in Motion”"
+                    if (!empty($data['body'])) {
+                        $data['body'] = preg_replace(
+                            '/your photo/i',
+                            'your photo “' . $photoTitle . '”',
+                            $data['body']
+                        );
+                    }
+
+                    // Optional: expose title separately for frontend
+                    $data['photo_title'] = $photoTitle;
+                }
+            }
+
+            // ---------- ACTOR NAME HANDLING ----------
             if (!empty($data['body'])) {
-                // Replace leading "username" portion with full name
+                // Replace username / actor prefix with full name
                 $data['body'] = preg_replace(
                     '/^.+?(?=\s(liked|commented|submitted|added))/i',
                     $actorName,
@@ -52,13 +79,15 @@ class NotificationController extends Controller
                 );
             }
 
+            // Optional: explicit fields for frontend
             $data['actor_name'] = $actorName;
 
-            // assign back
+            // Assign back (important for casted attributes)
             $notification->data = $data;
 
             return $notification;
         });
+
 
         return response()->json($notifications);
     }
