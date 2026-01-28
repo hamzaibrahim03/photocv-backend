@@ -607,7 +607,7 @@ class MemberRepository implements MemberRepositoryInterface
                             'comment' => $comment->comment,
                             'posted_by' => $comment->user->username ?? 'Unknown',
                             'posted_by_id' => $comment->user->id ?? null,
-                            'posted_at' => $comment->created_at->toDateTimeString(),
+                            // 'posted_at' => $comment->created_at->toDateTimeString(),
                         ];
                     })->values();
 

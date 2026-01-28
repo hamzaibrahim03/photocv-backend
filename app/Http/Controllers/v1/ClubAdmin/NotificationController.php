@@ -59,7 +59,7 @@ class NotificationController extends Controller
                     if (!empty($data['body'])) {
                         $data['body'] = preg_replace(
                             '/your photo/i',
-                            'your photo “' . $photoTitle . '”',
+                            'your photo',
                             $data['body']
                         );
                     }
