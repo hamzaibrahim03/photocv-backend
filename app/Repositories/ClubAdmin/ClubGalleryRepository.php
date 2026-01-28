@@ -38,7 +38,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                             'comment' => $comment->comment,
                             'posted_by' => $comment->user->username ?? 'Unknown',
                             'posted_by_id' => $comment->user->id ?? null,
-                            'posted_at' => $comment->created_at->toDateTimeString(),
+                            // 'posted_at' => $comment->created_at->toDateTimeString(),
                         ];
                     })->values();
 
@@ -47,7 +47,7 @@ class ClubGalleryRepository implements ClubGalleryRepositoryInterface
                             'id' => $like->id,
                             'liked_by' => $like->user->username ?? 'Unknown',
                             'liked_by_id' => $like->user->id ?? null,
-                            'liked_at' => $like->created_at->toDateTimeString(),
+                            // 'liked_at' => $like->created_at->toDateTimeString(),
                         ];
                     })->values();
 
