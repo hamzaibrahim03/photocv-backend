@@ -34,55 +34,39 @@ class NotificationController extends Controller
 
         $notifications->getCollection()->transform(function ($notification) {
 
-            // Actor full name
-            $actorName = $notification->actor
-                ? trim(($notification->actor->first_name ?? '') . ' ' . ($notification->actor->last_name ?? ''))
-                : 'Someone';
-
-            if ($actorName === '') {
-                $actorName = 'Someone';
-            }
-
-            // Work on data safely
             $data = $notification->data ?? [];
 
-            // ---------- PHOTO TITLE HANDLING ----------
-            if (
-                $notification->notifiable_type === \App\Models\Photo::class
-                && $notification->notifiable
-            ) {
-                $photoTitle = $notification->notifiable->title;
+            // ---------- ACTOR NAME (SEPARATE) ----------
+            $actorName = $notification->actor
+                ? trim(($notification->actor->first_name ?? '') . ' ' . ($notification->actor->last_name ?? ''))
+                : null;
 
-                if (!empty($photoTitle)) {
-                    // Replace body intelligently
-                    // Example: "liked your photo" -> "liked your photo “Grace in Motion”"
-                    if (!empty($data['body'])) {
-                        $data['body'] = preg_replace(
-                            '/your photo/i',
-                            'your photo',
-                            $data['body']
-                        );
-                    }
+            $data['actor_name'] = $actorName ?: null;
 
-                    // Optional: expose title separately for frontend
-                    $data['photo_title'] = $photoTitle;
-                }
-            }
-
-            // ---------- ACTOR NAME HANDLING ----------
+            // ---------- CLEAN BODY (REMOVE USERNAME COMPLETELY) ----------
             if (!empty($data['body'])) {
-                // Replace username / actor prefix with full name
+                // This removes anything before the action verb
+                // "kamranchohdry liked your photo" -> "liked your photo"
                 $data['body'] = preg_replace(
-                    '/^.+?(?=\s(liked|commented|submitted|added))/i',
-                    $actorName,
+                    '/^.*?\b(liked|commented|submitted|added)\b/i',
+                    '$1',
                     $data['body']
                 );
             }
 
-            // Optional: explicit fields for frontend
-            $data['actor_name'] = $actorName;
+            // ---------- PHOTO TITLE (LIKES ONLY) ----------
+            $isLikeNotification = str_ends_with((string) $notification->type, '_liked');
 
-            // Assign back (important for casted attributes)
+            if (
+                $isLikeNotification &&
+                $notification->notifiable_type === \App\Models\Photo::class &&
+                $notification->notifiable
+            ) {
+                $data['photo_title'] = $notification->notifiable->title ?: null;
+            } else {
+                unset($data['photo_title']);
+            }
+
             $notification->data = $data;
 
             return $notification;
@@ -91,6 +75,7 @@ class NotificationController extends Controller
 
         return response()->json($notifications);
     }
+
 
 
     /**
