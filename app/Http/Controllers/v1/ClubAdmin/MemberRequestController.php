@@ -25,10 +25,19 @@ class MemberRequestController extends Controller
     {
         $validated = $request->validate([
             'user_id' => 'required|exists:users,id',
-            'club_id' => 'required|exists:clubs,id',
+            'club_id' => 'nullable|exists:clubs,id',
         ]);
 
-        $this->memberRequestService->assignMember($validated['user_id'], $validated['club_id']);
+        $clubId = $validated['club_id'] ?? optional(auth()->user()->club)->id;
+
+        if (!$clubId) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You are not assigned to any club.',
+            ], 422);
+        }
+
+        $this->memberRequestService->assignMember($validated['user_id'], $clubId);
 
         return response()->json(['message' => 'Club assigned successfully']);
     }

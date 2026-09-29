@@ -44,6 +44,10 @@ class BookingRepository implements BookingRepositoryInterface
                 $booking->gears()->sync($data['gear_ids']);
             }
 
+            if (isset($data['gear_library_ids'])) {
+                $booking->gearLibraries()->sync($data['gear_library_ids']);
+            }
+
             if (isset($data['attachments']) && is_array($data['attachments'])) {
                 foreach ($data['attachments'] as $file) {
                     // Store in storage/app/public/attachments
@@ -74,7 +78,7 @@ class BookingRepository implements BookingRepositoryInterface
      */
     public function find($id)
     {
-        return Booking::with(['gears', 'attachments', 'bookingType', 'leadSource'])
+        return Booking::with(['gears', 'gearLibraries', 'attachments', 'bookingType', 'leadSource'])
                   ->find($id);
     }
 
@@ -97,6 +101,11 @@ class BookingRepository implements BookingRepositoryInterface
             // Update gears if provided
             if (isset($data['gear_ids'])) {
                 $booking->gears()->sync($data['gear_ids']);
+            }
+
+            // Update gear libraries if provided
+            if (isset($data['gear_library_ids'])) {
+                $booking->gearLibraries()->sync($data['gear_library_ids']);
             }
 
             // Update attachments if provided

@@ -42,7 +42,7 @@ trait CompetitionDataTableTrait
         // Eager load relationships
         $query->with([
             'competitionMembers.entries' => function ($q) {
-                $q->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type');
+                $q->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type', 'position', 'is_published');
             },
             'competitionMembers.entries.scores' => function ($q) {
                 $q->with('judge:id,first_name,last_name,email') // bring judge info
@@ -70,6 +70,8 @@ trait CompetitionDataTableTrait
                                 'entry_image'   => asset('storage/' . $entry->entry_image),
                                 'entry_title'   => $entry->entry_image_title,
                                 'entry_type'    => $entry->entry_type,
+                                'position'      => $entry->position,
+                                'is_published'  => (bool) $entry->is_published,
                                 'scores'        => $entry->scores->map(function ($score) {
                                     return [
                                         'id'      => $score->id,
@@ -175,7 +177,7 @@ trait CompetitionDataTableTrait
                 ->select('id', 'entry_id', 'judge_id', 'score', 'comment');
             },
             'competitionMembers.entries',
-            'competitionMembers.member:id,first_name,last_name,email'
+            'competitionMembers.member:id,first_name,last_name,title,email,profile_image'
         ]);
 
         $competitions = $query->get();
@@ -188,17 +190,26 @@ trait CompetitionDataTableTrait
                     $totalScore = $entry->scores->sum('score');
                     $entries[] = [
                         'entry_id' => $entry->id,
+                        'member_comp_id' => $entry->member_comp_id,
                         'entry_image' => asset('storage/' . $entry->entry_image),
                         'entry_image_title' => $entry->entry_image_title,
-                        'member_name' => $memberComp->member->first_name . ' ' . $memberComp->member->last_name,
+                        'member_name' => $memberComp->member
+                            ? trim($memberComp->member->first_name . ' ' . $memberComp->member->last_name)
+                            : null,
+                        'member_title' => $memberComp->member?->title,
+                        'member_profile_image' => $memberComp->member?->profile_image_url,
                         'scores' => $entry->scores->map(function ($score) {
                             return [
-                                'judge_name' => $score->judge->first_name . ' ' . $score->judge->last_name,
+                                'judge_name' => $score->judge
+                                    ? trim($score->judge->first_name . ' ' . $score->judge->last_name)
+                                    : null,
                                 'score' => $score->score,
                                 'comment' => $score->comment
                             ];
                         }),
-                        'total_score' => $totalScore
+                        'total_score' => $totalScore,
+                        'position' => $entry->position,
+                        'is_published' => (bool) $entry->is_published,
                     ];
                 }
             }

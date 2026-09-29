@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int|null $photo_id
  * @property string|null $record_type
  * @property string|null $comment
+ * @property string|null $username
  * @property int|null $interacted_by
  * @property bool|null $is_published
  * @property string|null $admin_notes
@@ -36,6 +37,7 @@ class MemberPhotoComment extends Model
 		'member_id' => 'int',
 		'photo_id' => 'int',
 		'interacted_by' => 'int',
+		'username' => 'string',
 		'is_published' => 'bool'
 	];
 
@@ -45,6 +47,7 @@ class MemberPhotoComment extends Model
 		'record_type',
 		'comment',
 		'interacted_by',
+		'username',
 		'is_published',
 		'admin_notes'
 	];

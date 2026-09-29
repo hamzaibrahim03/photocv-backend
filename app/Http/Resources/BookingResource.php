@@ -30,6 +30,8 @@ class BookingResource extends JsonResource
             'start_time' => $this->start_time?->format('H:i'),
             'end_time' => $this->end_time?->format('H:i'),
             'set_reminder' => (bool)$this->set_reminder,
+            'event_reminders' => $this->event_reminders ?? [],
+            'pre_event_reminder' => (bool)$this->pre_event_reminder,
 
             // Booking Type & Lead Source
             'booking_type' => $this->bookingType ? [
@@ -79,6 +81,16 @@ class BookingResource extends JsonResource
                     'model' => $gear->model,
                 ];
             }),
+
+            // Gear libraries / kits (pivot)
+            'gear_libraries' => $this->whenLoaded('gearLibraries', function () {
+                return $this->gearLibraries->map(function ($library) {
+                    return [
+                        'id' => $library->id,
+                        'title' => $library->title,
+                    ];
+                });
+            }, []),
 
             // Attachments (polymorphic)
             'attachments' => $this->attachments->map(function ($attachment) {

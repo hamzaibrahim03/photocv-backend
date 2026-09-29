@@ -39,6 +39,7 @@ class CommentsSeeder extends Seeder
                     'record_id'     => $photoId,
                     'record_type'   => 'photo',
                     'comment_type'  => 'comment',
+                    'username'      => 'username',
                     'comment'       => $sampleComments[array_rand($sampleComments)],
                     'interacted_by' => $memberIds[array_rand($memberIds)],
                     'is_published'  => true,

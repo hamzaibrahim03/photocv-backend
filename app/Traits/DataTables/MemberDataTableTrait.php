@@ -212,7 +212,7 @@ trait MemberDataTableTrait
 
     public function getMemberBookings($request, $userId)
     {
-        $query = Booking::with(['gears', 'attachments', 'bookingType', 'leadSource'])
+        $query = Booking::with(['gears', 'gearLibraries', 'attachments', 'bookingType', 'leadSource'])
             ->where('user_id', $userId);
 
         // Apply search filter

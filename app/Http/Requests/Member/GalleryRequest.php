@@ -43,6 +43,13 @@ class GalleryRequest extends FormRequest
                 'title.*'       => 'nullable|string|max:250',
                 'description'   => 'required|array|min:1',
                 'description.*' => 'nullable|string',
+
+                // Image settings (applied to every image in this upload)
+                'allow_comments'    => 'sometimes|boolean',
+                'allow_likes'       => 'sometimes|boolean',
+                'visibility'        => 'sometimes|in:public,private',
+                'show_in_portfolio' => 'sometimes|boolean',
+                'show_exif'         => 'sometimes|boolean',
             ];
         }
 

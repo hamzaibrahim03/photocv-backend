@@ -48,12 +48,20 @@ class Photo extends Model
 		'gallery_id' => 'int',
 		'is_active' => 'bool',
 		'allow_cc' => 'bool',
+		'allow_comments' => 'bool',
+		'allow_likes' => 'bool',
+		'show_in_portfolio' => 'bool',
+		'show_exif' => 'bool',
 		'image_sizes' => 'array',
 	];
 
 	protected $fillable = [
 		'gallery_id', 'title', 'image', 'description', 'is_active',
 		'club_admin_notes', 'allow_cc', 'uploaded_by',
+
+		// Image settings
+		'allow_comments', 'allow_likes', 'visibility',
+		'show_in_portfolio', 'show_exif',
 
 		// EXIF fields
 		'camera_model', 'lens', 'focal_length', 'aperture',

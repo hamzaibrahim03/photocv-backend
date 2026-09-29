@@ -33,6 +33,10 @@ use App\Http\Controllers\v1\Member\PlannedLocationController;
 use App\Http\Controllers\v1\GlobalSearchController;
 use App\Http\Controllers\v1\Member\PlannedDayOutController;
 use App\Http\Controllers\v1\ClubAdmin\NotificationController;
+use App\Http\Controllers\v1\Member\GearController;
+use App\Http\Controllers\v1\Member\GearLibraryController;
+use App\Http\Controllers\v1\Member\GearWishlistController;
+use App\Http\Controllers\v1\Member\CheatSheetController;
 
 Route::prefix('v1')->group(function() {
 
@@ -168,6 +172,15 @@ Route::prefix('v1')->group(function() {
             Route::post('booking-extras', [BookingController::class, 'bookingExtras']);
 
             Route::apiResource('planned-locations', PlannedLocationController::class);
+
+            // gear routes
+            Route::get('gear-extras', [GearController::class, 'extras']);
+            Route::apiResource('gears', GearController::class);
+            Route::apiResource('gear-libraries', GearLibraryController::class);
+            Route::apiResource('gear-wishlists', GearWishlistController::class);
+
+            // learning routes
+            Route::apiResource('cheat-sheets', CheatSheetController::class);
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);

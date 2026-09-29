@@ -74,8 +74,8 @@ class MemberRepository implements MemberRepositoryInterface
 
             // Load galleries with active photos and their comments
             $member->load([
-                'galleries' => function ($query) {
-                    $query->where('is_active', true)
+                    'galleries' => function ($query) {
+                        $query->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
                             $photoQuery->where('is_active', true)
                                 ->with(['comments' => function ($q) {
@@ -418,6 +418,9 @@ class MemberRepository implements MemberRepositoryInterface
             $descriptions = $data['description'] ?? [];
             $isActive = isset($data['is_active']) ? (bool) $data['is_active'] : true;
             $userId = auth()->id();
+            $settings = array_intersect_key($data, array_flip([
+                'allow_comments', 'allow_likes', 'visibility', 'show_in_portfolio', 'show_exif',
+            ]));
 
             foreach ($images as $index => $image) {
 
@@ -445,7 +448,7 @@ class MemberRepository implements MemberRepositoryInterface
 
                     'is_active'   => $isActive,
                     'uploaded_by' => $userId,
-                ]);
+                ] + $settings);
             }
 
             return MemberResponse::success('Images uploaded successfully.');
@@ -518,7 +521,8 @@ class MemberRepository implements MemberRepositoryInterface
             $clubId = auth()->user()->club->id;
 
             $members = User::whereHas('clubs', function ($query) use ($clubId) {
-                    $query->where('clubs.id', $clubId);
+                    $query->where('clubs.id', $clubId)
+                        ->where('club_user.status', 'approved');
                 })
                 ->withCount(['galleries']) // gallery count
                 ->with([
@@ -579,7 +583,7 @@ class MemberRepository implements MemberRepositoryInterface
 
             $member->load([
                 'galleries' => function ($query) {
-                    $query->where('is_active', true)
+                        $query->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
                             $photoQuery->where('is_active', true)
                                 ->with([

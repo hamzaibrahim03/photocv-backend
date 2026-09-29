@@ -27,6 +27,8 @@ class StorePlannedDayOutRequest extends FormRequest
             'planned_date' => 'nullable|date',
             'photography_description' => 'nullable|string',
             'location' => 'nullable|string|max:255',
+            'status' => 'nullable|in:upcoming,pending,visited',
+            'gear' => 'nullable|string|max:255',
         ];
     }
 }

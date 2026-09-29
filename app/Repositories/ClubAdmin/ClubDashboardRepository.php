@@ -142,12 +142,14 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
     public function getMembersGallerries(int $clubId, int $limit = 10)
     {
         return User::whereHas('clubs', function ($query) use ($clubId) {
-                $query->where('club_id', $clubId);
+                $query->where('club_id', $clubId)
+                    ->where('status', 'approved');
             })
             ->with([
                 'roles:id,name',
-                'galleries' => function ($galleryQuery) {
-                    $galleryQuery->where('is_active', true)
+                'galleries' => function ($galleryQuery) use ($clubId) {
+                    $galleryQuery->where('club_id', $clubId)
+                        ->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
                             $photoQuery->where('is_active', true)
                                     ->orderBy('created_at', 'desc')

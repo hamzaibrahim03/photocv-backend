@@ -56,6 +56,18 @@ class CatalogSeeder extends Seeder
             ['name' => 'Lighting', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-lightbulb'],
             ['name' => 'Accessory', 'catalog_type' => 'gear_category', 'icon' => 'fa-solid fa-plug'],
 
+            // Cheat Sheet Categories
+            ['name' => 'Portrait', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Landscape', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Street', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Wedding', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Events', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Sports', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Wildlife', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Night', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Macro', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+            ['name' => 'Studio', 'catalog_type' => 'cheat_sheet_category', 'icon' => null],
+
         ];
 
         DB::table('catalog')->insert($catalogs);

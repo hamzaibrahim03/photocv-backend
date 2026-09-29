@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class PlannedDayOut extends Model
+class GearLibrary extends Model
 {
     use HasFactory;
 
@@ -13,15 +13,20 @@ class PlannedDayOut extends Model
         'user_id',
         'title',
         'description',
-        'planned_date',
-        'photography_description',
-        'location',
-        'status',
-        'gear',
     ];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function gears()
+    {
+        return $this->belongsToMany(Gear::class, 'gear_library_gear')->withTimestamps();
+    }
+
+    public function bookings()
+    {
+        return $this->belongsToMany(Booking::class, 'booking_gear_library')->withTimestamps();
     }
 }

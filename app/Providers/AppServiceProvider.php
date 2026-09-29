@@ -98,6 +98,15 @@ use App\Repositories\ClubPublic\PublicClubRepositoryInterface;
 use App\Repositories\Member\PlannedDayOutRepository;
 use App\Repositories\Member\PlannedDayOutRepositoryInterface;
 
+use App\Repositories\Member\GearRepository;
+use App\Repositories\Member\GearRepositoryInterface;
+use App\Repositories\Member\GearLibraryRepository;
+use App\Repositories\Member\GearLibraryRepositoryInterface;
+use App\Repositories\Member\GearWishlistRepository;
+use App\Repositories\Member\GearWishlistRepositoryInterface;
+use App\Repositories\Member\CheatSheetRepository;
+use App\Repositories\Member\CheatSheetRepositoryInterface;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -125,6 +134,10 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(PlannedLocationRepositoryInterface::class, PlannedLocationRepository::class);
         $this->app->bind(PublicClubRepositoryInterface::class, PublicClubRepository::class);
         $this->app->bind(PlannedDayOutRepositoryInterface::class, PlannedDayOutRepository::class);
+        $this->app->bind(GearRepositoryInterface::class, GearRepository::class);
+        $this->app->bind(GearLibraryRepositoryInterface::class, GearLibraryRepository::class);
+        $this->app->bind(GearWishlistRepositoryInterface::class, GearWishlistRepository::class);
+        $this->app->bind(CheatSheetRepositoryInterface::class, CheatSheetRepository::class);
 
         $this->app->bind(NoticeRepositoryInterface::class, NoticeRepository::class);
         $this->app->bind(ClubGalleryRepositoryInterface::class, ClubGalleryRepository::class);

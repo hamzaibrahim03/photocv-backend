@@ -26,6 +26,8 @@ class Booking extends Model
         'start_time',
         'end_time',
         'set_reminder',
+        'event_reminders',
+        'pre_event_reminder',
         'service_ids',
         'location',
         'deliverables',
@@ -52,6 +54,8 @@ class Booking extends Model
         'start_time' => 'datetime:H:i',
         'end_time' => 'datetime:H:i',
         'set_reminder' => 'boolean',
+        'event_reminders' => 'array',
+        'pre_event_reminder' => 'boolean',
         'backup_gear_needed' => 'boolean',
         'total_cost' => 'decimal:2',
         'discount' => 'decimal:2',
@@ -68,6 +72,11 @@ class Booking extends Model
     public function gears()
     {
         return $this->belongsToMany(Gear::class, 'booking_gear');
+    }
+
+    public function gearLibraries()
+    {
+        return $this->belongsToMany(GearLibrary::class, 'booking_gear_library')->withTimestamps();
     }
 
     public function attachments()

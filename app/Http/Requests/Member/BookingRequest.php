@@ -85,6 +85,14 @@ class BookingRequest extends FormRequest
             'backup_gear_needed' => 'boolean',
             'gear_ids' => 'nullable|array',
             'gear_ids.*' => 'integer|exists:gears,id',
+            'gear_library_ids' => 'nullable|array',
+            'gear_library_ids.*' => [
+                'integer',
+                Rule::exists('gear_libraries', 'id')->where('user_id', auth()->id()),
+            ],
+            'event_reminders' => 'nullable|array|max:5',
+            'event_reminders.*' => 'integer|min:0|max:365', // days before event
+            'pre_event_reminder' => 'boolean',
         ];
 
         if ($this->isMethod('POST')) {

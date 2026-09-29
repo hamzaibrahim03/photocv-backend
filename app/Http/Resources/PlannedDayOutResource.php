@@ -28,6 +28,8 @@ class PlannedDayOutResource extends JsonResource
             'planned_date' => $this->planned_date,
             'photography_description' => $this->photography_description,
             'location' => $this->location,
+            'status' => $this->status,
+            'gear' => $this->gear,
             'created_at' => $this->created_at?->toDateTimeString(),
             'updated_at' => $this->updated_at?->toDateTimeString(),
         ];

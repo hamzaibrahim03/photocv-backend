@@ -8,14 +8,14 @@ trait CommonDataTableTrait
 {
     private $default_pagesize = 10;
 
-    protected function applySearchAndOrder($query, $request, $defaultSort = 'created_at')
+    protected function applySearchAndOrder($query, $request, $defaultSort = 'created_at', array $searchColumns = ['name', 'title', 'description'])
     {
         // Search
         if ($request->filled('search_term')) {
-            $query->where(function ($q) use ($request) {
-                $q->where('name', 'LIKE', '%' . $request->search_term . '%')
-                  ->orWhere('title', 'LIKE', '%' . $request->search_term . '%')
-                  ->orWhere('description', 'LIKE', '%' . $request->search_term . '%');
+            $query->where(function ($q) use ($request, $searchColumns) {
+                foreach ($searchColumns as $column) {
+                    $q->orWhere($column, 'LIKE', '%' . $request->search_term . '%');
+                }
             });
         }
 
