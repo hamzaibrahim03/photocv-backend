@@ -31,7 +31,7 @@ class JudgeController extends Controller
         $validated = $request->validate([
             'score'   => 'required|integer|min:1|max:100',
             'comment' => 'nullable|string',
-            'position' => 'nullable|string',
+            'position' => 'nullable|in:1,2,3',
             'is_bookmarked' => 'nullable|boolean',
         ]);
 

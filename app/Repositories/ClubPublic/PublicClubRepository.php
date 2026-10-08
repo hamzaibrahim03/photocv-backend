@@ -119,7 +119,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
 
                 'clubNews'      => $this->repos->clubNewsRepo->getClubNews($clubId),
                 'latest_notice' => $this->repos->noticeRepository->getLatestNotice($clubId),
-                'latestResults' => $this->repos->competitionResultRepository->getAllPublishedResultsForHome($clubId),
+                'latestResults' => $this->repos->competitionResultRepository->getAllPublishedResults(null, true),
                 'clubSettings'  => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
             ]
         ], 200);
@@ -229,7 +229,7 @@ class PublicClubRepository implements PublicClubRepositoryInterface
             'success' => true,
             'message' => 'Competition Results data retrieved successfully',
             'data' => [
-                'competitionResults'   => $this->repos->competitionResultRepository->getAllPublishedResults($clubId),
+                'competitionResults'   => $this->repos->competitionResultRepository->getAllPublishedResults(null, true),
                 'clubSettings'         => $this->repos->clubSettingRepo->getAllClubSettings($user->id),
                 'calendar'             => $this->repos->competitionRepo->getCalenderCompetitionAndEvent($clubId),
                 'upcomingEvents'       => $this->repos->eventRepo->getUpcomingEvents($clubId),

@@ -126,6 +126,26 @@ class Club extends Model
 		return $this->hasMany(ClubSeason::class);
 	}
 
+	/**
+	 * Compact club info for API payloads (e.g. competition results).
+	 * Built explicitly because `id` is in $hidden.
+	 */
+	public function summary(): array
+	{
+		return [
+			'id'          => $this->id,
+			'club_name'   => $this->club_name,
+			'tag_line'    => $this->tag_line,
+			'domain_name' => $this->domain_name,
+			'logo_url'    => $this->setting?->logo_url,
+		];
+	}
+
+	public function competitions()
+	{
+		return $this->hasMany(Competition::class, 'club_id');
+	}
+
 	public function upcomingCompetitions()
 	{
 		return $this->hasMany(Competition::class, 'club_id')

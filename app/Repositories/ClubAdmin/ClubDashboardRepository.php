@@ -227,7 +227,7 @@ class ClubDashboardRepository implements ClubDashboardRepositoryInterface
             });
 
         // Competitions of current month
-        $competitions = Competition::where('club_id', $clubId)
+        $competitions = Competition::query()
             ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
             ->orderBy('start_date', 'asc')
             ->get(['start_date', 'name']) // Only get these fields

@@ -49,7 +49,7 @@ class ClubDashboardService
             'total_members_count' => $latestMembersData['total_count'],
             'current_month_activities' => $this->clubDashboardRepository->getCurrentMonthActivities($clubId),
             // 'recent_results' => $this->clubDashboardRepository->getRecentResults($clubId),
-            'recent_results' => $this->competitionResultRepository->getAllPublishedResults($clubId),
+            'recent_results' => $this->competitionResultRepository->getAllPublishedResults(null, true),
         ];
     }
 }

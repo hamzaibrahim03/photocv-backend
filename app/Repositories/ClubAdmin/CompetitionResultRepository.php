@@ -28,14 +28,9 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 'competitionTheme'
             ]);
 
-            // If user is a club admin, filter by their club
-            if ($user->hasRole('club_admin')) {
-                $clubId = $user->club->id ?? null;
-                if ($clubId) {
-                    $query->where('club_id', $clubId);
-                } else {
-                    return CompetitionResponse::error('Club not found for this admin.', 404);
-                }
+            // Results of all clubs are listed; optionally narrow to one club
+            if ($request->filled('club_id')) {
+                $query->where('club_id', $request->club_id);
             }
 
             // Get paginated/searchable DataTable results
@@ -61,15 +56,6 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 'competitionTheme',
                 'judges'
             ])->where('id', $id);
-
-            if ($user->hasRole('club_admin')) {
-                $clubId = $user->club->id ?? null;
-                if ($clubId) {
-                    $query->where('club_id', $clubId);
-                } else {
-                    return CompetitionResponse::error('Club not found for this admin.', 404);
-                }
-            }
 
             $competitionEntries = $this->getCompetitionEntryData($request, $query, 'name');
             return CompetitionResponse::success('Competition entries successfully.', $competitionEntries);
@@ -115,22 +101,30 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
-    public function getAllPublishedResults($clubId = null)
+    /**
+     * Published results of one club, or of every club when $allClubs is true
+     * ($clubId then acts as an optional filter).
+     */
+    public function getAllPublishedResults($clubId = null, bool $allClubs = false)
     {
         try {
 
-            if(!$clubId) {
-                $clubId = auth()->user()->club->id ?? null;
-            }
-            if (!$clubId) {
-                return CompetitionResponse::error('Club not found for this admin.', 404);
+            if (!$allClubs) {
+                if(!$clubId) {
+                    $clubId = auth()->user()->club->id ?? null;
+                }
+                if (!$clubId) {
+                    return CompetitionResponse::error('Club not found for this admin.', 404);
+                }
             }
 
-            // ✅ Fetch seasons once
-            $seasons = ClubSeason::where('club_id', $clubId)
-                ->get(['name', 'start_date', 'end_date']);
+            // ✅ Fetch seasons once, grouped per club
+            $seasons = ClubSeason::when($clubId, fn ($q) => $q->where('club_id', $clubId))
+                ->get(['club_id', 'name', 'start_date', 'end_date'])
+                ->groupBy('club_id');
 
             $competitions = Competition::with([
+                'club.setting',
                 'competitionMembers' => function ($q) {
                     $q->select('id', 'comp_id', 'member_id');
                 },
@@ -156,7 +150,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                     ]);
                 }
             ])
-            ->where('club_id', $clubId)
+            ->when($clubId, fn ($q) => $q->where('club_id', $clubId))
             ->whereHas('competitionMembers.entries', function ($q) {
                 $q->where('is_published', true);
             })
@@ -167,7 +161,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 $created = $comp->created_at ? Carbon::parse($comp->created_at)->toDateString() : null;
 
                 $season = $created
-                    ? $seasons->first(function ($s) use ($created) {
+                    ? $seasons->get($comp->club_id, collect())->first(function ($s) use ($created) {
                         return $created >= $s->start_date && $created <= $s->end_date;
                     })
                     : null;
@@ -175,6 +169,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                 // add custom fields to response
                 $comp->season_name = $season->name ?? null;
 
+                $this->attachClubSummary($comp);
             });
 
             return CompetitionResponse::success('Club published results fetched successfully.', $competitions);
@@ -207,6 +202,7 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                     'club_id',
                 ])
                 ->with([
+                    'club.setting',
                     'competitionMembers' => function ($memberQuery) {
                         $memberQuery
                             ->select([
@@ -273,6 +269,8 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
                         ->filter(fn ($member) => $member->entries->isNotEmpty())
                         ->values()
                 );
+
+                $this->attachClubSummary($competition);
             });
 
             return CompetitionResponse::success(
@@ -288,6 +286,15 @@ class CompetitionResultRepository implements CompetitionResultRepositoryInterfac
         }
     }
 
-
-
+    /**
+     * Replace the loaded club relation with its compact summary so the
+     * response carries club id/name/logo instead of the full hidden-field model.
+     * @param Competition $competition
+     */
+    private function attachClubSummary(Competition $competition): void
+    {
+        $summary = $competition->club?->summary();
+        $competition->unsetRelation('club');
+        $competition->setAttribute('club', $summary);
+    }
 }

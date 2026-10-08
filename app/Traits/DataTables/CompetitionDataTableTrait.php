@@ -41,6 +41,7 @@ trait CompetitionDataTableTrait
 
         // Eager load relationships
         $query->with([
+            'club.setting',
             'competitionMembers.entries' => function ($q) {
                 $q->select('id', 'member_comp_id', 'entry_image', 'entry_image_title', 'entry_type', 'position', 'is_published');
             },
@@ -61,6 +62,9 @@ trait CompetitionDataTableTrait
                 return $competition->featured_image
                     ? asset('storage/' . $competition->featured_image)
                     : null;
+            })
+            ->addColumn('club', function ($competition) {
+                return $competition->club?->summary();
             })
             ->addColumn('images', function ($competition) {
                 return $competition->competitionMembers
@@ -177,7 +181,8 @@ trait CompetitionDataTableTrait
                 ->select('id', 'entry_id', 'judge_id', 'score', 'comment');
             },
             'competitionMembers.entries',
-            'competitionMembers.member:id,first_name,last_name,title,email,profile_image'
+            'competitionMembers.member:id,first_name,last_name,title,email,profile_image',
+            'club.setting',
         ]);
 
         $competitions = $query->get();
@@ -210,6 +215,7 @@ trait CompetitionDataTableTrait
                         'total_score' => $totalScore,
                         'position' => $entry->position,
                         'is_published' => (bool) $entry->is_published,
+                        'club' => $competition->club?->summary(),
                     ];
                 }
             }
@@ -227,21 +233,12 @@ trait CompetitionDataTableTrait
      */
     public function getAllAdminCompetitionData($request)
     {
-        $clubIds = auth()->user()->clubs->pluck('id')->toArray();
+        // Base query: competitions of all clubs, optionally narrowed to one club
+        $competitionQuery = Competition::query();
 
-        if (empty($clubIds)) {
-            return response()->json([
-                'dataTable' => [],
-                'totalCompetitionCount' => 0,
-                'daysUntilNextCompetition' => null,
-                'calendarCompetitions' => [],
-                'recentCompetitions' => [],
-                'recentSubmissions' => [],
-            ]);
+        if ($request->filled('club_id')) {
+            $competitionQuery->where('club_id', $request->club_id);
         }
-
-        // Base query
-        $competitionQuery = Competition::whereIn('club_id', $clubIds);
 
         // Total count
         $totalCompetitionCount = (clone $competitionQuery)->count();
@@ -306,7 +303,7 @@ trait CompetitionDataTableTrait
         $recentCompetitions = (clone $competitionQuery)
             ->latest('start_date')
             ->take(6)
-            ->get(['id', 'name', 'start_date', 'featured_image'])
+            ->get(['id', 'club_id', 'name', 'start_date', 'featured_image'])
             ->map(function ($comp) {
                 return [
                     'id' => $comp->id,
@@ -315,6 +312,7 @@ trait CompetitionDataTableTrait
                     'featured_image' => $comp->featured_image
                         ? asset('storage/' . $comp->featured_image)
                         : null,
+                    'club' => $comp->club?->summary(),
                 ];
             });
 
@@ -323,7 +321,7 @@ trait CompetitionDataTableTrait
                 'competitionMember.competition:id,name,club_id',
                 'competitionMember.member:id,username',
             ])
-            ->whereHas('competitionMember.competition', fn($q) => $q->whereIn('club_id', $clubIds))
+            ->when($request->filled('club_id'), fn ($q) => $q->whereHas('competitionMember.competition', fn ($c) => $c->where('club_id', $request->club_id)))
             ->latest()
             ->take(4)
             ->get()
@@ -431,8 +429,9 @@ trait CompetitionDataTableTrait
                 ->get()
                 ->map(fn($c) => array_merge($c->toArray(), ['is_assigned' => 'No']));
 
-            // Merge both for DataTables
-            $allCompetitions = $assigned->merge($unassigned);
+            // Merge both for DataTables. toBase(): an empty Eloquent collection stays
+            // Eloquent after map(), and its merge() calls getKey() on the array items.
+            $allCompetitions = $assigned->toBase()->merge($unassigned->toBase());
 
             // Counts
             $totalCompetitions = $allCompetitions->count();
@@ -448,7 +447,8 @@ trait CompetitionDataTableTrait
                             return collect($member['entries'] ?? [])
                                 ->map(function ($entry) use ($member) {
                                     return [
-                                        'entry_image' => $entry['entry_image'] ? asset('storage/' . $entry['entry_image']) : null,
+                                        // raw entry_image is $hidden on the model; use its URL accessor
+                                        'entry_image' => $entry['entry_image_url'] ?? null,
                                         'entry_title' => $entry['entry_image_title'],
                                         'entry_type' => $entry['entry_type'],
                                         'position' => $entry['position'],

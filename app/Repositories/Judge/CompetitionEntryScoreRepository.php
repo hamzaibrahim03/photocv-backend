@@ -50,15 +50,20 @@ class CompetitionEntryScoreRepository implements CompetitionEntryScoreRepository
                 );
             }
 
-            // Update or create score
+            // Update or create score; keep the existing bookmark unless one is sent
+            $values = [
+                'score' => $data['score'] ?? null,
+                'comment' => $data['comment'] ?? null,
+                'position' => $data['position'] ?? null,
+            ];
+
+            if (array_key_exists('is_bookmarked', $data)) {
+                $values['is_bookmarked'] = (bool) $data['is_bookmarked'];
+            }
+
             $score = CompetitionEntryScore::updateOrCreate(
                 ['entry_id' => $entryId, 'judge_id' => $judgeId],
-                [
-                    'score' => $data['score'] ?? null,
-                    'comment' => $data['comment'] ?? null,
-                    'position' => $data['position'] ?? null,
-                    'is_bookmarked' => $data['is_bookmarked'] ?? false,
-                ]
+                $values
             );
 
             return GenericResponse::success(

@@ -36,6 +36,7 @@ class ClubSetting extends Model
         'club_banner_thumb_url',
         'club_banner_medium_url',
         'club_banner_large_url',
+        'template_preview_url',
     ];
 
     protected $fillable = [
@@ -59,6 +60,7 @@ class ClubSetting extends Model
         'footer_description',
         'logo',
         'favicon',
+        'club_banner',
         'cover_image',
         'registration',
         'directory_visibility',
@@ -80,6 +82,16 @@ class ClubSetting extends Model
         'data_collection_preferences_description',
         'allow_reporting',
         'allow_reporting_description',
+        'template_preview',
+        'template_preview_generated_at',
+        'contact_email',
+        'contact_phone',
+        'contact_address',
+        'homepage_content_blocks',
+        'max_images_per_gallery',
+        'max_image_file_size',
+        'max_image_width',
+        'max_image_height',
     ];
 
     /**
@@ -218,6 +230,17 @@ class ClubSetting extends Model
     public function getClubBannerLargeUrlAttribute()
     {
         return $this->getSizeUrl($this->club_banner, 'large');
+    }
+
+    public function getTemplatePreviewUrlAttribute()
+    {
+        if (!$this->template_preview) {
+            return null;
+        }
+
+        return Storage::disk('public')->exists($this->template_preview)
+            ? URL::to('storage/' . $this->template_preview)
+            : null;
     }
 
     public function club()

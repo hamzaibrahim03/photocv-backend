@@ -28,6 +28,8 @@ class StoreCompetitionRequest extends FormRequest
             'judging_type_id' => 'nullable|integer|min:1',
             'start_date' => 'nullable|date',
             'submission_deadline' => 'nullable|date|after_or_equal:start_date',
+            'judging_start_date' => 'nullable|date',
+            'judging_end_date' => 'nullable|date|after_or_equal:judging_start_date',
             'max_entries_print' => 'nullable|integer|min:0',
             'max_entries_digital' => 'nullable|integer|min:0',
             'allowed_image_formats' => 'nullable|string|max:250',

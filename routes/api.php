@@ -9,11 +9,14 @@ use App\Http\Controllers\v1\ClubAdmin\CatalogController;
 use App\Http\Controllers\v1\ClubAdmin\EventController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionResultController;
+use App\Http\Controllers\v1\PhotoCommentController;
 use App\Http\Controllers\v1\Member\MemberCompetitionController;
 use App\Http\Controllers\v1\NoticeController;
 use App\Http\Controllers\v1\ClubAdmin\ClubNewsController;
 use App\Http\Controllers\v1\ClubAdmin\PagesController;
 use App\Http\Controllers\v1\ClubAdmin\ClubSettingsController;
+use App\Http\Controllers\v1\ClubAdmin\ClubSettingsStepsController;
+use App\Http\Controllers\v1\ClubAdmin\ClubConfigurationStepsController;
 use App\Http\Controllers\v1\MemberController;
 use App\Http\Controllers\v1\ClubAdmin\MemberRequestController;
 use App\Http\Controllers\v1\ClubAdmin\ClubDashboardController;
@@ -28,6 +31,7 @@ use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
 use App\Http\Controllers\v1\Judge\JudgeController;
+use App\Http\Controllers\v1\Judge\JudgePanelController;
 use App\Http\Controllers\v1\Member\BookingController;
 use App\Http\Controllers\v1\Member\PlannedLocationController;
 use App\Http\Controllers\v1\GlobalSearchController;
@@ -37,6 +41,11 @@ use App\Http\Controllers\v1\Member\GearController;
 use App\Http\Controllers\v1\Member\GearLibraryController;
 use App\Http\Controllers\v1\Member\GearWishlistController;
 use App\Http\Controllers\v1\Member\CheatSheetController;
+use App\Http\Controllers\v1\Member\SavedLibraryItemController;
+use App\Http\Controllers\v1\Super\SuperClubController;
+use App\Http\Controllers\v1\Super\SuperProfileController;
+use App\Http\Controllers\v1\Super\SuperRoleController;
+use App\Http\Controllers\v1\Super\SuperPlatformSettingController;
 
 Route::prefix('v1')->group(function() {
 
@@ -109,6 +118,11 @@ Route::prefix('v1')->group(function() {
         Route::post('logout', [AuthController::class, 'logout'])->name('logout');
         Route::get('/roles', [RoleController::class, 'index']);
 
+        // Any authenticated role that can view a photo (member, club_admin,
+        // Secretary, judge, speaker, etc. via CommentsDrawMember/CommentsDrawClub)
+        // can post a comment on it.
+        Route::post('/photos/{photoId}/comments', [PhotoCommentController::class, 'store']);
+
         //judges endpoints
         Route::prefix('judge')->name('judge.')->group(function () {
             Route::get('/{competitionId}/entries', [JudgeController::class, 'getEntriesWithScores']);
@@ -116,15 +130,32 @@ Route::prefix('v1')->group(function() {
 
             Route::post('/dashboard', [JudgeController::class, 'dashboardData']);
             Route::get('/clubs/{clubId}/competitions', [JudgeController::class, 'competitionsForJudge']);
+
+            // judge panel screens
+            Route::get('/dashboard', [JudgePanelController::class, 'dashboard']);
+            Route::get('/overview', [JudgePanelController::class, 'overview']);
+            Route::get('/clubs', [JudgePanelController::class, 'clubs']);
+            Route::get('/competitions', [JudgePanelController::class, 'competitions']);
+            Route::get('/competitions/{competitionId}', [JudgePanelController::class, 'competition'])->whereNumber('competitionId');
+            Route::put('/competitions/{competitionId}', [JudgePanelController::class, 'updateCompetition'])->whereNumber('competitionId');
+            Route::get('/competitions/{competitionId}/submissions', [JudgePanelController::class, 'submissions'])->whereNumber('competitionId');
+            Route::get('/submissions/{entryId}', [JudgePanelController::class, 'submission'])->whereNumber('entryId');
+            Route::post('/entry/{entryId}/bookmark', [JudgePanelController::class, 'bookmark'])->whereNumber('entryId');
         });
 
-        // club admin routes
-        Route::middleware(['auth', 'role:club_admin'])->group(function () {
+        // Shared with Speaker: Speaker screens (SpeakerClubEvents/SpeakerEventDetail/
+        // SpeakerEventEdit) manage the club's events + the catalogs dropdown used
+        // when editing one, so they need the same event/catalog access as club_admin.
+        Route::middleware(['auth', 'role:club_admin,speaker'])->group(function () {
             Route::apiResource('catalogs', CatalogController::class);
-        
             Route::apiResource('events', EventController::class);
             Route::get('/event-extras', [EventController::class, 'getEventExtras']);
+        });
 
+        // Shared with Secretary: Secretary screens (SecretaryCompetitions*,
+        // SecretarySeasonResults, SecretaryImageLightbox) manage competitions and
+        // publish/view their results, so they need the same access as club_admin.
+        Route::middleware(['auth', 'role:club_admin,Secretary'])->group(function () {
             Route::apiResource('competitions', CompetitionController::class);
             Route::get('/competition-extras', [CompetitionController::class, 'getCompetitionExtras']);
             Route::get('/competition-global-settings', [CompetitionGlobalSettingController::class, 'index']);
@@ -133,7 +164,10 @@ Route::prefix('v1')->group(function() {
             Route::apiResource('/competition-results', CompetitionResultController::class);
             Route::post('/competition-results/{competitionId}/publish', [CompetitionResultController::class, 'publishResults']);
             Route::get('/competition-results/club/published-results', [CompetitionResultController::class, 'recentPublishedResults']);
+        });
 
+        // club admin routes
+        Route::middleware(['auth', 'role:club_admin'])->group(function () {
             Route::apiResource('notices', NoticeController::class);
             Route::get('/notices-extras', [NoticeController::class, 'getNoticeExtras']);
 
@@ -150,6 +184,28 @@ Route::prefix('v1')->group(function() {
             Route::apiResource('club-settings', ClubSettingsController::class);
             Route::get('/club/dashboard', [ClubDashboardController::class, 'getDashboardData']);
 
+            Route::get('/club-settings-general', [ClubSettingsStepsController::class, 'generalShow']);
+            Route::post('/club-settings-general', [ClubSettingsStepsController::class, 'generalStore']);
+            Route::get('/club-settings-appearance', [ClubSettingsStepsController::class, 'appearanceShow']);
+            Route::post('/club-settings-appearance', [ClubSettingsStepsController::class, 'appearanceStore']);
+            Route::get('/club-settings-membership', [ClubSettingsStepsController::class, 'membershipShow']);
+            Route::post('/club-settings-membership', [ClubSettingsStepsController::class, 'membershipStore']);
+            Route::get('/club-settings-content', [ClubSettingsStepsController::class, 'contentShow']);
+            Route::post('/club-settings-content', [ClubSettingsStepsController::class, 'contentStore']);
+            Route::get('/club-settings-privacy', [ClubSettingsStepsController::class, 'privacyShow']);
+            Route::post('/club-settings-privacy', [ClubSettingsStepsController::class, 'privacyStore']);
+
+            Route::get('/club-configuration-general', [ClubConfigurationStepsController::class, 'generalShow']);
+            Route::post('/club-configuration-general', [ClubConfigurationStepsController::class, 'generalStore']);
+            Route::get('/club-configuration-news', [ClubConfigurationStepsController::class, 'newsShow']);
+            Route::post('/club-configuration-news', [ClubConfigurationStepsController::class, 'newsStore']);
+            Route::get('/club-configuration-events', [ClubConfigurationStepsController::class, 'eventsShow']);
+            Route::post('/club-configuration-events', [ClubConfigurationStepsController::class, 'eventsStore']);
+            Route::get('/club-configuration-galleries', [ClubConfigurationStepsController::class, 'galleriesShow']);
+            Route::post('/club-configuration-galleries', [ClubConfigurationStepsController::class, 'galleriesStore']);
+            Route::get('/club-configuration-competitions', [ClubConfigurationStepsController::class, 'competitionsShow']);
+            Route::post('/club-configuration-competitions', [ClubConfigurationStepsController::class, 'competitionsStore']);
+
             Route::post('/assign-feature-image', [FeaturedImageController::class, 'assign']);
 
             Route::apiResource('club-gallery', ClubGalleryController::class);
@@ -158,7 +214,37 @@ Route::prefix('v1')->group(function() {
             Route::post('/assign-club', [MemberRequestController::class, 'assignClub']);
             Route::get('/member-request/{userId}', [MemberRequestController::class, 'getRequestingMember']);
             Route::post('/reject-club-request', [MemberRequestController::class, 'rejectClubRequest']);
-            
+
+            Route::apiResource('saved-library-items', SavedLibraryItemController::class)->only(['index', 'store', 'destroy']);
+
+        });
+
+        // super admin routes
+        Route::middleware(['auth', 'role:super_admin'])->prefix('super')->name('super.')->group(function () {
+            Route::get('/clubs', [SuperClubController::class, 'index']);
+            Route::post('/clubs', [SuperClubController::class, 'store']);
+            Route::get('/clubs/{id}', [SuperClubController::class, 'show']);
+            Route::put('/clubs/{id}', [SuperClubController::class, 'update']);
+            Route::post('/clubs/{id}', [SuperClubController::class, 'update']);
+            Route::delete('/clubs/{id}', [SuperClubController::class, 'destroy']);
+            Route::post('/clubs/{id}/toggle-status', [SuperClubController::class, 'toggleStatus']);
+            Route::get('/clubs/{id}/members', [SuperClubController::class, 'members']);
+
+            Route::get('/dashboard-stats', [SuperProfileController::class, 'dashboardStats']);
+            Route::get('/dashboard-calendar', [SuperProfileController::class, 'dashboardCalendar']);
+            Route::get('/profiles', [SuperProfileController::class, 'index']);
+            Route::get('/profiles/{id}', [SuperProfileController::class, 'show']);
+            Route::put('/profiles/{id}', [SuperProfileController::class, 'update']);
+            Route::delete('/profiles/{id}', [SuperProfileController::class, 'destroy']);
+
+            Route::get('/roles', [SuperRoleController::class, 'index']);
+            Route::post('/roles', [SuperRoleController::class, 'store']);
+            Route::put('/roles/{id}', [SuperRoleController::class, 'update']);
+            Route::delete('/roles/{id}', [SuperRoleController::class, 'destroy']);
+            Route::post('/roles/{id}/toggle-status', [SuperRoleController::class, 'toggleStatus']);
+
+            Route::get('/platform-settings', [SuperPlatformSettingController::class, 'show']);
+            Route::put('/platform-settings', [SuperPlatformSettingController::class, 'update']);
         });
 
         // member routes

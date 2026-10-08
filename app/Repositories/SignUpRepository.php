@@ -41,25 +41,23 @@ class SignUpRepository implements SignUpRepositoryInterface
             $clubData = $data['club'];
             $clubData['user_id'] = $user->id;
 
-            // Handle about_img
-            if (!empty($data['about_img'])) {
-                $aboutImg = $data['about_img'];
-                $clubData['about_img'] = $aboutImg->store('uploads/clubs/about', 'public');
-            }
-
-            // Handle footer_img
-            if (!empty($data['footer_img'])) {
-                $footerImg = $data['footer_img'];
-                $clubData['footer_img'] = $footerImg->store('uploads/clubs/footer', 'public');
-            }
-
-            // Extract ClubSetting fields before creating Club
+            // Fields that belong to club_settings, not clubs — pulled out
+            // before Club::create() so mass assignment doesn't silently
+            // drop them (Club's $fillable only covers identity fields).
             $clubSettingFields = [
                 'registration',
                 'directory_visibility',
                 'comments',
                 'likes',
                 'reminders',
+                'website_sections',
+                'comment_preference',
+                'fb_link',
+                'fb_link_option',
+                'insta_link',
+                'insta_link_option',
+                'flickr_link',
+                'flickr_link_option',
             ];
 
             $clubSettingData = [];
@@ -70,14 +68,30 @@ class SignUpRepository implements SignUpRepositoryInterface
                 }
             }
 
+            // Logo / banner uploads go to club_settings (logo, club_banner),
+            // not clubs — Club has no columns for either.
+            if (!empty($clubData['logo'])) {
+                $clubSettingData['logo'] = $clubData['logo']->store('uploads/clubs/logo', 'public');
+            }
+            unset($clubData['logo']);
+
+            if (!empty($clubData['banner'])) {
+                $clubSettingData['club_banner'] = $clubData['banner']->store('uploads/clubs/banner', 'public');
+            }
+            unset($clubData['banner']);
+
+            // Columns with no default and no NOT NULL fallback in the
+            // schema — the signup wizard has no UI for club_privacy yet,
+            // so default it rather than letting the insert fail.
+            $clubSettingData['club_privacy'] = $clubSettingData['club_privacy'] ?? 'Public';
+            $clubSettingData['website_sections'] = $clubSettingData['website_sections'] ?? 'News';
+            $clubSettingData['comment_preference'] = $clubSettingData['comment_preference'] ?? 'All';
+
             // Create club
             $club = Club::create($clubData);
 
-            // Create club settings if any were provided
-            if (!empty($clubSettingData)) {
-                $clubSettingData['club_id'] = $club->id;
-                ClubSetting::create($clubSettingData);
-            }
+            $clubSettingData['club_id'] = $club->id;
+            ClubSetting::create($clubSettingData);
         }
 
         // Create Member record

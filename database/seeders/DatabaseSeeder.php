@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
     {
       $this->call(RoleSeeder::class);
       $this->call(UserSeeder::class);
+      $this->call(ClubSeeder::class);
       $this->call(CatalogSeeder::class);
       $this->call([
         EventSeeder::class,
@@ -27,6 +28,7 @@ class DatabaseSeeder extends Seeder
         PhotoSeeder::class,
         CompetitionSeeder::class,
         CompetitionMemberSeeder::class,
+        ReassignCompetitionClubsSeeder::class,
       ]);
     }
 }

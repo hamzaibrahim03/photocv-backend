@@ -64,11 +64,18 @@ class Competition extends Model
 	];
 	// protected $hidden = ['featured_image'];
 
+	/**
+	 * Always load the owning club so every competition API can return it.
+	 */
+	protected $with = ['club.setting'];
+
 	protected $casts = [
 		'competition_type_id' => 'int',
 		'judging_type_id' => 'int',
 		'start_date' => 'datetime',
 		'submission_deadline' => 'datetime',
+		'judging_start_date' => 'datetime',
+		'judging_end_date' => 'datetime',
 		'max_entries_print' => 'int',
 		'max_entries_digital' => 'int',
 		'max_file_size' => 'int',
@@ -96,6 +103,8 @@ class Competition extends Model
 		'judging_type_id',
 		'start_date',
 		'submission_deadline',
+		'judging_start_date',
+		'judging_end_date',
 		'max_entries_print',
 		'max_entries_digital',
 		'allowed_image_formats',
@@ -182,6 +191,21 @@ class Competition extends Model
 	public function club()
 	{
 		return $this->belongsTo(Club::class, 'club_id');
+	}
+
+	/**
+	 * Serialize the club relation as its compact summary (id, name, tag line,
+	 * domain, logo) rather than the full model, whose id is hidden.
+	 */
+	public function relationsToArray()
+	{
+		$relations = parent::relationsToArray();
+
+		if ($this->relationLoaded('club')) {
+			$relations['club'] = $this->club?->summary();
+		}
+
+		return $relations;
 	}
 
 	public function getFeaturedThumbUrlAttribute()

@@ -148,8 +148,8 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
             // Get club
             $clubId = $competition->club_id;
 
-            // Days until next competition in this club (excluding current)
-            $nextCompetition = Competition::where('club_id', $clubId)
+            // Days until the next competition (excluding current)
+            $nextCompetition = Competition::query()
                 ->where('id', '!=', $competition->id)
                 ->whereDate('start_date', '>', now())
                 ->orderBy('start_date')
@@ -163,7 +163,7 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
             $startOfMonth = now()->startOfMonth();
             $endOfMonth = now()->endOfMonth();
 
-            $calendarCompetitions = Competition::where('club_id', $clubId)
+            $calendarCompetitions = Competition::query()
                 ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
                 ->orderBy('start_date')
                 ->get(['start_date', 'name'])
@@ -195,8 +195,8 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
                 ];
             });
 
-            // More competitions from same club (excluding current)
-            $moreCompetitions = Competition::where('club_id', $clubId)
+            // More competitions (excluding current)
+            $moreCompetitions = Competition::query()
                 ->where('id', '!=', $competition->id)
                 ->latest('start_date')
                 ->take(4)
@@ -321,33 +321,42 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
             // Fetch the User model instance
             $member = User::findOrFail(auth()->user()->id);
 
-            // Load member's galleries and active photos
+            // Load member's galleries and active photos, with per-photo
+            // like/comment counts so the portfolio/gallery UI can show real
+            // interaction numbers instead of placeholder values.
             $member->load([
                 'galleries' => function ($query) {
                     $query->where('is_active', true)
                         ->with(['photos' => function ($photoQuery) {
-                            $photoQuery->where('is_active', true);
+                            $photoQuery->where('is_active', true)
+                                ->withCount(['likes', 'comments']);
                         }]);
                 }
             ]);
 
             // Calculate gallery and photo stats
             $galleryCount = $member->galleries->count();
-            $totalPhotos = $member->galleries->sum(function ($gallery) {
-                return $gallery->photos->count();
-            });
+            $allPhotos = $member->galleries->flatMap(fn ($gallery) => $gallery->photos);
+            $totalPhotos = $allPhotos->count();
+            $totalLikes = $allPhotos->sum('likes_count');
+            $totalComments = $allPhotos->sum('comments_count');
 
             $averagePhotos = $galleryCount > 0
                 ? round($totalPhotos / $galleryCount, 2)
                 : 0;
+
+            $portfolioPhotos = $allPhotos->where('show_in_portfolio', true)->values();
 
             // Prepare response
             $data = [
                 'member' => $member,
                 'gallery_count' => $galleryCount,
                 'total_photos' => $totalPhotos,
+                'total_likes' => $totalLikes,
+                'total_comments' => $totalComments,
                 'average_photos_per_gallery' => $averagePhotos,
-                // 'galleries' => $member->galleries,
+                'galleries' => $member->galleries,
+                'portfolio_photos' => $portfolioPhotos,
             ];
 
             return MemberResponse::success('Member galleries retrieved successfully.', $data);

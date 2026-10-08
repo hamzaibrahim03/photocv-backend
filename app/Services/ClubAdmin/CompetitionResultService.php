@@ -29,6 +29,6 @@ class CompetitionResultService
 
     public function getAllPublishedResults()
     {
-        return $this->competitionResultRepository->getAllPublishedResults();
+        return $this->competitionResultRepository->getAllPublishedResults(request('club_id'), true);
     }
 }

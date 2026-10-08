@@ -15,8 +15,7 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
     public function all($request)
     {
         try {
-            $clubId = auth()->user()->club->id;
-            $query = Competition::where('club_id', $clubId)->with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme']);
+            $query = Competition::with(['judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme']);
             $competitions = $this->getAllCompetitionsData($request, $query, 'name');
             return CompetitionResponse::success('Competitions retrieved successfully.', $competitions);
         } catch (\Exception $e) {
@@ -26,7 +25,7 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
 
     public function getUpcomingCompetitions($clubId)
     {
-        return Competition::where('club_id', $clubId)
+        return Competition::query()
             ->whereDate('start_date', '>=', now())
             ->orderBy('start_date', 'asc')
             ->first();
@@ -79,6 +78,7 @@ class MemberCompetitionRepository implements MemberCompetitionRepositoryInterfac
             return [
                 'competition_member_id' => $competition->pivot->id,
                 'name'                  => $competition->name,
+                'club'                  => $competition->club?->summary(),
             ];
         });
 

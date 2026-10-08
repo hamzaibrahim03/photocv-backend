@@ -47,13 +47,14 @@ class GlobalSearchController extends Controller
             ]);
 
         $competitions = Competition::where('name', 'LIKE', "%{$term}%")
-            ->select('id', 'name')
+            ->select('id', 'club_id', 'name')
             ->limit(5)
             ->get()
             ->map(fn ($comp) => [
                 'id' => $comp->id,
                 'type' => 'competition',
                 'title' => $comp->name,
+                'club' => $comp->club?->summary(),
                 'url' => route('competitions.show', $comp->id),
             ]);
 

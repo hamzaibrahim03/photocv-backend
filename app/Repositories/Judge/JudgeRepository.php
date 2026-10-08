@@ -83,7 +83,7 @@ class JudgeRepository implements JudgeRepositoryInterface
                     ->with([
                         'competitionMember:id,comp_id,member_id',
                         'competitionMember.member:id,first_name,last_name,email',
-                        'competitionMember.competition:id,club_id,comp_name'
+                        'competitionMember.competition:id,club_id,name'
                     ]);
                 },
                 'judge:id,first_name,last_name,email'

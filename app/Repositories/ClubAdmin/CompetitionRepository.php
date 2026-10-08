@@ -29,7 +29,8 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function all($request, $clubId = null)
     {
         try {
-            $query = Competition::where('club_id', $clubId)->with([
+            // Competitions of all clubs are listed; optionally narrow to one club
+            $query = Competition::query()->with([
                 'judgingType',
                 'competitionType',
                 'resultMethod',
@@ -38,6 +39,10 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'competitionTheme',
                 'judges',
             ]);
+
+            if ($request->filled('club_id')) {
+                $query->where('club_id', $request->club_id);
+            }
 
             $competitionArr = [
                 'competitions' => $this->getAllCompetitionsData($request, $query, 'name'),
@@ -66,15 +71,6 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'competitionMembers.entries.comments.user',
                 'competitionMembers.entries.likes',
             ])->findOrFail($id);
-
-            $club = Club::where('user_id', $userId)->first();
-
-            if (!$club || $competition->club_id !== $club->id) {
-                return CompetitionResponse::error(
-                    'Unauthorized to view this competition.',
-                    403
-                );
-            }
 
             // build entries (unchanged)
             $entries = [];
@@ -282,8 +278,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
 
         // Random competitions
-        $randomCompetitions = Competition::select('id', 'name', 'start_date', 'featured_image')
-            ->where('club_id', $clubId)
+        $randomCompetitions = Competition::select('id', 'club_id', 'name', 'start_date', 'featured_image')
             ->inRandomOrder()
             ->take(5)
             ->get();
@@ -324,7 +319,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         $startOfMonth = Carbon::now()->startOfMonth();
         $endOfMonth = Carbon::now()->endOfMonth();
 
-        $competitionCountThisMonth = Competition::where('club_id', $clubId)
+        $competitionCountThisMonth = Competition::query()
             ->whereDate('start_date', '>=', $today)
             ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
             ->count();
@@ -354,7 +349,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'name' => $e->name,
             ]);
 
-        $competitions = Competition::where('club_id', $clubId)
+        $competitions = Competition::query()
             ->whereBetween('start_date', [$startOfMonth, $endOfMonth])
             ->orderBy('start_date', 'asc')
             ->get(['start_date', 'name'])
@@ -371,7 +366,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
     public function getUpcomingCompetitions($clubId)
     {
-        return Competition::where('club_id', $clubId)
+        return Competition::query()
             ->whereDate('start_date', '>=', now())
             ->orderBy('start_date', 'asc')
             ->first();
@@ -407,6 +402,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
                 'description' => $competition->description,
                 'total_images' => $competition->total_images,
                 'images' => $images,
+                'club' => $competition->club?->summary(),
             ];
         });
     }
@@ -414,7 +410,6 @@ class CompetitionRepository implements CompetitionRepositoryInterface
     public function getLatestCompetitionsByLimit(int $clubId, ?int $limit = 3)
     {
         $query = Competition::query()
-            ->where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
             ->with([
                 'judges:id,first_name,last_name,email',
@@ -432,7 +427,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
 
     public function getCompetitionsByLimit(int $clubId, ?int $limit = 3)
     {
-        $query = Competition::where('club_id', $clubId)->with('judges')
+        $query = Competition::with('judges')
             ->orderBy('start_date', 'asc');
 
         if ($limit) {
@@ -464,7 +459,7 @@ class CompetitionRepository implements CompetitionRepositoryInterface
             ]);
 
         // Fetch competitions
-        $competitions = Competition::where('club_id', $clubId)
+        $competitions = Competition::query()
             ->whereDate('start_date', '>=', $startOfMonth)
             ->orderBy('start_date', 'asc')
             ->get(['start_date', 'name'])
@@ -508,12 +503,12 @@ class CompetitionRepository implements CompetitionRepositoryInterface
         $query = Competition::query()
             ->select([
                 'id',
+                'club_id',
                 'featured_image',
                 'name',
                 'start_date',
                 'status',
             ])
-            ->where('club_id', $clubId)
             ->whereDate('start_date', '>=', now())
             ->with([
                 'judges'

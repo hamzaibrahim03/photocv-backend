@@ -19,8 +19,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => RoleMiddleware::class,
             // 'dynamic.database' => DynamicDatabase::class,
         ]);
+
+        // API has no login page: don't redirect guests (route('login') doesn't exist)
+        $middleware->redirectGuestsTo(fn ($request) => $request->is('api/*') ? null : '/');
     })
     ->withExceptions(function (Exceptions $exceptions) {
-
+        // Always answer API errors (e.g. missing/expired token -> 401) as JSON,
+        // even when the client doesn't send "Accept: application/json"
+        $exceptions->shouldRenderJsonWhen(fn ($request) => $request->is('api/*') || $request->expectsJson());
     })->create();
 
