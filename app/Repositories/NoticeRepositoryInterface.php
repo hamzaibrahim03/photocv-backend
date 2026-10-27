@@ -12,4 +12,7 @@ interface NoticeRepositoryInterface
     public function getNoticeExtras( $request );
     public function getLatestNotice($clubId);
     public function getLatestNoticeWithLimit($clubId, $limit);
+    public function memberAll($memberId);
+    public function memberShow($id, $memberId);
+    public function memberExtras($memberId);
 }

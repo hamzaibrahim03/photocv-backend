@@ -13,4 +13,7 @@ interface JudgePanelRepositoryInterface
     public function submissions($judgeId, $competitionId, $request);
     public function submission($judgeId, $entryId);
     public function toggleBookmark($judgeId, $entryId, ?bool $isBookmarked = null);
+    public function profile($judgeId);
+    public function updateProfile($judgeId, array $data);
+    public function updatePassword($judgeId, string $currentPassword, string $newPassword);
 }

@@ -8,10 +8,12 @@ use App\Models\Competition;
 use App\Models\CompetitionEntryScore;
 use App\Models\CompetitionMembersEntry;
 use App\Models\User;
+use App\Repositories\Judge\CompetitionEntryScoreRepositoryInterface;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 /**
  * Data for the judge panel screens. A "judge" is any user assigned to a
@@ -20,6 +22,13 @@ use Illuminate\Support\Facades\DB;
  */
 class JudgePanelRepository implements JudgePanelRepositoryInterface
 {
+    protected $scoreRepository;
+
+    public function __construct(CompetitionEntryScoreRepositoryInterface $scoreRepository)
+    {
+        $this->scoreRepository = $scoreRepository;
+    }
+
     /**
      * Judging dashboard: judge card, stats, calendar and upcoming competitions.
      */
@@ -278,6 +287,8 @@ class JudgePanelRepository implements JudgePanelRepositoryInterface
         try {
             $competition = $this->judgedCompetitions($judgeId)->findOrFail($competitionId);
 
+            $this->scoreRepository->recomputeAwardPositions($competition->id, $judgeId);
+
             $mine = fn ($q) => $q->where('judge_id', $judgeId);
             $scored = fn ($q) => $q->where('judge_id', $judgeId)->whereNotNull('score');
 
@@ -321,6 +332,8 @@ class JudgePanelRepository implements JudgePanelRepositoryInterface
     {
         try {
             [$entry, $competition] = $this->judgedEntry($judgeId, $entryId);
+
+            $this->scoreRepository->recomputeAwardPositions($competition->id, $judgeId);
 
             $entry->load([
                 'competitionMember.member:id,first_name,last_name',
@@ -396,6 +409,77 @@ class JudgePanelRepository implements JudgePanelRepositoryInterface
         } catch (Exception $e) {
             return GenericResponse::error($e->getMessage(), $this->status($e));
         }
+    }
+
+    /**
+     * The judge's own editable profile.
+     */
+    public function profile($judgeId)
+    {
+        try {
+            $user = User::findOrFail($judgeId);
+
+            return GenericResponse::success('Profile fetched successfully.', $this->profileCard($user));
+        } catch (Exception $e) {
+            return GenericResponse::error($e->getMessage(), $this->status($e));
+        }
+    }
+
+    /**
+     * Update the judge's own profile fields.
+     */
+    public function updateProfile($judgeId, array $data)
+    {
+        try {
+            $user = User::findOrFail($judgeId);
+            $user->update($data + ['updated_by' => $judgeId]);
+
+            return GenericResponse::success('Profile updated successfully.', $this->profileCard($user->fresh()));
+        } catch (Exception $e) {
+            return GenericResponse::error($e->getMessage(), $this->status($e));
+        }
+    }
+
+    /**
+     * Change the judge's own password (requires the current password).
+     */
+    public function updatePassword($judgeId, string $currentPassword, string $newPassword)
+    {
+        try {
+            $user = User::findOrFail($judgeId);
+
+            if (!Hash::check($currentPassword, $user->password)) {
+                return GenericResponse::error('The current password is incorrect.', 422);
+            }
+
+            $user->password = Hash::make($newPassword);
+            $user->updated_by = $judgeId;
+            $user->save();
+
+            return GenericResponse::success('Password updated successfully.', null);
+        } catch (Exception $e) {
+            return GenericResponse::error($e->getMessage(), $this->status($e));
+        }
+    }
+
+    private function profileCard(User $user): array
+    {
+        return [
+            'id'                => $user->id,
+            'first_name'        => $user->first_name,
+            'last_name'         => $user->last_name,
+            'title'             => $user->title,
+            'about'             => $user->about,
+            'bio'               => $user->bio,
+            'email'             => $user->email,
+            'phone'             => $user->phone,
+            'address'           => $user->address,
+            'city'              => $user->ciy,
+            'postcode'          => $user->postcode,
+            'county'            => $user->county,
+            'country'           => $user->country,
+            'profile_image_url' => $user->profile_image_url,
+        ];
     }
 
     /**

@@ -26,6 +26,7 @@ class CheatSheet extends Model
         'white_balance',
         'noise_reduction',
         'notes',
+        'tips',
         'accessories',
         'tags',
         'visibility',
@@ -34,6 +35,7 @@ class CheatSheet extends Model
     protected $casts = [
         'accessories' => 'array',
         'tags' => 'array',
+        'tips' => 'array',
         'iso_min' => 'integer',
         'iso_max' => 'integer',
     ];

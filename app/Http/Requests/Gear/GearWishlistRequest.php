@@ -25,6 +25,7 @@ class GearWishlistRequest extends FormRequest
         return [
             'list_type'    => 'sometimes|in:wish,gift',
             'title'        => ($this->isMethod('POST') ? 'required' : 'sometimes|required') . '|string|max:255',
+            'brand'        => 'nullable|string|max:100',
             'category_id'  => [
                 'nullable',
                 'integer',

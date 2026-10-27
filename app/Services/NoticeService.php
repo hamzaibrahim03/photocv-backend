@@ -40,4 +40,19 @@ class NoticeService
     {
         return $this->noticeRepository->getNoticeExtras($request);
     }
+
+    public function memberNotices()
+    {
+        return $this->noticeRepository->memberAll(auth()->id());
+    }
+
+    public function memberShowNotice($id)
+    {
+        return $this->noticeRepository->memberShow($id, auth()->id());
+    }
+
+    public function memberNoticeExtras()
+    {
+        return $this->noticeRepository->memberExtras(auth()->id());
+    }
 }

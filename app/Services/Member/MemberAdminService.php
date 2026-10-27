@@ -110,4 +110,14 @@ class MemberAdminService
         return $this->memberAdminRepository->memberNotes($data);
     }
 
+    /**
+     * Method to get a single gallery photo (owned by the authenticated
+     * member) with its full comments/likes list.
+     * @param mixed $id
+     */
+    public function memberGalleryPhoto($id)
+    {
+        return $this->memberAdminRepository->getMemberGalleryPhoto($id);
+    }
+
 }

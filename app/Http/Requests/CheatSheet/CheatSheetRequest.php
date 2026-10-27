@@ -47,6 +47,8 @@ class CheatSheetRequest extends FormRequest
             'noise_reduction' => 'nullable|string',
 
             'notes'         => 'nullable|string',
+            'tips'          => 'nullable|array',
+            'tips.*'        => 'string|max:255',
             'accessories'   => 'nullable|array',
             'accessories.*' => 'string|max:255',
             'tags'          => 'nullable|array',

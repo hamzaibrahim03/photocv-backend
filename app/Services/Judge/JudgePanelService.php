@@ -57,4 +57,19 @@ class JudgePanelService
     {
         return $this->judgePanelRepository->toggleBookmark(auth()->id(), $entryId, $isBookmarked);
     }
+
+    public function profile()
+    {
+        return $this->judgePanelRepository->profile(auth()->id());
+    }
+
+    public function updateProfile(array $data)
+    {
+        return $this->judgePanelRepository->updateProfile(auth()->id(), $data);
+    }
+
+    public function updatePassword(string $currentPassword, string $newPassword)
+    {
+        return $this->judgePanelRepository->updatePassword(auth()->id(), $currentPassword, $newPassword);
+    }
 }

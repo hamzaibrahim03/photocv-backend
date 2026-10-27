@@ -45,4 +45,23 @@ class NoticeController extends Controller
     {
         return $this->noticeService->getNoticeExtras( $request );
     }
+
+    /**
+     * List the authenticated member's own notices (not their club's) -
+     * backs the photographer "My Notices" screen.
+     */
+    public function memberIndex()
+    {
+        return $this->noticeService->memberNotices();
+    }
+
+    public function memberShow( $id )
+    {
+        return $this->noticeService->memberShowNotice( $id );
+    }
+
+    public function memberExtras()
+    {
+        return $this->noticeService->memberNoticeExtras();
+    }
 }

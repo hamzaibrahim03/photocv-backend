@@ -13,6 +13,7 @@ interface MemberRepositoryInterface
     public function requestToJoinClub($user_id, $club_id);
     public function createGallery($data);
     public function memberGalleryImages($data);
+    public function updateGalleryPhoto($photoId, $data);
     public function postCommentOrLikes($data);
     public function membersGalleries();
     public function memberGalleryDetails($memberId);

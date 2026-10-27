@@ -439,13 +439,6 @@ class MemberRepository implements MemberRepositoryInterface
                     // store ORIGINAL path as primary
                     'image'       => $paths['original'],
 
-                    // optional: store JSON sizes (recommended)
-                    'image_sizes' => json_encode([
-                        'thumb'  => $paths['thumb'],
-                        'medium' => $paths['medium'],
-                        'large'  => $paths['large'],
-                    ]),
-
                     'is_active'   => $isActive,
                     'uploaded_by' => $userId,
                 ] + $settings);
@@ -453,6 +446,55 @@ class MemberRepository implements MemberRepositoryInterface
 
             return MemberResponse::success('Images uploaded successfully.');
 
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Update one of the authenticated member's own gallery photos - title,
+     * description, the image settings toggles, and optionally the image
+     * itself. Ownership is scoped via the owning gallery's member_id (not
+     * photo.uploaded_by - see MemberAdminRepository::getMemberGalleryPhoto()
+     * for why that field isn't a reliable ownership check).
+     *
+     * @param  int  $photoId
+     * @param  array  $data
+     * @return mixed
+     */
+    public function updateGalleryPhoto($photoId, $data)
+    {
+        try {
+            $photo = Photo::where('id', $photoId)
+                ->whereHas('gallery', function ($query) {
+                    $query->where('member_id', auth()->id());
+                })
+                ->firstOrFail();
+
+            if (array_key_exists('title', $data)) {
+                $photo->title = $data['title'];
+            }
+            if (array_key_exists('description', $data)) {
+                $photo->description = $data['description'];
+            }
+
+            $settings = array_intersect_key($data, array_flip([
+                'allow_comments', 'allow_likes', 'visibility', 'show_in_portfolio', 'show_exif',
+            ]));
+            foreach ($settings as $key => $value) {
+                $photo->$key = $value;
+            }
+
+            if (isset($data['image']) && $data['image']->isValid()) {
+                $originalPath = $data['image']->store('member-galleries/original', 'public');
+                $paths = ImageResizeService::generateSizes($originalPath);
+
+                $photo->image = $paths['original'];
+            }
+
+            $photo->save();
+
+            return MemberResponse::success('Photo updated successfully.', $photo);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }

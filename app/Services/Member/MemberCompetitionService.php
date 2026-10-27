@@ -25,4 +25,19 @@ class MemberCompetitionService
     public function submitCompetitionEntry($data){
         return $this->competitionRepository->submitCompetitionEntry($data);
     }
+
+    public function getCompetitionEntries($compId)
+    {
+        return $this->competitionRepository->getCompetitionEntries($compId);
+    }
+
+    public function updateCompetitionEntry($entryId, $data)
+    {
+        return $this->competitionRepository->updateCompetitionEntry($entryId, $data);
+    }
+
+    public function deleteCompetitionEntry($entryId)
+    {
+        return $this->competitionRepository->deleteCompetitionEntry($entryId);
+    }
 }

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\v1\SignUpController;
 use App\Http\Controllers\v1\AuthController;
+use App\Http\Controllers\v1\AccountController;
 use App\Http\Controllers\v1\ClubAdmin\CatalogController;
 use App\Http\Controllers\v1\ClubAdmin\EventController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionController;
@@ -27,6 +28,7 @@ use App\Http\Controllers\v1\Member\MemberClassLogController;
 use App\Http\Controllers\v1\Member\MemberInterestBrandController;
 use App\Http\Controllers\v1\ClubPublic\PublicClubController;
 use App\Http\Controllers\v1\Member\MemberPracticeLogController;
+use App\Http\Controllers\v1\Member\MemberWebsiteSettingController;
 use App\Http\Controllers\v1\ClubAdmin\ClubGalleryController;
 use App\Http\Controllers\v1\ClubAdmin\RoleController;
 use App\Http\Controllers\v1\ClubAdmin\CompetitionGlobalSettingController;
@@ -46,6 +48,10 @@ use App\Http\Controllers\v1\Super\SuperClubController;
 use App\Http\Controllers\v1\Super\SuperProfileController;
 use App\Http\Controllers\v1\Super\SuperRoleController;
 use App\Http\Controllers\v1\Super\SuperPlatformSettingController;
+use App\Http\Controllers\v1\Photographer\PhotographerDashboardController;
+use App\Http\Controllers\v1\Photographer\PhotographerSaleController;
+use App\Http\Controllers\v1\Photographer\PhotographerSaleRequestController;
+use App\Http\Controllers\v1\Photographer\PhotographerNoticeController;
 
 Route::prefix('v1')->group(function() {
 
@@ -57,7 +63,11 @@ Route::prefix('v1')->group(function() {
     Route::post('login', [AuthController::class, 'login']);
 
     Route::post('/forgot-password', [AuthController::class, 'forgotPassword']);
-    Route::get('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
+    Route::post('reset-password', [AuthController::class, 'resetPassword'])->name('reset-password');
+
+    // Public directory for the marketing homepage (src/marketing/Home.jsx) - no auth.
+    Route::get('/public/directory/members', [\App\Http\Controllers\v1\Public\PublicDirectoryController::class, 'members']);
+    Route::get('/public/directory/clubs', [\App\Http\Controllers\v1\Public\PublicDirectoryController::class, 'clubs']);
 
 
     // Route::middleware('auth:sanctum')->group(function () {
@@ -123,6 +133,13 @@ Route::prefix('v1')->group(function() {
         // can post a comment on it.
         Route::post('/photos/{photoId}/comments', [PhotoCommentController::class, 'store']);
 
+        // Self-service profile/password for any authenticated role - used by
+        // Secretary and Speaker, which have no dedicated profile controller
+        // of their own (club_admin/member/judge/super_admin have their own).
+        Route::get('/account/profile', [AccountController::class, 'profile']);
+        Route::put('/account/profile', [AccountController::class, 'updateProfile']);
+        Route::put('/account/password', [AccountController::class, 'updatePassword']);
+
         //judges endpoints
         Route::prefix('judge')->name('judge.')->group(function () {
             Route::get('/{competitionId}/entries', [JudgeController::class, 'getEntriesWithScores']);
@@ -141,6 +158,9 @@ Route::prefix('v1')->group(function() {
             Route::get('/competitions/{competitionId}/submissions', [JudgePanelController::class, 'submissions'])->whereNumber('competitionId');
             Route::get('/submissions/{entryId}', [JudgePanelController::class, 'submission'])->whereNumber('entryId');
             Route::post('/entry/{entryId}/bookmark', [JudgePanelController::class, 'bookmark'])->whereNumber('entryId');
+            Route::get('/profile', [JudgePanelController::class, 'profile']);
+            Route::put('/profile', [JudgePanelController::class, 'updateProfile']);
+            Route::put('/password', [JudgePanelController::class, 'updatePassword']);
         });
 
         // Shared with Speaker: Speaker screens (SpeakerClubEvents/SpeakerEventDetail/
@@ -166,6 +186,14 @@ Route::prefix('v1')->group(function() {
             Route::get('/competition-results/club/published-results', [CompetitionResultController::class, 'recentPublishedResults']);
         });
 
+        // Shared with member/photographer: the "Saved Library" bookmark feature
+        // (PhotographerCompetitions bookmarking + the /photo-library screen) is
+        // scoped per-user inside the controller, so club_admin and member both
+        // need access to it.
+        Route::middleware(['auth', 'role:club_admin,member'])->group(function () {
+            Route::apiResource('saved-library-items', SavedLibraryItemController::class)->only(['index', 'store', 'destroy']);
+        });
+
         // club admin routes
         Route::middleware(['auth', 'role:club_admin'])->group(function () {
             Route::apiResource('notices', NoticeController::class);
@@ -188,6 +216,7 @@ Route::prefix('v1')->group(function() {
             Route::post('/club-settings-general', [ClubSettingsStepsController::class, 'generalStore']);
             Route::get('/club-settings-appearance', [ClubSettingsStepsController::class, 'appearanceShow']);
             Route::post('/club-settings-appearance', [ClubSettingsStepsController::class, 'appearanceStore']);
+            Route::delete('/club-settings-appearance/images/{imageId}', [ClubSettingsStepsController::class, 'appearanceDeleteImage']);
             Route::get('/club-settings-membership', [ClubSettingsStepsController::class, 'membershipShow']);
             Route::post('/club-settings-membership', [ClubSettingsStepsController::class, 'membershipStore']);
             Route::get('/club-settings-content', [ClubSettingsStepsController::class, 'contentShow']);
@@ -214,9 +243,6 @@ Route::prefix('v1')->group(function() {
             Route::post('/assign-club', [MemberRequestController::class, 'assignClub']);
             Route::get('/member-request/{userId}', [MemberRequestController::class, 'getRequestingMember']);
             Route::post('/reject-club-request', [MemberRequestController::class, 'rejectClubRequest']);
-
-            Route::apiResource('saved-library-items', SavedLibraryItemController::class)->only(['index', 'store', 'destroy']);
-
         });
 
         // super admin routes
@@ -270,6 +296,7 @@ Route::prefix('v1')->group(function() {
 
             Route::post('/create-gallery', [MemberController::class, 'createGallery']);
             Route::post('/upload-gallery-images', [MemberController::class, 'uploadGalleryImages']);
+            Route::post('/gallery-photo/{id}/update', [MemberController::class, 'updateGalleryPhoto']);
             Route::post('/post-comment', [MemberController::class, 'postCommentOrLikes']);
             Route::put('/profile/update', [MemberController::class, 'profileUpdate']);
 
@@ -277,10 +304,38 @@ Route::prefix('v1')->group(function() {
             Route::post('/join-competition', [MemberCompetitionController::class, 'joinCompetition']);
             Route::get('/get-joined-competition', [MemberCompetitionController::class, 'joinedCompetition']);
             Route::post('/submit-competition-entry', [MemberCompetitionController::class, 'submitCompetitionEntry']);
+            Route::get('/competition-entries/{compId}', [MemberCompetitionController::class, 'competitionEntries']);
+            Route::post('/competition-entry/{entryId}/update', [MemberCompetitionController::class, 'updateCompetitionEntry']);
+            Route::delete('/competition-entry/{entryId}', [MemberCompetitionController::class, 'deleteCompetitionEntry']);
 
             //member admin routes
             Route::get('/profile/posts/view', [MemberAdminController::class, 'memberProfilePostsView']);
             Route::apiResource('member-notice', NoticeController::class)->only(['store', 'update']);
+            Route::get('/member-notice', [NoticeController::class, 'memberIndex']);
+            Route::get('/member-notice/{id}', [NoticeController::class, 'memberShow']);
+            Route::get('/member-notice-extras', [NoticeController::class, 'memberExtras']);
+
+            // photographer dashboard
+            Route::prefix('photographer')->group(function () {
+                Route::get('/dashboard', [PhotographerDashboardController::class, 'dashboard']);
+
+                Route::get('/sales', [PhotographerSaleController::class, 'index']);
+                Route::get('/sales/browse', [PhotographerSaleController::class, 'browse']);
+                Route::post('/sales', [PhotographerSaleController::class, 'store']);
+                Route::get('/sales/{id}', [PhotographerSaleController::class, 'show']);
+                Route::match(['put', 'post'], '/sales/{id}', [PhotographerSaleController::class, 'update']);
+                Route::delete('/sales/{id}', [PhotographerSaleController::class, 'destroy']);
+                Route::post('/sales/{id}/request', [PhotographerSaleController::class, 'request']);
+
+                Route::get('/sale-requests', [PhotographerSaleRequestController::class, 'index']);
+                Route::post('/sale-requests/{id}/accept', [PhotographerSaleRequestController::class, 'accept']);
+                Route::post('/sale-requests/{id}/reject', [PhotographerSaleRequestController::class, 'reject']);
+
+                Route::apiResource('notices', PhotographerNoticeController::class)->only(['store', 'update']);
+                Route::get('/notices', [PhotographerNoticeController::class, 'index']);
+                Route::get('/notices/{id}', [PhotographerNoticeController::class, 'show']);
+                Route::get('/notice-extras', [PhotographerNoticeController::class, 'extras']);
+            });
 
             Route::prefix('member-admin')->group(function () {
 
@@ -292,6 +347,7 @@ Route::prefix('v1')->group(function() {
 
                 Route::get('/profile', [MemberAdminController::class, 'memberAdminProfile']);
                 Route::get('/profile/portfolio', [MemberAdminController::class, 'memberAdminProfilePortfolio']);
+                Route::get('/profile/portfolio/photo/{id}', [MemberAdminController::class, 'memberGalleryPhoto']);
                 Route::get('/profile/learning', [MemberAdminController::class, 'memberAdminProfileLearning']);
 
                 Route::apiResource('profile/notes', MemberNoteController::class);
@@ -301,6 +357,9 @@ Route::prefix('v1')->group(function() {
                 Route::get('practice-logs', [MemberPracticeLogController::class, 'index']);
                 Route::post('practice-logs', [MemberPracticeLogController::class, 'store']);
                 Route::delete('practice-logs/{id}', [MemberPracticeLogController::class, 'destroy']);
+
+                Route::get('/website-settings', [MemberWebsiteSettingController::class, 'show']);
+                Route::put('/website-settings', [MemberWebsiteSettingController::class, 'update']);
 
             });
             

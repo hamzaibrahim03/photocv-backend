@@ -54,6 +54,7 @@ class CompetitionMembersEntry extends Model
         'file_size',
         'color_type',
         'bit_depth',
+        'dpi',
     ];
 
     /* ================= RELATIONS ================= */
@@ -107,6 +108,12 @@ class CompetitionMembersEntry extends Model
     {
         if (!$this->entry_image) {
             return null;
+        }
+
+        if ($size === 'original') {
+            return Storage::disk('public')->exists($this->entry_image)
+                ? asset('storage/' . $this->entry_image)
+                : null;
         }
 
         $filename = basename($this->entry_image);

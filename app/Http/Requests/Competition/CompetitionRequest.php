@@ -44,8 +44,23 @@ class CompetitionRequest extends FormRequest
             return [
                 'member_comp_id' => 'required|exists:competition_members,id',
                 'entry_type' => 'required|in:print,digital',
-                'entry_image_title' => 'required|string|max:250',
-                'entry_image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+                // Single-image submission (backward compatible)
+                'entry_image_title' => 'required_without:entry_images|nullable|string|max:250',
+                'entry_image' => 'required_without:entry_images|nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+
+                // Multi-image submission - one title per image
+                'entry_images' => 'required_without:entry_image|nullable|array',
+                'entry_images.*' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+                'entry_image_titles' => 'nullable|array',
+                'entry_image_titles.*' => 'nullable|string|max:250',
+            ];
+        }
+
+        if ($route === 'updateCompetitionEntry') {
+            return [
+                'entry_image_title' => 'nullable|string|max:250',
+                'entry_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             ];
         }
 

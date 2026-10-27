@@ -41,6 +41,7 @@ class CheatSheetResource extends JsonResource
             'noise_reduction' => $this->noise_reduction,
 
             'notes'       => $this->notes,
+            'tips'        => $this->tips ?? [],
             'accessories' => $this->accessories ?? [],
             'tags'        => $this->tags ?? [],
             'visibility'  => $this->visibility,

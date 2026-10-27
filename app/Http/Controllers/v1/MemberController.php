@@ -105,6 +105,18 @@ class MemberController extends Controller
     }
 
     /**
+     * Update one of the authenticated member's own gallery photos.
+     *
+     * @param  \App\Http\Requests\Member\GalleryRequest  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function updateGalleryPhoto(GalleryRequest $request, $id)
+    {
+        return $this->memberService->updateGalleryPhoto($id, $request->validated());
+    }
+
+    /**
      * Method to post comments or likes on member galleries.
      * @param \App\Http\Requests\Member\StoreMemberRequest $request
      */

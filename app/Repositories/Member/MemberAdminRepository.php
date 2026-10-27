@@ -16,6 +16,7 @@ use Carbon\Carbon;
 use App\Models\MemberAward;
 use App\Models\MemberSocialLink;
 use App\Models\MemberBrand;
+use App\Models\Photo;
 
 class MemberAdminRepository implements MemberAdminRepositoryInterface
 {
@@ -143,7 +144,9 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
     public function memberSingleCompetition($id)
     {
         try {
-            $competition = Competition::findOrFail($id);
+            $competition = Competition::with([
+                'judgingType', 'competitionType', 'resultMethod', 'votingMethod', 'competitionCategory', 'competitionTheme',
+            ])->findOrFail($id);
 
             // Get club
             $clubId = $competition->club_id;
@@ -362,6 +365,60 @@ class MemberAdminRepository implements MemberAdminRepositoryInterface
             return MemberResponse::success('Member galleries retrieved successfully.', $data);
         } catch (\Exception $e) {
             return MemberResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Single gallery photo (owned by the authenticated member) with its
+     * full comments/likes list - deliberately a separate lookup from
+     * getMemberGallery() above so the list endpoint isn't bloated with
+     * every photo's full comment/like rows just to serve this one page.
+     */
+    public function getMemberGalleryPhoto($id)
+    {
+        try {
+            // Scoped via the owning gallery's member_id, not the photo's own
+            // uploaded_by - photos inside a member's gallery can have been
+            // added by someone else (e.g. a club admin) on their behalf, so
+            // uploaded_by isn't a reliable ownership check here.
+            $photo = Photo::where('id', $id)
+                ->whereHas('gallery', function ($query) {
+                    $query->where('member_id', auth()->id());
+                })
+                ->where('is_active', true)
+                ->withCount(['likes', 'comments'])
+                ->with([
+                    'gallery:id,gallery_name',
+                    'comments' => function ($query) {
+                        $query->with('user:id,username,first_name,last_name')->orderBy('created_at');
+                    },
+                    'likes' => function ($query) {
+                        $query->with('user:id,username,first_name,last_name');
+                    },
+                ])
+                ->firstOrFail();
+
+            $displayName = function ($user) {
+                if (!$user) return 'Unknown';
+                $full = trim(($user->first_name ?? '') . ' ' . ($user->last_name ?? ''));
+                return $full !== '' ? $full : ($user->username ?? 'Unknown');
+            };
+
+            $data = $photo->toArray();
+            $data['gallery_name'] = $photo->gallery?->gallery_name;
+            $data['comments'] = $photo->comments->map(fn ($c) => [
+                'id' => $c->id,
+                'comment' => $c->comment,
+                'posted_by' => $displayName($c->user),
+            ])->values();
+            $data['likes'] = $photo->likes->map(fn ($l) => [
+                'id' => $l->id,
+                'liked_by' => $displayName($l->user),
+            ])->values();
+
+            return MemberResponse::success('Photo retrieved successfully.', $data);
+        } catch (\Exception $e) {
+            return MemberResponse::error($e->getMessage(), $e->getCode() ?: 404);
         }
     }
 

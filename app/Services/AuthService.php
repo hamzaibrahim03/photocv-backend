@@ -43,7 +43,7 @@ class AuthService
     }
 
 
-    public function forgotPassword(array $data): void
+    public function forgotPassword(array $data): string
     {
         // Get user by email
         $user = $this->authRepository->findByEmail($data['email']);
@@ -55,10 +55,13 @@ class AuthService
         $user->forgot_pass_token = $resetToken;
         $user->save();
 
-        $reset_password_Url = route('reset-password', ['token' => $resetToken]);
+        $frontendUrl = rtrim(env('FRONTEND_URL', 'http://localhost:5173'), '/');
+        $reset_password_Url = $frontendUrl . '/change-password?token=' . $resetToken;
 
         // Send the token to the user's email
         Mail::to($user->email)->send(new PasswordResetMail($reset_password_Url));
+
+        return $reset_password_Url;
     }
 
 

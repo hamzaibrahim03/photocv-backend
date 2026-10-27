@@ -15,21 +15,13 @@ class GearLibraryResource extends JsonResource
      */
     public function toArray($request)
     {
-        $gears = $this->gears->map(fn ($gear) => [
-            'id'         => $gear->id,
-            'title'      => $gear->title,
-            'brand'      => $gear->brand,
-            'model'      => $gear->model,
-            'model_name' => $gear->model_name,
-            'mount'      => $gear->mount,
-            'resolution' => $gear->resolution,
-            'image'      => $gear->image ? asset('storage/' . $gear->image) : null,
-            'category'   => $gear->category?->name,
-        ]);
+        // Every linked item gets its full gear record (same shape as GET /gears/{id}),
+        // not just a handful of summary fields.
+        $gears = $this->gears->map(fn ($gear) => (new GearResource($gear))->resolve($request));
 
         // Match on keyword so "Camera", "Camera Body", "Lens", "Lenses" all group correctly
-        $isCamera = fn ($gear) => str_contains(strtolower($gear['category'] ?? ''), 'camera');
-        $isLens   = fn ($gear) => str_contains(strtolower($gear['category'] ?? ''), 'lens');
+        $isCamera = fn ($gear) => str_contains(strtolower($gear['category']['name'] ?? ''), 'camera');
+        $isLens   = fn ($gear) => str_contains(strtolower($gear['category']['name'] ?? ''), 'lens');
 
         $cameras     = $gears->filter($isCamera)->values();
         $lenses      = $gears->filter($isLens)->values();

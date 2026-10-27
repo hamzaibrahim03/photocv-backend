@@ -14,7 +14,13 @@ class CompetitionService
 
     public function allCompetitions( $request )
     {
-        return $this->competitionRepository->all( $request, auth()->user()->club->id );
+        // This endpoint is shared by club_admin (who owns a club via the
+        // club() relation) and Secretary (who only joins one via the
+        // many-to-many clubs() relation), so fall back to the first joined
+        // club when there's no owned one.
+        $clubId = auth()->user()->club?->id ?? auth()->user()->clubs->first()?->id;
+
+        return $this->competitionRepository->all( $request, $clubId );
     }
 
     public function showCompetition( $id ) {

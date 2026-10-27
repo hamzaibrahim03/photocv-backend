@@ -28,10 +28,13 @@ class JudgeController extends Controller
     {
         $judgeId = auth()->id();
 
+        // Award position is no longer client-submitted: the server ranks every
+        // entry this judge has scored in the competition by score and assigns
+        // 1-9 / C / H / I automatically. See
+        // CompetitionEntryScoreRepository::recomputeAwardPositions().
         $validated = $request->validate([
             'score'   => 'required|integer|min:1|max:100',
             'comment' => 'nullable|string',
-            'position' => 'nullable|in:1,2,3',
             'is_bookmarked' => 'nullable|boolean',
         ]);
 

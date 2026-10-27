@@ -5,7 +5,9 @@ namespace App\Http\Controllers\v1\ClubAdmin;
 use App\Http\Controllers\Controller;
 use App\Http\Responses\MemberResponse;
 use App\Models\ClubSetting;
+use App\Models\ClubCoverImage;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Backs the 5-step "Settings" wizard on ClubRoute.jsx (General / Appearance /
@@ -91,6 +93,20 @@ class ClubSettingsStepsController extends Controller
             'logos_url' => $setting?->logo_url,
             'banner_url' => $setting?->club_banner_url,
             'favicon_url' => $setting?->favicon_url,
+            'theme_colors' => $setting?->theme_colors,
+            'text_color' => $setting?->text_color,
+            'primary_color' => $setting?->primary_color,
+            'background_color' => $setting?->background_color,
+            'secondary_color' => $setting?->secondary_color,
+            'accent_color' => $setting?->accent_color,
+            'typography' => $setting?->typography,
+            'fonts' => $setting?->fonts,
+            'cover_images' => $setting
+                ? $setting->coverImages()->get(['id', 'image_path'])->map(fn ($img) => [
+                    'id' => $img->id,
+                    'url' => $img->image_path ? asset('storage/' . $img->image_path) : null,
+                ])
+                : [],
         ]);
     }
 
@@ -104,6 +120,16 @@ class ClubSettingsStepsController extends Controller
             'logos' => 'nullable|image|max:5120',
             'banner' => 'nullable|image|max:5120',
             'favicon' => 'nullable|image|max:2048',
+            'theme_colors' => 'nullable|string|max:50',
+            'text_color' => 'nullable|string|max:10',
+            'primary_color' => 'nullable|string|max:10',
+            'background_color' => 'nullable|string|max:10',
+            'secondary_color' => 'nullable|string|max:10',
+            'accent_color' => 'nullable|string|max:10',
+            'typography' => 'nullable|string|max:50',
+            'fonts' => 'nullable|string|max:255',
+            'cover_images' => 'nullable|array',
+            'cover_images.*' => 'image|max:5120',
         ]);
 
         $setting = $this->setting($request);
@@ -112,6 +138,14 @@ class ClubSettingsStepsController extends Controller
             'footer_text' => $data['footer_title'] ?? $setting->footer_text,
             'header_description' => $data['header_description'] ?? $setting->header_description,
             'footer_description' => $data['footer_description'] ?? $setting->footer_description,
+            'theme_colors' => $data['theme_colors'] ?? $setting->theme_colors,
+            'text_color' => $data['text_color'] ?? $setting->text_color,
+            'primary_color' => $data['primary_color'] ?? $setting->primary_color,
+            'background_color' => $data['background_color'] ?? $setting->background_color,
+            'secondary_color' => $data['secondary_color'] ?? $setting->secondary_color,
+            'accent_color' => $data['accent_color'] ?? $setting->accent_color,
+            'typography' => $data['typography'] ?? $setting->typography,
+            'fonts' => $data['fonts'] ?? $setting->fonts,
         ];
 
         if ($request->hasFile('logos')) {
@@ -126,7 +160,33 @@ class ClubSettingsStepsController extends Controller
 
         $setting->update($payload);
 
+        if ($request->hasFile('cover_images')) {
+            foreach ($request->file('cover_images') as $file) {
+                ClubCoverImage::create([
+                    'club_setting_id' => $setting->id,
+                    'image_path' => $file->store('uploads/clubs/cover', 'public'),
+                ]);
+            }
+        }
+
         return MemberResponse::success('Appearance settings saved successfully.', null);
+    }
+
+    public function appearanceDeleteImage(Request $request, $imageId)
+    {
+        $setting = $this->club($request)->setting;
+        $image = $setting?->coverImages()->find($imageId);
+
+        if (!$image) {
+            return MemberResponse::error('Image not found.', 404);
+        }
+
+        if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+            Storage::disk('public')->delete($image->image_path);
+        }
+        $image->delete();
+
+        return MemberResponse::success('Image deleted successfully.', null);
     }
 
     /**

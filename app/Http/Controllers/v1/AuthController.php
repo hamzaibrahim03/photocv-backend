@@ -56,11 +56,16 @@ class AuthController extends Controller
     public function forgotPassword(ForgotPasswordRequest $request)
     {
         try {
-            // dd($request);
             // Pass validated data to the service to handle the password reset logic
-            $this->authService->forgotPassword($request->validated());
+            $resetUrl = $this->authService->forgotPassword($request->validated());
 
-            return AuthResponse::success('Password reset link has been sent to your email.', null, 200);
+            // Dev convenience only: surface the link directly since local
+            // mail is just written to the log, not actually delivered.
+            // Never include this outside local - it would let anyone with
+            // an email address skip the mail step entirely.
+            $data = app()->environment('local') ? ['dev_reset_url' => $resetUrl] : null;
+
+            return AuthResponse::success('Password reset link has been sent to your email.', $data, 200);
         } catch (\Exception $e) {
             return AuthResponse::error('Failed to send password reset link.', $e->getMessage(), 500);
         }
@@ -69,9 +74,7 @@ class AuthController extends Controller
     public function resetPassword( ResetPasswordRequest $request)
     {
         try {
-            // dd($request);
-            $token = $request->query('token');
-            // dd($token);
+            $token = $request->validated('token');
             $isSuccessful = $this->authService->resetPassword($token, $request->new_password, $request->new_password_confirmation);
 
             if ($isSuccessful) {

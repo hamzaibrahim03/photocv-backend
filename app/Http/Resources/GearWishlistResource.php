@@ -17,6 +17,7 @@ class GearWishlistResource extends JsonResource
             'id'           => $this->id,
             'list_type'    => $this->list_type,
             'title'        => $this->title,
+            'brand'        => $this->brand,
             'category'     => $this->category ? [
                 'id'   => $this->category->id,
                 'name' => $this->category->name,

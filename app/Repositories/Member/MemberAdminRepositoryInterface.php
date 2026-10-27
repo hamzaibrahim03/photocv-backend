@@ -11,4 +11,5 @@ interface MemberAdminRepositoryInterface
     public function getMemberNotices();
     public function addMemberNotes($data);
     public function memberNotes($data);
+    public function getMemberGalleryPhoto($id);
 }

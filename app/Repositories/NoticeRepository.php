@@ -70,6 +70,12 @@ class NoticeRepository implements NoticeRepositoryInterface
                 $data['member_id'] = $userId;
             }
 
+            // tags is a plain string(250) column, not JSON - the frontend
+            // sends it as tags[] (an array), so flatten it before saving.
+            if (isset($data['tags']) && is_array($data['tags'])) {
+                $data['tags'] = implode(',', $data['tags']);
+            }
+
             $notice = MemberNotice::create($data);
 
             /* ================= IMAGE UPLOAD ================= */
@@ -155,7 +161,24 @@ class NoticeRepository implements NoticeRepositoryInterface
     public function update($id, array $data, $images = [], $documents = [])
     {
         try {
+            $userId = auth()->id();
             $notice = MemberNotice::findOrFail($id);
+            $club = Club::where('user_id', $userId)->first();
+
+            // Same ownership split as create(): a club admin may update
+            // notices belonging to their own club, a plain member only
+            // their own member-authored notices.
+            $authorized = $club
+                ? $notice->club_id === $club->id
+                : $notice->member_id === $userId;
+
+            if (!$authorized) {
+                return NoticeResponse::error('Unauthorized to update this notice.', 403);
+            }
+
+            if (isset($data['tags']) && is_array($data['tags'])) {
+                $data['tags'] = implode(',', $data['tags']);
+            }
 
             $notice->update($data);
 
@@ -354,6 +377,84 @@ class NoticeRepository implements NoticeRepositoryInterface
         } catch (\Exception $e) {
             return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
         }
+    }
+
+    /**
+     * List notices authored by the given member themselves (member_id),
+     * not their club's notices - for a photographer's own "My Notices".
+     */
+    public function memberAll($memberId)
+    {
+        try {
+            $notices = MemberNotice::where('member_id', $memberId)
+                ->orderByDesc('created_at')
+                ->get();
+
+            return NoticeResponse::success('Notices retrieved successfully.', $notices);
+        } catch (\Exception $e) {
+            return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 500);
+        }
+    }
+
+    /**
+     * Single notice authored by the given member - scoped by member_id in
+     * the query itself (not findOrFail-then-check) so a member can never
+     * even probe whether another id exists.
+     */
+    public function memberShow($id, $memberId)
+    {
+        try {
+            $notice = MemberNotice::with(['comments.user:id,username', 'noticeType', 'files'])
+                ->where('id', $id)
+                ->where('member_id', $memberId)
+                ->firstOrFail();
+
+            return NoticeResponse::success('Notice retrieved successfully.', $notice);
+        } catch (\Exception $e) {
+            return NoticeResponse::error($e->getMessage(), $e->getCode() ?: 404);
+        }
+    }
+
+    /**
+     * Same shape as getNoticeExtras() but scoped to a member's own
+     * notices instead of requiring the caller to own a Club.
+     */
+    public function memberExtras($memberId)
+    {
+        $randomNotices = MemberNotice::select('id', 'title', 'created_at', 'featured_image')
+            ->where('member_id', $memberId)
+            ->inRandomOrder()
+            ->take(5)
+            ->get();
+
+        $lastNotice = MemberNotice::where('member_id', $memberId)
+            ->latest('created_at')
+            ->first();
+
+        $daysAgo = $lastNotice
+            ? Carbon::parse($lastNotice->created_at)->startOfDay()->diffInDays(Carbon::now()->startOfDay(), false)
+            : null;
+
+        $lastNoticeDaysFormatted = $daysAgo !== null
+            ? ($daysAgo < 0 ? '-' : '') . sprintf('%02d', abs($daysAgo))
+            : null;
+
+        $totalNotices = MemberNotice::where('member_id', $memberId)->count();
+
+        $recentComments = MemberNotice::with('comments')
+            ->where('member_id', $memberId)
+            ->latest('created_at')
+            ->take(5)
+            ->get();
+
+        return [
+            'data' => [
+                'last_notice_days_ago' => $lastNoticeDaysFormatted,
+                'total_notices' => $totalNotices,
+                'random_notices' => $randomNotices,
+                'recent_comments' => $recentComments,
+            ],
+        ];
     }
 
     public function getLatestNoticeWithLimit($clubId, $limit = 3)

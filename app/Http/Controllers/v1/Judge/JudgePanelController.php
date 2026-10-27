@@ -92,4 +92,52 @@ class JudgePanelController extends Controller
 
         return $this->judgePanelService->toggleBookmark($entryId, $isBookmarked);
     }
+
+    /**
+     * The judge's own profile.
+     */
+    public function profile()
+    {
+        return $this->judgePanelService->profile();
+    }
+
+    /**
+     * Update the judge's own profile fields.
+     */
+    public function updateProfile(Request $request)
+    {
+        $data = $request->validate([
+            'first_name' => 'sometimes|string|max:255',
+            'last_name'  => 'sometimes|string|max:255',
+            'title'      => 'nullable|string|max:255',
+            'about'      => 'nullable|string',
+            'bio'        => 'nullable|string',
+            'phone'      => 'nullable|string|max:50',
+            'address'    => 'nullable|string|max:255',
+            'city'       => 'nullable|string|max:120',
+            'postcode'   => 'nullable|string|max:20',
+            'county'     => 'nullable|string|max:120',
+            'country'    => 'nullable|string|max:120',
+        ]);
+
+        if (array_key_exists('city', $data)) {
+            $data['ciy'] = $data['city'];
+            unset($data['city']);
+        }
+
+        return $this->judgePanelService->updateProfile($data);
+    }
+
+    /**
+     * Change the judge's own password.
+     */
+    public function updatePassword(Request $request)
+    {
+        $data = $request->validate([
+            'current_password' => 'required|string',
+            'new_password'     => 'required|string|min:8|confirmed',
+        ]);
+
+        return $this->judgePanelService->updatePassword($data['current_password'], $data['new_password']);
+    }
 }

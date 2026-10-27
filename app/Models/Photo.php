@@ -52,7 +52,6 @@ class Photo extends Model
 		'allow_likes' => 'bool',
 		'show_in_portfolio' => 'bool',
 		'show_exif' => 'bool',
-		'image_sizes' => 'array',
 	];
 
 	protected $fillable = [

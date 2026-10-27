@@ -91,9 +91,14 @@ class MemberService
      * @param  array  $images
      * @return \Illuminate\Http\Response
      */
-    public function memberGalleryImages($data) 
+    public function memberGalleryImages($data)
     {
         return $this->memberRepository->memberGalleryImages( $data );
+    }
+
+    public function updateGalleryPhoto($photoId, $data)
+    {
+        return $this->memberRepository->updateGalleryPhoto($photoId, $data);
     }
 
     public function postCommentOrLikes($data)

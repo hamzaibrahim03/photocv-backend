@@ -13,6 +13,7 @@ class GearWishlist extends Model
         'user_id',
         'list_type',
         'title',
+        'brand',
         'category_id',
         'price',
         'image',

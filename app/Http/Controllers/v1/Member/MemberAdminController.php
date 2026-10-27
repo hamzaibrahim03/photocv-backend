@@ -90,4 +90,13 @@ class MemberAdminController extends Controller
     {
         return $this->memberAdminService->memberNotes($request->validated());
     }
+
+    /**
+     * Method to get a single gallery photo with its full comments/likes list
+     * @param mixed $id
+     */
+    public function memberGalleryPhoto($id)
+    {
+        return $this->memberAdminService->memberGalleryPhoto($id);
+    }
 }

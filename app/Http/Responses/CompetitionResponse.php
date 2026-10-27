@@ -15,6 +15,10 @@ class CompetitionResponse
 
     public static function error($message, $status = 500)
     {
+        if (!is_int($status) || $status < 100 || $status > 599) {
+            $status = 500;
+        }
+
         return response()->json([
             'success' => false,
             'message' => $message

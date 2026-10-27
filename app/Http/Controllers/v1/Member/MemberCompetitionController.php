@@ -29,4 +29,19 @@ class MemberCompetitionController extends Controller
     {
         return $this->competitionService->joinedCompetition();
     }
+
+    public function competitionEntries($compId)
+    {
+        return $this->competitionService->getCompetitionEntries($compId);
+    }
+
+    public function updateCompetitionEntry(CompetitionRequest $request, $entryId)
+    {
+        return $this->competitionService->updateCompetitionEntry($entryId, $request->validated());
+    }
+
+    public function deleteCompetitionEntry($entryId)
+    {
+        return $this->competitionService->deleteCompetitionEntry($entryId);
+    }
 }

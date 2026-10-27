@@ -53,6 +53,20 @@ class GalleryRequest extends FormRequest
             ];
         }
 
+        if ($route === 'updateGalleryPhoto') {
+            return [
+                'title'       => 'sometimes|nullable|string|max:250',
+                'description' => 'sometimes|nullable|string',
+                'image'       => 'sometimes|image|mimes:jpg,jpeg,png|max:2048',
+
+                'allow_comments'    => 'sometimes|boolean',
+                'allow_likes'       => 'sometimes|boolean',
+                'visibility'        => 'sometimes|in:public,private',
+                'show_in_portfolio' => 'sometimes|boolean',
+                'show_exif'         => 'sometimes|boolean',
+            ];
+        }
+
         return [];
     }
 }
